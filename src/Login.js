@@ -105,7 +105,7 @@ function Login() {
             <div style={styles.loadingContent}>
             {/* Spinner animado */}
             <div style={styles.spinner}></div>
-            Iniciando...
+            Ingresando...
           </div>
         ) : (
           "Ingresar"
