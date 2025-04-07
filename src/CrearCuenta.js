@@ -107,7 +107,7 @@ function CrearCuenta() {
             <div style={{...styles.formGroup, flex: 1, marginRight: '15px'}}>
               <label htmlFor="name" style={styles.label}>Nombre</label>
               <input
-                type="text"
+                type="name"
                 id="name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
@@ -118,7 +118,7 @@ function CrearCuenta() {
             <div style={{...styles.formGroup, flex: 1, marginRight: '15px'}}>
               <label htmlFor="email" style={styles.label}>Apellido</label>
               <input
-                type="text"
+                type="lastname"
                 id="lastname"
                 value={lastname}
                 onChange={(e) => setLastname(e.target.value)}

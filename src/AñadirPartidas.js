@@ -1153,7 +1153,9 @@ return (
                     <div style={styles.userInfo}>
                       <FaUserCircle size={24} style={styles.userIcon} />
                       <div style={styles.userText}>
-                        <span style={styles.userName}>{user?.name || "Nombre Usuario"}</span>
+                        <span style={styles.userName}>
+                        {user?.displayName || "Nombre Usuario"}
+                        </span>
                         <span style={styles.userRole}>{user?.role || "Rol"}</span>
                       </div>
                       {isDropdownOpen ? <FaChevronUp /> : <FaChevronDown />}
@@ -1374,6 +1376,10 @@ const styles = {
   userContainer: {
     position: 'relative',
     cursor: 'pointer',
+  },
+  userName: {
+    fontSize: "1rem",
+    fontWeight: "600",
   },
   userInfo: {
     display: "flex",

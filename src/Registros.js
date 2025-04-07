@@ -303,7 +303,9 @@ function Registros() {
             <div style={styles.userInfo}>
               <FaUserCircle size={24} style={styles.userIcon} />
               <div style={styles.userText}>
-                <span style={styles.userName}>{user?.name || "Nombre Usuario"}</span>
+                <span style={styles.userName}>
+                {user?.displayName || "Nombre Usuario"}
+                </span>
                 <span style={styles.userRole}>{user?.role || "Rol"}</span>
               </div>
               {isDropdownOpen ? <FaChevronUp /> : <FaChevronDown />}
@@ -418,7 +420,7 @@ function Registros() {
                   scrollHeight="800px"
                   filters={filters}
                   onFilter={(e) => setFilters(e.filters)}
-                  tableStyle={{minWidth: "50rem", height: "100%",}}
+                  tableStyle={{minWidth: "50rem", height: "100%", cursor: 'text',}}
                   
                 >
                   <Column
@@ -633,6 +635,7 @@ const styles = {
     flex: 1,
     fontSize: "1.5rem",
     fontWeight: "600",
+    cursor: 'default',
   },
   icon: {
     width: "18px",
@@ -652,6 +655,10 @@ const styles = {
   userContainer: {
     position: 'relative',
     cursor: 'pointer',
+  },
+  userName: {
+    fontSize: "1rem",
+    fontWeight: "600",
   },
   userInfo: {
     display: "flex",
@@ -852,6 +859,7 @@ const styles = {
     marginLeft: "200px",
     backgroundColor: "#FFFFFF",
     height: "calc(100vh - 100px)",
+    cursor: 'default',
   },
   filtroContainer: {
     alignItems: "center",
@@ -861,12 +869,19 @@ const styles = {
     fontWeight: '600',
     display: 'flex',
     gap: '0rem',
+    cursor: 'default',
   },
   label: {
     fontSize: '1.2rem',
     fontWeight: '600',
     marginLeft: '0.5rem',
     color: '#000000',
+    cursor: 'pointer',
+    transition: 'all 0.3s ease',
+    ':hover': {
+      cursor: 'text',
+      borderBottom: '2px solid #3498db'
+    }
   },
   select: {
     padding: '0.5rem',
@@ -904,7 +919,6 @@ const styles = {
     borderRight: '1px solid #000',
     borderBottom: '1px solid #000'
   },
-
   columnaTabla: {
     backgroundColor: '#FCCE74',
     border: '1px solid #000000',
@@ -913,9 +927,9 @@ const styles = {
     color: 'black',
     textAlign: 'center',
     padding: '12px',
-    borderRight: '1px solid #000'
+    borderRight: '1px solid #000',
+    cursor: 'pointer',
   },
-
   filaTabla: {
     backgroundColor: '#FFFFFF',
     border: '1px solid #000000',
@@ -924,7 +938,8 @@ const styles = {
     color: 'black',
     textAlign: 'center',
     padding: '12px',
-    borderRight: '1px solid #000'
+    borderRight: '1px solid #000',
+    cursor: 'default',
   },
 
 }

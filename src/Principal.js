@@ -19,9 +19,10 @@ function Principal() {
   const { user, logout } = useAuth()
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
+  const [nombre, setNombre] = useState(""); // Define 'nombre' state
+  const [apellido, setApellido] = useState(""); // Define 'apellido' state
 
   const handleClickOutside = useCallback((event) => {
-    // Verificación segura de la referencia
     if (!dropdownRef.current || dropdownRef.current.contains(event.target)) {
       return;
     }
@@ -30,17 +31,22 @@ function Principal() {
 
   // 2. Efecto para el click fuera
   useEffect(() => {
+    if (user?.displayName) {
+      const [name, lastName] = user.displayName.split(" ");
+      setNombre(name);
+      setApellido(lastName || "");
+    }
+  }, [user]);
+
+  useEffect(() => {
     if (isDropdownOpen) {
-      // Usamos capture: true para mejor manejo de eventos
       document.addEventListener('mousedown', handleClickOutside, { capture: true });
     }
-
     return () => {
       document.removeEventListener('mousedown', handleClickOutside, { capture: true });
     };
   }, [isDropdownOpen, handleClickOutside]);
 
-  // 3. Manejo seguro del toggle
   const toggleDropdown = useCallback((e) => {
     e?.stopPropagation();
     setIsDropdownOpen(prev => !prev);
@@ -64,11 +70,6 @@ function Principal() {
   const handleCorrect = () => {
     console.log("Función para corregir")
     // Implementa la lógica para corregir aquí
-  }
-
-  const handlePrint = () => {
-    console.log("Función para imprimir")
-    // Implementa la lógica de impresión aquí
   }
 
   const handleLogout = () => {
@@ -104,8 +105,7 @@ function Principal() {
   };
 
   return (
-    <div style={styles.container} onDoubleClick={handleDoubleClick}
-    tabIndex={0} >
+    <div style={styles.container}>
       {/* Barra superior */}
       <header style={styles.header}>
       <div
@@ -114,13 +114,20 @@ function Principal() {
           onClick={toggleDropdown}
         >
         </div>
+        <div
+        style={styles.logoContainer}
+        onClick={() => navigate("/principal")}
+        >
         <img src={logo || "/placeholder.svg"} alt="Logo" style={styles.logo} />
+        </div>
         <h1 style={styles.headerTitle}>Parroquia San Luis Gonzaga</h1>
-        <div style={styles.userContainer} onClick={toggleDropdown} onDoubleClick={ handleContainerClick}>
-            <div style={styles.userInfo}>
+        <div style={styles.userContainer} onClick={toggleDropdown}>
+          <div style={styles.userInfo}>
               <FaUserCircle size={24} style={styles.userIcon} />
               <div style={styles.userText}>
-                <span style={styles.userName}>{user?.name || "Nombre Usuario"}</span>
+              <span style={styles.userName}>
+              {user?.displayName || "Nombre Usuario"}
+              </span>
                 <span style={styles.userRole}>{user?.role || "Rol"}</span>
               </div>
               {isDropdownOpen ? <FaChevronUp /> : <FaChevronDown />}
@@ -129,7 +136,7 @@ function Principal() {
             {/* Menú desplegable */}
             {isDropdownOpen && (
               <div style={styles.dropdownMenu}>
-                <button style={styles.dropdownItem} onClick={handleEditProfile} onKeyDown={(e) => e.key === 'Enter' && handleEditProfile()}>
+                <button onClick={handleEditProfile} style={styles.dropdownItem}>
                   <FaEdit style={styles.dropdownIcon} />
                   <span style={styles.dropdownIconText}>Editar perfil</span>
                 </button>
@@ -146,7 +153,7 @@ function Principal() {
       <div style={styles.mainContent}>
         
         {/* Menú lateral */}
-        <nav style={styles.sidebar}> 
+        <nav style={styles.sidebar}>
           
           {/* Botones principales */}
           <div style={styles.sidebarButtons}>
@@ -219,7 +226,7 @@ const styles = {
     textAlign: "center",
     fontSize: "1.5rem",
     fontWeight: "600",
-    
+    cursor: 'default',
   },
   userContainer: {
     position: 'relative',
@@ -227,6 +234,10 @@ const styles = {
     zIndex: 1001,
     alignItems: "center",
     marginLeft: "auto",
+  },
+  userName: {
+    fontSize: "1rem",
+    fontWeight: "600",
   },
   userInfo: {
     display: "flex",
@@ -389,6 +400,11 @@ const styles = {
   logoContainer: {
     maxWidth: "400px",
     width: "100%",
+    cursor: 'pointer',
+    transition: 'opacity 0.2s ease-in-out',
+    ':hover': {
+      opacity: 0.8,
+    },
   },
   logo: {
     width: "60px",

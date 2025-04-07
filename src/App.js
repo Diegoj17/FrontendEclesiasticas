@@ -3,14 +3,15 @@ import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-d
 import Login from './Login';
 import Principal from './Principal';
 import Registros from "./Registros"
-import ScrollableContainer from "./ScrollableContainer" 
+import ScrollableContainer from "./ScrollableContainer"
 import RecuperarContraseña from './RecuperarContraseña';
 import CrearCuenta from './CrearCuenta';
+import EditarPerfil from './EditarPerfil';
 import { AuthProvider } from "./AuthContext"
 import ProtectedRoute from "./ProtectedRoute"
 import AñadirPartidas from './AñadirPartidas';
 import BuscarPartidas from './BuscarPartidas';
-import EditarPerfil from './EditarPerfil';
+
 function App() {
   return (
     <AuthProvider>
@@ -30,12 +31,6 @@ function App() {
               <RecuperarContraseña/>
               }
               />
-            <Route
-              path="/EditarPerfil"
-              element={
-              <EditarPerfil />
-              }
-            />
             <Route
               path="/Principal"
               element={
