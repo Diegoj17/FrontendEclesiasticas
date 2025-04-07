@@ -27,7 +27,11 @@ export function AuthProvider({ children }) {
   // Función para iniciar sesión
   const login = (userData) => {
     setIsAuthenticated(true)
-    setUser(userData)
+    setUser({
+      userData,
+    nombre: userData.nombre,
+    apellido: userData.apellido
+  })
     localStorage.setItem("isAuthenticated", "true")
     localStorage.setItem("user", JSON.stringify(userData))
   }
@@ -40,11 +44,18 @@ export function AuthProvider({ children }) {
     localStorage.removeItem("user")
   }
 
-  return <AuthContext.Provider value={{ isAuthenticated, user, login, logout }}>{children}</AuthContext.Provider>
+  const updateUser = (newData) => {
+    setUser(prev => ({
+      ...prev,
+      ...newData,
+      displayName: `${newData.nombre} ${newData.apellido}`
+    }));
+  };
+
+  return <AuthContext.Provider value={{ isAuthenticated, user, login, logout,updateUser }}>{children}</AuthContext.Provider>
 }
 
 // Hook personalizado para usar el contexto de autenticación
 export function useAuth() {
   return useContext(AuthContext)
 }
-

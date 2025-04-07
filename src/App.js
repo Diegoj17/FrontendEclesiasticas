@@ -10,7 +10,7 @@ import { AuthProvider } from "./AuthContext"
 import ProtectedRoute from "./ProtectedRoute"
 import AñadirPartidas from './AñadirPartidas';
 import BuscarPartidas from './BuscarPartidas';
-
+import EditarPerfil from './EditarPerfil';
 function App() {
   return (
     <AuthProvider>
@@ -19,15 +19,21 @@ function App() {
           <Routes>
             <Route path="/" element={<Login />} />
             <Route
+              path="/crearCuenta"
+              element={
+              <CrearCuenta />
+              }
+            />
+            <Route
               path="/recuperarContraseña"
               element={
               <RecuperarContraseña/>
               }
               />
             <Route
-              path="/crearCuenta"
+              path="/EditarPerfil"
               element={
-              <CrearCuenta />
+              <EditarPerfil />
               }
             />
             <Route

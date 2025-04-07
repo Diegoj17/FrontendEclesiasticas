@@ -1,33 +1,74 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import logo from "./logo.png";
+import axios from 'axios';
 
 function RecuperarContraseña() {
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState("")
   const [error, setError] = useState("")
-  const [loading, setLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [emailError, setEmailError] = useState("");
+  const [cancelTokenSource, setCancelTokenSource] = useState(null);
+
   const navigate = useNavigate();
 
-  const handleSubmit = (event) => {
+  const [modal, setModal] = useState({
+    show: false,
+    type: 'success', // 'success' o 'error'
+    message: ''
+  });
+
+  
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    // Aquí puedes manejar la lógica para enviar el correo de recuperación
-    console.log('Correo electrónico:', email);
-    alert('Se ha enviado un correo para recuperar tu contraseña.');
-    navigate('/'); // Redirige al inicio de sesión después de enviar
+    setIsLoading(true);
+    
+    const source = axios.CancelToken.source();
+    setCancelTokenSource(source);
+
+    
+    try {
+      const response = await axios.post(
+        "https://eclesiasticasbackend.onrender.com/api/auth/reset-password",
+        { email },
+        { cancelToken: source.token }
+      );
+      
+      // Modal de éxito
+      setModal({
+        show: true,
+        type: 'success',
+        message: 'Correo enviado exitosamente'
+      });
+      
+    } catch (error) {
+      if (!axios.isCancel(error)) {
+        setError(error.response?.data?.error || "Error al enviar el correo");
+      }
+    } finally {
+      setCancelTokenSource(null);
+      setIsLoading(false);
+    }
   };
 
-  const handleCancel = (e) => {
-    e.preventDefault();
-    navigate('/login'); // Redirige al inicio de sesión al cancelar
-  };
-
-  const closeModal = () => {
-    setShowSuccessModal(false);
+  const handleCancel = () => {
+    if (cancelTokenSource) {
+      cancelTokenSource.cancel('Solicitud cancelada por el usuario');
+      setCancelTokenSource(null);
+      setIsLoading(false);
+    }
     navigate('/login');
   };
 
+
+  const handleCloseModal = () => {
+    setModal(prev => ({...prev, show: false}));
+    // Solo redirigir si es éxito
+    if(modal.type === 'success') navigate('/login');
+  };
 
   return (
     <div style={styles.container}>
@@ -51,32 +92,75 @@ function RecuperarContraseña() {
               type="email"
               id="email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              style={styles.input}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                if(submitted) setEmailError("");
+              }}
+              onBlur={() => !email && setEmailError("Correo electrónico")}
+              style={{
+                ...styles.input,
+                borderColor: emailError ? "#e74c3c" : "#ddd"
+              }}
               required
-              disabled={loading}
             />
+            {emailError && (
+              <div style={styles.errorText}>
+                {emailError}
+              </div>
+            )}
           </div>
           <div style={styles.buttonContainer}>
-            <button type="button" style={styles.cancelButton} onClick={handleCancel} disabled={loading}>
-              Cancelar
-            </button>
-            <button type="submit" style={styles.submitButton} disabled={loading}>
-              Enviar
-            </button>
+              <button
+                type="button"
+                style={styles.cancelButton}
+                onClick={handleCancel}
+                disabled={!isLoading}
+              >
+                Cancelar
+              </button>
+            <button
+                type="submit"
+                style={styles.submitButton}
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <div style={styles.loadingContent}>
+                    <div style={styles.spinner}></div>
+                    Enviando...
+                  </div>
+                ) : "Enviar"}
+              </button>
+
+              {/* Incluir animación CSS global */}
+                <style>{`
+                  @keyframes spin {
+                  0% { transform: rotate(0deg); }
+                  100% { transform: rotate(360deg); }
+                  }
+      `       }</style>
           </div>
         </form>
       </div>
     </div>
-    {/* Modal de éxito */}
-    {showSuccessModal && (
+     {/* Modal unificado */}
+    {modal.show && (
         <div style={styles.modalOverlay}>
           <div style={styles.modal}>
-            <h3>Cuenta Creada Exitosamente</h3>
-            <p>Tu cuenta ha sido creada correctamente.</p>
+            <h3 style={{
+              ...styles.modalTitle,
+              color: modal.type === 'success' ? '#2ecc71' : '#e74c3c'
+            }}>
+              {modal.type === 'success' ? '¡Éxito!' : '¡Error!'}
+            </h3>
+            
+            <p style={styles.modalText}>{modal.message}</p>
+            
             <button
-              style={styles.modalButton}
-              onClick={closeModal}
+              style={{
+                ...styles.modalButton,
+                backgroundColor: modal.type === 'success' ? '#2ecc71' : '#e74c3c'
+              }}
+              onClick={handleCloseModal}
             >
               Aceptar
             </button>
@@ -180,6 +264,77 @@ const styles = {
     cursor: 'pointer',
     flex: 1, // Ocupa el espacio disponible
   },
+
+  loadingContent: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: "0.5rem",
+    justifyContent: "center",
+  },
+
+  spinner: {
+    width: '20px',
+    height: '20px',
+    border: '3px solid #f3f3f3',
+    borderTop: '3px solid #3498db',
+    borderRadius: '50%',
+    animation: 'spin 1s linear infinite',
+  },
+  modalOverlay: {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1000,
+  },
+  modal: {
+    backgroundColor: 'white',
+    padding: '2rem',
+    borderRadius: '8px',
+    textAlign: 'center',
+    maxWidth: '400px',
+    width: '90%',
+  },
+  modalTitle: {
+    color: '#2ecc71',
+    marginBottom: '1rem',
+  },
+  modalText: {
+    marginBottom: '1.5rem',
+    color: '#555',
+  },
+  modalButton: {
+    backgroundColor: '#2ecc71',
+    color: 'white',
+    padding: '0.8rem 2rem',
+    border: 'none',
+    borderRadius: '4px',
+    cursor: 'pointer',
+    fontSize: '1rem',
+  },
+  '@keyframes spin': {
+    '0%': {
+      transform: 'rotate(0deg)',
+    },
+    '100%': {
+      transform: 'rotate(360deg)',
+    }
+  },
+  
 };
+
+<style>
+  {`
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  `}
+</style>
 
 export default RecuperarContraseña;

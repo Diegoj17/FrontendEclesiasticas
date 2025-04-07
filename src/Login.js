@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react"
+import axios from "axios"
 import { useNavigate } from "react-router-dom"
 import logo from "./logo.png" // Asegúrate de que la ruta del logo sea correcta
 import { useAuth } from "./AuthContext"
@@ -8,6 +9,8 @@ function Login() {
   const [password, setPassword] = useState("")
   const navigate = useNavigate()
   const { isAuthenticated, login } = useAuth()
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState("")
 
   // Redirigir si ya está autenticado
   useEffect(() => {
@@ -16,25 +19,35 @@ function Login() {
     }
   }, [isAuthenticated, navigate])
 
-  const handleSubmit = (event) => {
-    event.preventDefault()
-    // Aquí puedes manejar la lógica de inicio de sesión
-    console.log("Email:", email)
-    console.log("Password:", password)
-
-    // Crear datos del usuario para la autenticación
-    const userData = {
-      name: "Nombre Usuario",
-      role: "Rol",
-      email: email,
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setIsLoading(true);
+    setError("");
+    try {
+      const response = await axios.post(
+        'https://eclesiasticasbackend.onrender.com/api/auth/login',
+        { email, password }
+      );
+      
+      if (response.data.error) {
+        setError(response.data.error);
+        return;
+      }
+  
+      // Guardar datos en contexto/auth
+      login({
+        email: response.data.email,
+        displayName: response.data.displayName, // Usar displayName
+        token: response.data.idToken
+      });
+      
+      navigate("/Principal");
+    } catch (error) {
+      setError(error.response?.data?.error || "Error desconocido");
+    } finally {
+      setIsLoading(false); // Desactivar carga independientemente del resultado
     }
-
-    // Guardar la sesión en el contexto de autenticación
-    login(userData)
-
-    // Redirigir a la interfaz principal
-    navigate("/Principal")
-  }
+  };
 
   const handleForgotPassword = () => {
     navigate("/recuperarContraseña") // Redirige a la interfaz de recuperación de contraseña
@@ -83,9 +96,29 @@ function Login() {
             />
           </div>
 
-          <button type="submit" style={styles.button}>
-            Ingresar
-          </button>
+          <button
+            type="submit"
+            style={styles.button}
+            disabled={isLoading}
+            >
+            {isLoading ? (
+            <div style={styles.loadingContent}>
+            {/* Spinner animado */}
+            <div style={styles.spinner}></div>
+            Iniciando...
+          </div>
+        ) : (
+          "Ingresar"
+        )}
+      </button>
+      {error && <div style={styles.error}>{error}</div>}
+      {/* Incluir animación CSS global */}
+      <style>{`
+          @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+          }
+      `       }</style>
         </form>
         <p style={styles.createAccountLink} onClick={handleCreateAccount}>
           Crear Cuenta
@@ -209,6 +242,32 @@ const styles = {
     cursor: 'pointer',
     textDecoration: 'underline',
   },
+  loadingContent: {
+    display: "flex",
+    alignItems: "center",
+    gap: "0.5rem",
+    justifyContent: "center",
+  },
+  spinner: {
+    width: "20px",
+    height: "20px",
+    border: "3px solid #f3f3f3",
+    borderTop: "3px solid #3498db",
+    borderRadius: "50%",
+    animation: "spin 1s linear infinite",
+  },
+  error: {
+    color: "#ff4444",
+    marginTop: "10px",
+    textAlign: "center",
+    fontSize: "14px",
+  },
+  // Agregar animación CSS-in-JS
+  "@keyframes spin": {
+    "0%": { transform: "rotate(0deg)" },
+    "100%": { transform: "rotate(360deg)" },
+  },
+  
 
 };
 
