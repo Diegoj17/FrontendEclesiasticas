@@ -104,7 +104,7 @@ function EditProfile() {
         window.dispatchEvent(new Event("storage"));
         
         // Mostrar modal de éxito
-        setShowSuccessModal({
+        setModal({
           show:true,
           type: 'success',
           message: 'Perfil actualizado exitosamente'
@@ -165,7 +165,7 @@ function EditProfile() {
   ];
 
   const closeSuccessModal = () => {
-    setShowSuccessModal(false);
+    setModal(prev => ({...prev, show: false}));
     navigate("/principal");
 };
 
@@ -310,6 +310,7 @@ function EditProfile() {
                     Guardar Cambios
                   </>
                 )}
+                </button>
 
                 {/* Incluir animación CSS global */}
                 <style>{`
@@ -318,7 +319,6 @@ function EditProfile() {
                     100% { transform: rotate(360deg); }
                   }
                 `}</style>
-              </button>
             </div>
           </form>
         </div>
@@ -331,11 +331,16 @@ function EditProfile() {
               ...styles.modalTitle,
               color: modal.type === 'success' ? '#2ecc71' : '#e74c3c'
             }}>
-              {modal.type === 'success' ? '¡Actualización Exitosa!' : '¡Error!'}
+              {modal.type === 'success' ? '¡Actualización Exitosa!' : 'Error'}
             </h3>
+
+            <p style={styles.modalText}>{modal.message}</p>
           
             <button
-                style={styles.modalButton}
+              style={{
+                ...styles.modalButton,
+                backgroundColor: modal.type === 'success' ? '#2ecc71' : '#e74c3c'
+              }}
                 onClick={closeSuccessModal}
             >
                 Aceptar
@@ -347,10 +352,17 @@ function EditProfile() {
 {showErrorModal && (
     <div style={styles.modalOverlay}>
         <div style={styles.modal}>
-            <h3>Error</h3>
-            <p>{modalMessage}</p>
+        <h3 style={{
+              ...styles.modalTitle,
+              color: modal.type === 'success' ? '#2ecc71' : '#e74c3c'
+            }}>
+              {modal.type === 'success' ? '¡Actualización Exitosa!' : 'Error'}
+            </h3>
+
+            <p style={styles.modalText}>{modal.message}</p>
+
             <button
-                style={{...styles.modalButton, backgroundColor: '#e74c3c'}} 
+                style={{...styles.modalButton, backgroundColor: '#e74c3c'}}
                 onClick={closeErrorModal}
             >
                 Cerrar
@@ -573,7 +585,7 @@ const styles = {
     left: '100%',
     top: '0',
     marginLeft: '30px',
-    width: '220px',
+    width: '275px',
     backgroundColor: '#FFCFB3',
     borderRadius: '8px',
     boxShadow: '0 2px 14px rgba(0, 0, 0, 0.1)',
@@ -641,11 +653,11 @@ const styles = {
   },
   modal: {
     backgroundColor: 'white',
-    padding: '20px',
+    padding: '2rem',
     borderRadius: '8px',
-    maxWidth: '400px',
-    width: '100%',
     textAlign: 'center',
+    maxWidth: '400px',
+    width: '90%',
   },
   modalTitle: {
     color: '#2ecc71',
@@ -656,13 +668,13 @@ const styles = {
     color: '#555',
   },
   modalButton: {
-    padding: '10px 20px',
-    backgroundColor: '#4CAF50',
+    backgroundColor: '#2ecc71',
     color: 'white',
+    padding: '0.8rem 2rem',
     border: 'none',
     borderRadius: '4px',
     cursor: 'pointer',
-    marginTop: '15px',
+    fontSize: '1rem',
   },
 }
 

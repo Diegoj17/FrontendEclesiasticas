@@ -9,21 +9,33 @@ function CrearCuenta() {
   const [lastname, setLastname] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false)
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showErrorModal, setShowErrorModal] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   const navigate = useNavigate();
   const [errors, setErrors] = useState({});
   const [showRules, setShowRules] = useState(false);
   const inputRef = useRef(null);
   const bubbleRef = useRef(null);
+  
   const [passwordErrors, setPasswordErrors] = useState({
     length: false,
     uppercase: false,
     number: false,
     specialChar: false,
   });
+
   const [touched, setTouched] = useState({
     email: false,
     password: false,
+  });
+
+  const [modal, setModal] = useState({
+    show: false,
+    type: 'success', // 'success' o 'error'
+    message: ''
   });
 
   const handleBlur = (field) => {
@@ -54,14 +66,13 @@ function CrearCuenta() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    setIsLoading(true);
     const isEmailValid = validateEmail(email);
     const isPasswordValid = validatePassword(password);
 
     if (!isEmailValid || !isPasswordValid) {
-      setTouched({
-        email: true,
-        password: true,
-      });
+      setTouched({ email: true, password: true });
+      setIsLoading(true); // Desactivar carga si hay error
       return;
     }
 
@@ -77,8 +88,13 @@ function CrearCuenta() {
       );
 
       setShowSuccessModal(true);
+  
     } catch (error) {
-      alert("Error: " + (error.response?.data || error.message));
+      const errorMsg = error.response?.data?.error || "El correo ya existe, por favor intenta con otro.";
+      setErrorMessage(errorMsg);
+      setShowErrorModal(true);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -110,6 +126,15 @@ function CrearCuenta() {
     { id: 3, text: 'Al menos un número', valid: /\d/.test(password) },
     { id: 4, text: 'Un carácter especial (!@#$%^&*)', valid: /[!@#$%^&*]/.test(password) },
   ];
+
+  const closeErrorModal = () => {
+    setShowErrorModal(false);
+    setName("");
+    setLastname("");
+    setEmail("");
+    setPassword("");
+    setErrorMessage("");
+  };
 
   return (
     <div style={styles.container}>
@@ -224,10 +249,28 @@ function CrearCuenta() {
               <button type="button" style={styles.cancelButton} onClick={handleCancel}>
                 Cancelar
               </button>
-              <button type="submit" style={styles.submitButton}>
-                Crear Cuenta
-              </button>
+              <button
+                type="submit"
+                style={styles.submitButton}
+                disabled={isLoading}
+                >
+                {isLoading ? (
+            <div style={styles.loadingContainer}>
+              <div style={styles.spinner}></div>
+              Creando...
             </div>
+          ) : (
+            "Crear Cuenta"
+          )}
+        </button>
+        {/* Incluir animación CSS global */}
+        <style>{`
+                  @keyframes spin {
+                  0% { transform: rotate(0deg); }
+                  100% { transform: rotate(360deg); }
+                  }
+      `       }</style>
+      </div>
           </form>
         </div>
       </div>
@@ -238,6 +281,22 @@ function CrearCuenta() {
             <p>Tu cuenta ha sido creada correctamente.</p>
             <button style={styles.modalButton} onClick={closeModal}>
               Aceptar
+            </button>
+          </div>
+        </div>
+      )}
+
+{/* Modal de Error corregido */}
+{showErrorModal && (
+        <div style={styles.modalOverlay}>
+          <div style={styles.modal}>
+            <h3 style={{ color: '#e74c3c', marginBottom: '15px' }}>¡Error!</h3>
+            <p style={styles.modalText}>{errorMessage}</p>
+            <button
+              style={styles.modalButtonError}
+              onClick={closeErrorModal}
+            >
+              Cerrar
             </button>
           </div>
         </div>
@@ -256,6 +315,7 @@ const styles = {
     boxSizing: 'border-box',
     padding: '20px 0 0 0',
     cursor: 'default',
+    gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
   },
   formContainer: {
     display: 'flex',
@@ -375,6 +435,9 @@ const styles = {
     borderRadius: '5px',
     cursor: 'pointer',
     fontWeight: "550",
+    position: 'relative',
+    transition: 'opacity 0.3s ease',
+    transform: "none !important",
   },
   submitButton: {
     flex: 1,
@@ -386,6 +449,24 @@ const styles = {
     borderRadius: '5px',
     cursor: 'pointer',
     fontWeight: "550",
+    transition: 'opacity 0.3s ease',
+    position: 'relative',
+    transform: "none !important",
+
+  },
+  loadingContent: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: "0.5rem",
+    justifyContent: "center",
+  },
+  spinner: {
+    width: '20px',
+    height: '20px',
+    border: '3px solid #f3f3f3',
+    borderTop: '3px solid #3498db',
+    borderRadius: '50%',
+    animation: 'spin 1s linear infinite',
   },
   modalOverlay: {
     position: 'fixed',
@@ -401,20 +482,36 @@ const styles = {
   },
   modal: {
     backgroundColor: 'white',
-    padding: '20px',
+    padding: '2rem',
     borderRadius: '8px',
-    maxWidth: '400px',
-    width: '100%',
     textAlign: 'center',
+    maxWidth: '400px',
+    width: '90%',
   },
   modalButton: {
-    padding: '10px 20px',
-    backgroundColor: '#4CAF50',
+    backgroundColor: '#2ecc71',
     color: 'white',
+    padding: '0.8rem 2rem',
     border: 'none',
     borderRadius: '4px',
     cursor: 'pointer',
+    fontSize: '1rem',
+  },
+  modalButtonError: {
+    backgroundColor: '#e74c3c',
+    color: 'white',
+    padding: '10px 25px',
+    borderRadius: '5px',
+    border: 'none',
+    cursor: 'pointer',
     marginTop: '15px',
+    '&:hover': {
+      opacity: 0.9
+    }
+  },
+  modalText: {
+    color: '#666',
+    margin: '15px 0'
   },
   passwordRequirements: {
     margin: '15px 0',
@@ -464,7 +561,7 @@ const styles = {
     left: '100%',
     top: '0',
     marginLeft: '30px',
-    width: '220px',
+    width: '275px',
     backgroundColor: '#FFCFB3',
     borderRadius: '8px',
     boxShadow: '0 2px 14px rgba(0, 0, 0, 0.1)',
@@ -499,7 +596,16 @@ const styles = {
     fontSize: '16px',
     color: '#1877f2',
     backgroundColor: '#FFCFB3',
-  }
+  },
+  '@keyframes spin': {
+    '0%': {
+      transform: 'rotate(0deg)',
+    },
+    '100%': {
+      transform: 'rotate(360deg)',
+    }
+  },
+  
 };
 
 export default CrearCuenta;
