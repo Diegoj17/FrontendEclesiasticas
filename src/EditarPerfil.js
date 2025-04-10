@@ -26,12 +26,23 @@ function EditProfile() {
     number: false,
     specialChar: false,
   });
+
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showErrorModal, setShowErrorModal] = useState(false);
+  const [modalMessage, setModalMessage] = useState("");
   const [isPasswordFocused, setIsPasswordFocused] = useState(false);
   const [showPasswordRules, setShowPasswordRules] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showRules, setShowRules] = useState(false);
   const inputRef = useRef(null);
   const bubbleRef = useRef(null);
+
+  const [modal, setModal] = useState({
+      show: false,
+      type: 'success', // 'success' o 'error'
+      message: ''
+    });
+  
 
   const [message, setMessage] = useState({ text: "", type: "" });
 
@@ -42,7 +53,7 @@ function EditProfile() {
         nombre: user.nombre || "",
         apellido: user.apellido || "",
         email: user.email || "",
-        password: user.password || "",
+        password: "",
       });
     }
   }, [user]);
@@ -60,44 +71,65 @@ function EditProfile() {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setMessage({ text: "", type: "" });
+    e.preventDefault()
+    setLoading(true)
+    setMessage({ text: "", type: "" })
+
+    if (formData.password && !validatePassword(formData.password)) {
+      return;
+    }
 
     try {
-      console.log("Enviando datos:", formData);
-      const success = await updateUser(formData);
+      console.log("Enviando datos para actualizar:", formData)
+
+      // Llamar a la función updateUser del contexto
+      const success = await updateUser({
+        nombre: formData.nombre,
+        apellido: formData.apellido,
+        email: formData.email,
+        password: formData.password || undefined, // Solo enviar si tiene valor
+      })
 
       if (success) {
-        setMessage({
-          text: "Perfil actualizado correctamente",
-          type: "success",
+        // Actualizar localStorage
+        const updatedUser = {
+            ...user,
+            nombre: formData.nombre,
+            apellido: formData.apellido,
+            email: formData.email,
+            displayName: `${formData.nombre} ${formData.apellido}`.trim(),
+        };
+        
+        localStorage.setItem("user", JSON.stringify(updatedUser));
+        window.dispatchEvent(new Event("storage"));
+        
+        // Mostrar modal de éxito
+        setShowSuccessModal({
+          show:true,
+          type: 'success',
+          message: 'Perfil actualizado exitosamente'
         });
-        setTimeout(() => {
-          navigate("/principal");
-        }, 2000);
-      } else {
-        setMessage({
-          text: "Error al actualizar el perfil",
-          type: "error",
-        });
-      }
-    } catch (error) {
-      console.error("Error:", error);
-      setMessage({
-        text: "Error al actualizar el perfil",
-        type: "error",
-      });
-    } finally {
-      setLoading(false);
+
+    } else {
+        setModalMessage("Error al actualizar el perfil");
+        setShowErrorModal(true);
     }
-  };
+} catch (error) {
+    console.error("Error:", error);
+    setModalMessage(error.message || "Error al actualizar el perfil");
+    setShowErrorModal(true);
+} finally {
+    setLoading(false);
+}
+};
 
   const handleCancel = () => {
     navigate("/principal");
   };
 
   const validatePassword = (pass) => {
+
+    if (pass === "") return true;
     const errors = {
       length: pass.length >= 6, // Cambiado a 6 caracteres
       uppercase: /[A-Z]/.test(pass),
@@ -132,6 +164,16 @@ function EditProfile() {
     { id: 4, text: 'Un carácter especial (!@#$%^&*)', valid: /[!@#$%^&*]/.test(password) },
   ];
 
+  const closeSuccessModal = () => {
+    setShowSuccessModal(false);
+    navigate("/principal");
+};
+
+  const closeErrorModal = () => {
+    setShowErrorModal(false);
+    navigate("/principal");
+  };
+
   return (
     <div style={styles.container}>
       <div style={styles.formContainer}>
@@ -158,13 +200,13 @@ function EditProfile() {
           <form onSubmit={handleSubmit} style={styles.form}>
             <div style={styles.rowContainer}>
               <div style={{ ...styles.formGroup, flex: 1, marginRight: '10px' }}>
-                <label htmlFor="name" style={styles.label}>Nombre</label>
+                <label htmlFor="nombre" style={styles.label}>Nombre</label>
                 <input
                   type="text"
-                  id="name"
-                  name="name"
-                  value={formData.name}
-                  onChange={(e) => setName(e.target.value)}
+                  id="nombre"
+                  name="nombre"
+                  value={formData.nombre}
+                  onChange={handleChange}
                   style={styles.input}
                   required
                 />
@@ -173,10 +215,10 @@ function EditProfile() {
                 <label htmlFor="email" style={styles.label}>Apellido</label>
                 <input
                   type="text"
-                  id="lastname"
-                  name="lastname"
-                  value={formData.lastname}
-                  onChange={(e) => setLastname(e.target.value)}
+                  id="apellido"
+                  name="apellido"
+                  value={formData.apellido}
+                  onChange={handleChange}
                   style={styles.input}
                   required
                 />
@@ -204,7 +246,7 @@ function EditProfile() {
                 <input
                   ref={inputRef}
                   name="password"
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => {
                     setPassword(e.target.value);
@@ -260,7 +302,7 @@ function EditProfile() {
                 {loading ? (
                   <div style={styles.loadingContent}>
                     <div style={styles.spinner}></div>
-                    "Guardando..."
+                    Guardando...
                   </div>
                 ) : (
                   <>
@@ -281,6 +323,42 @@ function EditProfile() {
           </form>
         </div>
       </div>
+
+      {showSuccessModal && (
+    <div style={styles.modalOverlay}>
+        <div style={styles.modal}>
+        <h3 style={{
+              ...styles.modalTitle,
+              color: modal.type === 'success' ? '#2ecc71' : '#e74c3c'
+            }}>
+              {modal.type === 'success' ? '¡Actualización Exitosa!' : '¡Error!'}
+            </h3>
+          
+            <button
+                style={styles.modalButton}
+                onClick={closeSuccessModal}
+            >
+                Aceptar
+            </button>
+        </div>
+    </div>
+)}
+
+{showErrorModal && (
+    <div style={styles.modalOverlay}>
+        <div style={styles.modal}>
+            <h3>Error</h3>
+            <p>{modalMessage}</p>
+            <button
+                style={{...styles.modalButton, backgroundColor: '#e74c3c'}} 
+                onClick={closeErrorModal}
+            >
+                Cerrar
+            </button>
+        </div>
+    </div>
+)}
+
     </div>
   );
 }
@@ -530,7 +608,62 @@ const styles = {
     fontSize: '16px',
     color: '#1877f2',
     backgroundColor: '#FFCFB3',
-  }
+  },
+  loadingContent: {
+    display: "flex",
+    alignItems: "center",
+    gap: "0.5rem",
+    justifyContent: "center",
+  },
+  spinner: {
+    width: "20px",
+    height: "20px",
+    border: "3px solid #f3f3f3",
+    borderTop: "3px solid #3498db",
+    borderRadius: "50%",
+    animation: "spin 1s linear infinite",
+  },
+  "@keyframes spin": {
+    "0%": { transform: "rotate(0deg)" },
+    "100%": { transform: "rotate(360deg)" },
+  },
+  modalOverlay: {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1000,
+  },
+  modal: {
+    backgroundColor: 'white',
+    padding: '20px',
+    borderRadius: '8px',
+    maxWidth: '400px',
+    width: '100%',
+    textAlign: 'center',
+  },
+  modalTitle: {
+    color: '#2ecc71',
+    marginBottom: '1rem',
+  },
+  modalText: {
+    marginBottom: '1.5rem',
+    color: '#555',
+  },
+  modalButton: {
+    padding: '10px 20px',
+    backgroundColor: '#4CAF50',
+    color: 'white',
+    border: 'none',
+    borderRadius: '4px',
+    cursor: 'pointer',
+    marginTop: '15px',
+  },
 }
 
 export default EditProfile

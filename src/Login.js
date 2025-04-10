@@ -67,7 +67,7 @@ function Login() {
 
       {/* Formulario de inicio de sesión (cuadro blanco) */}
       <div style={styles.loginContainer}>
-        <h2 style={styles.title}>Inicio de sesión</h2>
+        <h2 style={styles.title}>Inicio de Sesión</h2>
         <form onSubmit={handleSubmit} style={styles.form}>
           <div style={styles.formGroup}>
             <label htmlFor="email" style={styles.label}>

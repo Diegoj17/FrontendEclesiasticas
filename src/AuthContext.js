@@ -16,17 +16,18 @@ export function AuthProvider({ children }) {
 
   // Al cargar el componente, verificar si hay una sesión guardada
   useEffect(() => {
-    const storedUser = JSON.parse(localStorage.getItem("user"))
-    if (storedUser) {
+    const storedUser = JSON.parse(localStorage.getItem("user"));
+    if (storedUser && !user) {
       setIsAuthenticated(true)
       setUser({
         ...storedUser,
         // Asegurar compatibilidad con versiones anteriores
         nombre: storedUser.nombre || storedUser.displayName?.split(" ")[0] || "",
-        apellido: storedUser.apellido || storedUser.displayName?.split(" ")[1] || ""
+        apellido: storedUser.apellido || storedUser.displayName?.split(" ")[1] || "",
       })
     }
   }, [])
+
 
   // Función para iniciar sesión
   const login = (userData) => {
@@ -63,8 +64,19 @@ export function AuthProvider({ children }) {
 
   const updateUser = async (newData) => {
     try {
+      console.log("Actualizando usuario con datos:", newData)
+
       // Obtener token actualizado de Firebase o del localStorage
-      const token = (await auth.currentUser?.getIdToken()) || localStorage.getItem("token")
+      let token
+      try {
+        token = await auth.currentUser?.getIdToken()
+      } catch (error) {
+        console.log("Error al obtener token de Firebase:", error)
+      }
+
+      if (!token) {
+        token = localStorage.getItem("token")
+      }
 
       if (!token) {
         console.error("No se encontró token de autenticación")
@@ -82,6 +94,8 @@ export function AuthProvider({ children }) {
       if (newData.password) {
         updateData.password = newData.password
       }
+
+      console.log("Enviando datos al servidor:", updateData)
 
       // Realizar la solicitud HTTP
       const response = await fetch("https://eclesiasticasbackend.onrender.com/api/auth/update-profile", {
@@ -102,22 +116,32 @@ export function AuthProvider({ children }) {
 
       // Obtener los datos de la respuesta
       const responseData = await response.json()
+      console.log("Respuesta del servidor:", responseData)
 
       // Actualizar estado local con los datos recibidos o los enviados
       const updatedUser = {
         ...user,
-        ...newData,
+        nombre: newData.nombre,
+        apellido: newData.apellido,
+        email: newData.email,
         displayName: `${newData.nombre} ${newData.apellido}`.trim(),
         // Si la respuesta incluye datos actualizados, usarlos
         ...(responseData && responseData.user ? responseData.user : {}),
       }
 
+      if (JSON.stringify(updatedUser) !== JSON.stringify(user)) {
+        setUser(updatedUser);
+        localStorage.setItem("user", JSON.stringify(updatedUser));
+      }
+
+      console.log("Usuario actualizado:", updatedUser)
+
+      // Actualizar el estado y localStorage
       setUser(updatedUser)
       localStorage.setItem("user", JSON.stringify(updatedUser))
 
-      if (onUserUpdate) {
-        onUserUpdate(updatedUser)
-      }
+      // Forzar una actualización de la interfaz
+      window.dispatchEvent(new Event("storage"))
 
       return true
     } catch (error) {

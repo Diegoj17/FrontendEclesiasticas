@@ -19,8 +19,9 @@ function Principal() {
   const { user, logout } = useAuth()
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
-  const [nombre, setNombre] = useState(""); // Define 'nombre' state
-  const [apellido, setApellido] = useState(""); // Define 'apellido' state
+  const [nombre, setNombre] = useState("");
+  const [apellido, setApellido] = useState("");
+  const [displayName, setDisplayName] = useState("")
 
   const handleClickOutside = useCallback((event) => {
     if (!dropdownRef.current || dropdownRef.current.contains(event.target)) {
@@ -29,14 +30,30 @@ function Principal() {
     setIsDropdownOpen(false);
   }, []);
 
-  // 2. Efecto para el click fuera
   useEffect(() => {
-    if (user?.displayName) {
-      const [name, lastName] = user.displayName.split(" ");
-      setNombre(name);
-      setApellido(lastName || "");
+    if (user) {
+      console.log("Usuario en Principal:", user)
+      setNombre(user.nombre || "")
+      setApellido(user.apellido || "")
+      setDisplayName(user.displayName || `${user.nombre || ""} ${user.apellido || ""}`.trim())
     }
-  }, [user]);
+  }, [user])
+
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const storedUser = JSON.parse(localStorage.getItem("user"))
+      if (storedUser) {
+        setNombre(storedUser.nombre || "")
+        setApellido(storedUser.apellido || "")
+        setDisplayName(storedUser.displayName || `${storedUser.nombre || ""} ${storedUser.apellido || ""}`.trim())
+      }
+    }
+
+    window.addEventListener("storage", handleStorageChange)
+    return () => {
+      window.removeEventListener("storage", handleStorageChange)
+    }
+  }, [])
 
   useEffect(() => {
     if (isDropdownOpen) {
@@ -86,11 +103,6 @@ function Principal() {
     setIsDropdownOpen(false) // Cerramos el dropdown
     navigate("/editarPerfil") // Navegamos a la ruta correcta
   }
-
-  const handleChangePassword = () => {
-    navigate("/cambiarContraseña");
-    setIsDropdownOpen(false);
-  };
 
   const handleDoubleClick = (e) => {
     e.preventDefault();
