@@ -42,7 +42,7 @@ function EditProfile() {
         nombre: user.nombre || "",
         apellido: user.apellido || "",
         email: user.email || "",
-        password: "",
+        password: user.password || "",
       });
     }
   }, [user]);
