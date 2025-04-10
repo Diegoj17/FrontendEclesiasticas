@@ -162,7 +162,7 @@ function EditProfile() {
                 <input
                   type="text"
                   id="name"
-                  value={name}
+                  value={formData.name}
                   onChange={(e) => setName(e.target.value)}
                   style={styles.input}
                   required
@@ -173,7 +173,7 @@ function EditProfile() {
                 <input
                   type="text"
                   id="lastname"
-                  value={lastname}
+                  value={formData.lastname}
                   onChange={(e) => setLastname(e.target.value)}
                   style={styles.input}
                   required
