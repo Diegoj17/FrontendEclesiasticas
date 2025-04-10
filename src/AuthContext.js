@@ -57,6 +57,10 @@ export function AuthProvider({ children }) {
     localStorage.removeItem("token")
   }
 
+  const onUserUpdate = (updatedUser) => {
+    console.log("User updated:", updatedUser)
+  }
+
   const updateUser = async (newData) => {
     try {
       // Obtener token actualizado de Firebase o del localStorage
@@ -110,6 +114,10 @@ export function AuthProvider({ children }) {
 
       setUser(updatedUser)
       localStorage.setItem("user", JSON.stringify(updatedUser))
+
+      if (onUserUpdate) {
+        onUserUpdate(updatedUser)
+      }
 
       return true
     } catch (error) {
