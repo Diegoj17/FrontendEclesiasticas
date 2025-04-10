@@ -73,9 +73,7 @@ function Principal() {
   }
 
   const handleLogout = () => {
-    // Llamar a la función logout del contexto de autenticación
     logout()
-    // Redirigir al login
     navigate("/")
   }
 
@@ -84,9 +82,10 @@ function Principal() {
   }
 
   const handleEditProfile = () => {
-    navigate("/editarPerfil");
-    setIsDropdownOpen(false);
-  };
+    console.log("Navegando a editar perfil") // Agregamos un log para depuración
+    setIsDropdownOpen(false) // Cerramos el dropdown
+    navigate("/editarPerfil") // Navegamos a la ruta correcta
+  }
 
   const handleChangePassword = () => {
     navigate("/cambiarContraseña");
@@ -103,77 +102,66 @@ function Principal() {
       setIsDropdownOpen(false);
     }
   };
-
   return (
-    <div style={styles.container}>
+    <div
+      style={styles.container}
+      onClick={(e) => isDropdownOpen && !dropdownRef.current.contains(e.target) && setIsDropdownOpen(false)}
+    >
       {/* Barra superior */}
       <header style={styles.header}>
-      <div
-          ref={dropdownRef}
-          style={styles.userContainer}
-          onClick={toggleDropdown}
-        >
-        </div>
-        <div
-        style={styles.logoContainer}
-        onClick={() => navigate("/principal")}
-        >
-        <img src={logo || "/placeholder.svg"} alt="Logo" style={styles.logo} />
+        <div style={styles.logoContainer} onClick={() => navigate("/principal")}>
+          <img src={logo || "/placeholder.svg"} alt="Logo" style={styles.logo} />
         </div>
         <h1 style={styles.headerTitle}>Parroquia San Luis Gonzaga</h1>
-        <div style={styles.userContainer} onClick={toggleDropdown}>
+        <div ref={dropdownRef} style={styles.userContainer} onClick={toggleDropdown}>
           <div style={styles.userInfo}>
-              <FaUserCircle size={24} style={styles.userIcon} />
-              <div style={styles.userText}>
-              <span style={styles.userName}>
-              {user?.displayName || "Nombre Usuario"}
-              </span>
-                <span style={styles.userRole}>{user?.role || "Rol"}</span>
-              </div>
-              {isDropdownOpen ? <FaChevronUp /> : <FaChevronDown />}
+            <FaUserCircle size={24} style={styles.userIcon} />
+            <div style={styles.userText}>
+              <span style={styles.userName}>{user?.displayName || "Nombre Usuario"}</span>
+              <span style={styles.userRole}>{user?.role || "Rol"}</span>
             </div>
-    
-            {/* Menú desplegable */}
-            {isDropdownOpen && (
-              <div style={styles.dropdownMenu}>
-                <button onClick={handleEditProfile} style={styles.dropdownItem}>
-                  <FaEdit style={styles.dropdownIcon} />
-                  <span style={styles.dropdownIconText}>Editar perfil</span>
-                </button>
-                <button style={styles.dropdownItem} onClick={handleChangePassword} onKeyDown={(e) => e.key === 'Enter' && handleChangePassword()}>
-                  <FaKey style={styles.dropdownIcon} />
-                  <span style={styles.dropdownIconText}>Cambiar contraseña</span>
-                </button>
-              </div>
-            )}
+            {isDropdownOpen ? <FaChevronUp /> : <FaChevronDown />}
           </div>
-        </header>
+
+          {/* Menú desplegable */}
+          {isDropdownOpen && (
+            <div style={styles.dropdownMenu}>
+              {/* Usamos un botón normal en lugar de un elemento de menú para mejor compatibilidad */}
+              <button onClick={handleEditProfile} style={styles.dropdownItem}>
+                <FaEdit style={styles.dropdownIcon} />
+                <span style={styles.dropdownIconText}>Editar perfil</span>
+              </button>
+            </div>
+          )}
+        </div>
+      </header>
 
       {/* Contenido principal */}
       <div style={styles.mainContent}>
-        
         {/* Menú lateral */}
         <nav style={styles.sidebar}>
-          
           {/* Botones principales */}
           <div style={styles.sidebarButtons}>
-
-          <button onClick={handleViewRegistros} style={{ ...styles.sidebarButton}} title="Vista de Registros de Partidas">
+            <button
+              onClick={handleViewRegistros}
+              style={{ ...styles.sidebarButton }}
+              title="Vista de Registros de Partidas"
+            >
               <FaFileAlt style={styles.buttonIcon} />
               {<span style={styles.buttonText}>Vista de Registros</span>}
             </button>
 
-            <button onClick={handleSearch} style={{ ...styles.sidebarButton}} title="Buscar partidas">
+            <button onClick={handleSearch} style={{ ...styles.sidebarButton }} title="Buscar partidas">
               <FaSearch style={styles.buttonIcon} />
               {<span style={styles.buttonText}>Buscar Partidas</span>}
             </button>
 
-            <button onClick={handleAdd} style={{ ...styles.sidebarButton}} title="Añadir partidas">
+            <button onClick={handleAdd} style={{ ...styles.sidebarButton }} title="Añadir partidas">
               <FaFileMedical style={styles.buttonIcon} />
               {<span style={styles.buttonText}>Añadir Partidas</span>}
             </button>
 
-            <button onClick={handleCorrect} style={{ ...styles.sidebarButton}} title="Corregir partidas">
+            <button onClick={handleCorrect} style={{ ...styles.sidebarButton }} title="Corregir partidas">
               <FaEdit style={styles.buttonIcon} />
               {<span style={styles.buttonText}>Corregir Partidas</span>}
             </button>
@@ -183,10 +171,10 @@ function Principal() {
           <div style={{ flex: 1 }}></div>
 
           {/* Botones inferiores */}
-            <button onClick={handleLogout} style={{ ...styles.logoutButton}}>
-              <FaSignOutAlt style={styles.buttonIcon} />
-              {<span style={styles.buttonText}>Cerrar Sesión</span>}
-            </button>
+          <button onClick={handleLogout} style={{ ...styles.logoutButton }}>
+            <FaSignOutAlt style={styles.buttonIcon} />
+            {<span style={styles.buttonText}>Cerrar Sesión</span>}
+          </button>
         </nav>
 
         {/* Área de contenido */}

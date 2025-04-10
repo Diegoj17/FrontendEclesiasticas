@@ -31,6 +31,12 @@ function App() {
               <RecuperarContraseña/>
               }
               />
+              <Route
+              path="/editarPerfil"
+              element={
+              <EditarPerfil/>
+              }
+              />
             <Route
               path="/Principal"
               element={
@@ -63,8 +69,8 @@ function App() {
               </ProtectedRoute>
             }
           />
-            
-            <Route path="*" element={<Navigate to="/" />} />
+          
+            <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </ScrollableContainer>
       </Router>

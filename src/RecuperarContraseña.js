@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import logo from "./logo.png";
 import axios from 'axios';
+import { FaKey } from 'react-icons/fa';
 
 function RecuperarContraseña() {
   const [email, setEmail] = useState('');
@@ -56,9 +57,9 @@ function RecuperarContraseña() {
 
   const handleCancel = () => {
     if (cancelTokenSource) {
-      cancelTokenSource.cancel('Solicitud cancelada por el usuario');
+      cancelTokenSource.cancel('Operación cancelada por el usuario');
       setCancelTokenSource(null);
-      setIsLoading(false);
+      setIsLoading(true);
     }
     navigate('/login');
   };
@@ -66,8 +67,7 @@ function RecuperarContraseña() {
 
   const handleCloseModal = () => {
     setModal(prev => ({...prev, show: false}));
-    // Solo redirigir si es éxito
-    if(modal.type === 'success') navigate('/login');
+    navigate('/login'); // Redirige siempre al cerrar modal
   };
 
   return (
@@ -85,6 +85,13 @@ function RecuperarContraseña() {
         </p>
         {error && <div style={styles.error}>{error}</div>}
         {message && <div style={styles.success}>{message}</div>}
+        
+        <div style={styles.avatarContainer}>
+                              <div style={styles.avatar}>
+                                <FaKey size={40} color="#385792" />
+                              </div>
+                            </div>
+        
         <form onSubmit={handleSubmit} style={styles.form}>
           <div style={styles.formGroup}>
             <label htmlFor="email" style={styles.label}>Correo Electrónico</label>
@@ -96,7 +103,7 @@ function RecuperarContraseña() {
                 setEmail(e.target.value);
                 if(submitted) setEmailError("");
               }}
-              onBlur={() => !email && setEmailError("Correo electrónico")}
+              onBlur={() => !email && setEmailError("Ingrese el Correo electrónico")}
               style={{
                 ...styles.input,
                 borderColor: emailError ? "#e74c3c" : "#ddd"
@@ -109,12 +116,11 @@ function RecuperarContraseña() {
               </div>
             )}
           </div>
-          <div style={styles.buttonContainer}>
+          <div style={{...styles.buttonContainer}}>
               <button
                 type="button"
                 style={styles.cancelButton}
                 onClick={handleCancel}
-                disabled={!isLoading}
               >
                 Cancelar
               </button>
@@ -181,6 +187,7 @@ const styles = {
     padding: '20px',
     boxSizing: 'border-box',
     paddingTop: '40px',
+    cursor: 'default',
   },
   formContainer: {
     display: 'flex',
@@ -189,16 +196,21 @@ const styles = {
     maxWidth: '400px',
     width: '100%',
     gap: '20px',
+    cursor: 'default',
   },
   logoContainer: {
-    marginBottom: '10px',
+    marginBottom: '0rem',
+    alignItems: 'center',
     display: 'flex',
     justifyContent: 'center',
+    cursor: 'default',
   },
   logo: {
-    width: '250px',
+    width: '200px',
     height: 'auto',
     objectFit: 'contain',
+    transition: 'all 0.3s ease',
+    cursor: 'default',
   },
   card: {
     backgroundColor: 'white',
@@ -210,26 +222,49 @@ const styles = {
     textAlign: 'center',
   },
   title: {
-    fontSize: '1.5rem',
-    marginBottom: '1rem',
+    fontSize: '1.8rem',
+    marginBottom: '0.5rem',
+    margin: '0 0 8px 0',
+    textAlign: 'center',
   },
   description: {
     fontSize: '1rem',
+    margin: '0 0 20px 0',
+    textAlign: 'center',
     marginBottom: '1.5rem',
-    color: '#666',
+    color: '#000000',
+  },
+  avatarContainer: {
+    display: "flex",
+    justifyContent: "center",
+    marginBottom: "20px",
+  },
+  avatar: {
+    width: "80px",
+    height: "80px",
+    borderRadius: "50%",
+    backgroundColor: "#f0f0f0",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    border: "2px solid #385792",
   },
   form: {
     display: 'flex',
+    width: "100%",
     flexDirection: 'column',
   },
   formGroup: {
-    marginBottom: '1.5rem',
+    marginBottom: '1rem',
+    display: "flex",
+    flexDirection: "column",
   },
   label: {
     fontSize: '1rem',
     marginBottom: '0.5rem',
     display: 'block',
     textAlign: 'left',
+    fontWeight: "600",
   },
   input: {
     padding: '0.75rem',
@@ -238,11 +273,16 @@ const styles = {
     borderRadius: '5px',
     border: '1px solid #ccc',
     boxSizing: 'border-box',
+    outline: 'none',
+    '&:focus': {
+      borderColor: '#1877f2',
+      boxShadow: '0 0 0 2px #e7f3ff'
+    }
   },
   buttonContainer: {
     display: 'flex',
     justifyContent: 'space-between',
-    gap: '1rem', // Espacio entre los botones
+    gap: '0.5rem',
   },
   cancelButton: {
     padding: '0.75rem',
@@ -252,26 +292,28 @@ const styles = {
     border: 'none',
     borderRadius: '5px',
     cursor: 'pointer',
-    flex: 1, // Ocupa el espacio disponible
+    flex: 1,
+    transition: 'opacity 0.3s ease',
+    fontWeight: "550",
   },
   submitButton: {
-    padding: '0.75rem',
+    padding: '1rem 1rem',
     fontSize: '1rem',
     backgroundColor: '#FCCE74',
     color: 'black',
     border: 'none',
     borderRadius: '5px',
     cursor: 'pointer',
-    flex: 1, // Ocupa el espacio disponible
+    flex: 1,
+    fontWeight: "550",
+    transition: 'opacity 0.3s ease',
   },
-
   loadingContent: {
     display: 'flex',
     alignItems: 'center',
     gap: "0.5rem",
     justifyContent: "center",
   },
-
   spinner: {
     width: '20px',
     height: '20px',

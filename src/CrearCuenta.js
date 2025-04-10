@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import logo from "./logo.png";
 import axios from 'axios';
-import { FaExclamationCircle } from 'react-icons/fa';
+import { FaExclamationCircle, FaCheck, FaUser } from 'react-icons/fa';
 
 function CrearCuenta() {
   const [name, setName] = useState('');
@@ -12,6 +12,9 @@ function CrearCuenta() {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const navigate = useNavigate();
   const [errors, setErrors] = useState({});
+  const [showRules, setShowRules] = useState(false);
+  const inputRef = useRef(null);
+  const bubbleRef = useRef(null);
   const [passwordErrors, setPasswordErrors] = useState({
     length: false,
     uppercase: false,
@@ -28,9 +31,9 @@ function CrearCuenta() {
   };
 
   const validateEmail = (email) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Regex más preciso
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const isValid = emailRegex.test(email);
-    setErrors(prev => ({...prev, email: !isValid}));
+    setErrors((prev) => ({ ...prev, email: !isValid }));
     return isValid;
   };
 
@@ -39,24 +42,25 @@ function CrearCuenta() {
       length: pass.length >= 8,
       uppercase: /[A-Z]/.test(pass),
       number: /\d/.test(pass),
-      specialChar: /[\W_]/.test(pass)
+      specialChar: /[\W_]/.test(pass),
     };
-    
-    const isValid = Object.values(errors).every(v => v);
+
+    const isValid = Object.values(errors).every((v) => v);
     setPasswordErrors(errors);
-    setErrors(prev => ({...prev, password: !isValid}));
-    
+    setErrors((prev) => ({ ...prev, password: !isValid }));
+
     return isValid;
   };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     const isEmailValid = validateEmail(email);
     const isPasswordValid = validatePassword(password);
-    
+
     if (!isEmailValid || !isPasswordValid) {
       setTouched({
         email: true,
-        password: true
+        password: true,
       });
       return;
     }
@@ -68,12 +72,10 @@ function CrearCuenta() {
           email,
           password,
           nombre: name,
-          apellido: lastname
+          apellido: lastname,
         }
       );
 
-      
-      
       setShowSuccessModal(true);
     } catch (error) {
       alert("Error: " + (error.response?.data || error.message));
@@ -81,7 +83,7 @@ function CrearCuenta() {
   };
 
   const handleCancel = () => {
-    navigate('/'); // Redirige al inicio de sesión al cancelar
+    navigate('/');
   };
 
   const closeModal = () => {
@@ -89,7 +91,25 @@ function CrearCuenta() {
     navigate('/login');
   };
 
-  
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (bubbleRef.current && !bubbleRef.current.contains(event.target)) {
+        if (inputRef.current !== event.target) {
+          setShowRules(false);
+        }
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const rules = [
+    { id: 1, text: 'Mínimo 6 caracteres', valid: password.length >= 6 },
+    { id: 2, text: 'Al menos una mayúscula', valid: /[A-Z]/.test(password) },
+    { id: 3, text: 'Al menos un número', valid: /\d/.test(password) },
+    { id: 4, text: 'Un carácter especial (!@#$%^&*)', valid: /[!@#$%^&*]/.test(password) },
+  ];
 
   return (
     <div style={styles.container}>
@@ -99,108 +119,107 @@ function CrearCuenta() {
         </div>
         <div style={styles.card}>
           <h2 style={styles.title}>Crear Cuenta</h2>
-          <p style={styles.description}>
-            Ingresa los datos para crear la cuenta.
-          </p>
-          <form onSubmit={handleSubmit} style={styles.form}>
-          <div style={styles.rowContainer}>
-            <div style={{...styles.formGroup, flex: 1, marginRight: '15px'}}>
-              <label htmlFor="name" style={styles.label}>Nombre</label>
-              <input
-                type="name"
-                id="name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                style={styles.input}
-                required
-              />
-            </div>
-            <div style={{...styles.formGroup, flex: 1, marginRight: '15px'}}>
-              <label htmlFor="email" style={styles.label}>Apellido</label>
-              <input
-                type="lastname"
-                id="lastname"
-                value={lastname}
-                onChange={(e) => setLastname(e.target.value)}
-                style={styles.input}
-                required
-              />
+          <p style={styles.description}>Ingresa los datos para crear la cuenta.</p>
+          <div style={styles.avatarContainer}>
+            <div style={styles.avatar}>
+              <FaUser size={40} color="#385792" />
             </div>
           </div>
+          <form onSubmit={handleSubmit} style={styles.form}>
+            <div style={styles.rowContainer}>
+              <div style={{ ...styles.formGroup, flex: 1, marginRight: '15px' }}>
+                <label htmlFor="name" style={styles.label}>Nombre</label>
+                <input
+                  type="text"
+                  id="name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  style={styles.input}
+                  required
+                />
+              </div>
+              <div style={{ ...styles.formGroup, flex: 1, marginRight: '15px' }}>
+                <label htmlFor="email" style={styles.label}>Apellido</label>
+                <input
+                  type="text"
+                  id="lastname"
+                  value={lastname}
+                  onChange={(e) => setLastname(e.target.value)}
+                  style={styles.input}
+                  required
+                />
+              </div>
+            </div>
             <div style={styles.formGroup}>
               <label htmlFor="email" style={styles.label}>Correo Electrónico</label>
               <div style={styles.inputWrapper}>
-              <input
-                type="email"
-                id="email"
-                value={email}
-                onChange={(e) => {
-                  setEmail(e.target.value);
-                  if (touched.email) validateEmail(e.target.value);
-                }}
-                onBlur={() => {
-                  setTouched(prev => ({...prev, email: true}));
-                  validateEmail(email);
-                }}
-                style={{
-                  ...styles.input,
-                  borderColor: errors.email && touched.email ? '#e74c3c' : '#ddd',
-                  paddingRight: '35px'
-                }}
-                required
-              />
-              {errors.email && touched.email && (
-                <FaExclamationCircle
-                  style={styles.errorIcon}
-                  color="#e74c3c"
+                <input
+                  type="email"
+                  id="email"
+                  value={email}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    if (touched.email) validateEmail(e.target.value);
+                  }}
+                  onBlur={() => {
+                    setTouched((prev) => ({ ...prev, email: true }));
+                    validateEmail(email);
+                  }}
+                  style={{
+                    ...styles.input,
+                    borderColor: errors.email && touched.email ? '#e74c3c' : '#ddd',
+                    paddingRight: '35px',
+                  }}
+                  required
                 />
-              )}
+                {errors.email && touched.email && (
+                  <FaExclamationCircle style={styles.errorIcon} color="#e74c3c" />
+                )}
+              </div>
             </div>
-          </div>
-          <div style={styles.formGroup}>
-            <label htmlFor="password" style={styles.label}>Contraseña</label>
-            <div style={styles.inputWrapper}>
-            <input
-              type="password"
-              id="password"
-              value={password}
-              onChange={(e) => {
-                setPassword(e.target.value);
-                validatePassword(e.target.value);
-              }}
-              onBlur={() => handleBlur('password')}
-              style={{
-                ...styles.input,
-              borderColor: errors.password && touched.password ? '#e74c3c' : '#ddd',
-              paddingRight: '35px'
-              }}
-              required
-            />
-            {errors.password && touched.password && (
-            <FaExclamationCircle
-              style={styles.errorIcon}
-              color="#e74c3c"
-            />
-            )}
-      </div>
-        <div style={styles.passwordRequirements}>
-          <p style={styles.requirementTitle}>La contraseña debe contener:</p>
-          <ul style={styles.requirementList}>
-            <li style={{color: passwordErrors.length ? '#2ecc71' : '#e74c3c'}}>
-              • Mínimo 6 caracteres
-            </li>
-            <li style={{color: passwordErrors.uppercase ? '#2ecc71' : '#e74c3c'}}>
-              • Al menos una mayúscula
-            </li>
-            <li style={{color: passwordErrors.number ? '#2ecc71' : '#e74c3c'}}>
-              • Al menos un número
-            </li>
-            <li style={{color: passwordErrors.specialChar ? '#2ecc71' : '#e74c3c'}}>
-              • Un carácter especial (!@#$%^&*)
-            </li>
-          </ul>
-        </div>
-      </div>
+            <div style={styles.passwordContainer}>
+              <label htmlFor="password" style={styles.label}>Contraseña</label>
+              <div style={styles.inputWrapper}>
+                <input
+                  ref={inputRef}
+                  type="password"
+                  value={password}
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    validatePassword(e.target.value);
+                  }}
+                  onBlur={() => handleBlur('password')}
+                  onFocus={() => setShowRules(true)}
+                  style={{
+                    ...styles.input,
+                    borderColor: errors.password && touched.password ? '#E83F25' : '#ddd',
+                    paddingRight: '35px',
+                  }}
+                  required
+                />
+                {errors.password && touched.password && (
+                  <FaExclamationCircle style={styles.errorIcon} color="#E83F25" />
+                )}
+                {showRules && (
+                  <div ref={bubbleRef} style={styles.rulesBubble}>
+                    <div style={styles.bubbleArrow}></div>
+                    <div style={styles.rulesContainer}>
+                      {rules.map((rule) => (
+                        <div key={rule.id} style={styles.ruleItem}>
+                          <FaCheck
+                            style={{
+                              color: rule.valid ? '#00a400' : '#ffffff',
+                              fontSize: '15px',
+                            }}
+                          />
+                          <span style={styles.ruleText}>{rule.text}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
             <div style={styles.buttonContainer}>
               <button type="button" style={styles.cancelButton} onClick={handleCancel}>
                 Cancelar
@@ -209,29 +228,24 @@ function CrearCuenta() {
                 Crear Cuenta
               </button>
             </div>
-            </form>
-          </div>
+          </form>
         </div>
-
-      {/* Modal de éxito */}
+      </div>
       {showSuccessModal && (
         <div style={styles.modalOverlay}>
           <div style={styles.modal}>
             <h3>Cuenta Creada Exitosamente</h3>
             <p>Tu cuenta ha sido creada correctamente.</p>
-            <button
-              style={styles.modalButton}
-              onClick={closeModal}
-            >
+            <button style={styles.modalButton} onClick={closeModal}>
               Aceptar
             </button>
           </div>
         </div>
       )}
     </div>
-
   );
 }
+
 const styles = {
   container: {
     display: 'flex',
@@ -239,7 +253,6 @@ const styles = {
     justifyContent: 'center',
     height: '100vh',
     backgroundColor: '#385792',
-    padding: '20px',
     boxSizing: 'border-box',
     padding: '20px 0 0 0',
     cursor: 'default',
@@ -251,17 +264,21 @@ const styles = {
     maxWidth: '400px',
     width: '100%',
     gap: '20px',
+    cursor: 'default',
   },
   logoContainer: {
-    marginBottom: '0.5rem',
+    marginBottom: '0rem',
+    alignItems: 'center',
     display: 'flex',
     justifyContent: 'center',
+    cursor: 'default',
   },
   logo: {
     width: '200px',
     height: 'auto',
     objectFit: 'contain',
     transition: 'all 0.3s ease',
+    cursor: 'default',
   },
   rowContainer: {
     display: 'flex',
@@ -292,23 +309,42 @@ const styles = {
     fontSize: '1rem',
     margin: '0 0 20px 0',
     textAlign: 'center',
-
     marginBottom: '1.5rem',
     color: '#000000',
+  },
+  avatarContainer: {
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: "20px",
+  },
+  avatar: {
+    width: "80px",
+    height: "80px",
+    borderRadius: "50%",
+    backgroundColor: "#f0f0f0",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    border: "2px solid #385792",
   },
   form: {
     display: 'flex',
     flexDirection: 'column',
+    width: "100%",
     marginTop: '15px',
   },
   formGroup: {
     marginBottom: '0.5rem',
+    display: "flex",
+    flexDirection: "column",
   },
   label: {
     fontSize: '1rem',
     marginBottom: '0.5rem',
     display: 'block',
     textAlign: 'left',
+    fontWeight: "600",
   },
   input: {
     padding: '0.75rem',
@@ -317,33 +353,39 @@ const styles = {
     borderRadius: '5px',
     border: '1px solid #ccc',
     boxSizing: 'border-box',
-    transition: 'all 0.3s ease-in-out'
+    transition: 'all 0.3s ease-in-out',
+    outline: 'none',
+    '&:focus': {
+      borderColor: '#1877f2',
+      boxShadow: '0 0 0 2px #e7f3ff'
+    }
   },
   buttonContainer: {
     display: 'flex',
     justifyContent: 'space-between',
-    gap: '1rem',
-    marginTop: '1rem',
+    gap: '0.5rem',
   },
   cancelButton: {
-    padding: '0.75rem',
+    flex: 1,
+    padding: '1rem 1rem',
     fontSize: '1rem',
     backgroundColor: '#FCCE74',
     color: 'black',
     border: 'none',
     borderRadius: '5px',
     cursor: 'pointer',
-    flex: 1,
+    fontWeight: "550",
   },
   submitButton: {
-    padding: '0.75rem',
+    flex: 1,
+    padding: '1rem 1rem',
     fontSize: '1rem',
     backgroundColor: '#FCCE74',
     color: 'black',
     border: 'none',
     borderRadius: '5px',
     cursor: 'pointer',
-    flex: 1,
+    fontWeight: "550",
   },
   modalOverlay: {
     position: 'fixed',
@@ -397,7 +439,8 @@ const styles = {
   },
   inputWrapper: {
     position: 'relative',
-    width: '100%'
+    width: '100%',
+    display: 'inline-block'
   },
   errorIcon: {
     position: 'absolute',
@@ -411,6 +454,52 @@ const styles = {
     fontSize: '0.8rem',
     display: 'block'
   },
+  passwordContainer: {
+    position: 'relative',
+    marginBottom: '20px',
+    width: '100%'
+  },
+  rulesBubble: {
+    position: 'absolute',
+    left: '100%',
+    top: '0',
+    marginLeft: '30px',
+    width: '220px',
+    backgroundColor: '#FFCFB3',
+    borderRadius: '8px',
+    boxShadow: '0 2px 14px rgba(0, 0, 0, 0.1)',
+    border: '1px solid #e4e6eb',
+    zIndex: 1000
+  },
+  bubbleArrow: {
+    position: 'absolute',
+    left: '-8px',
+    top: '16px',
+    width: '0',
+    height: '0',
+    borderTop: '8px solid transparent',
+    borderBottom: '8px solid transparent',
+    borderRight: '8px solid #FFCFB3',
+    filter: 'drop-shadow(-2px 0 1px rgba(0, 0, 0, 0.05))'
+  },
+  rulesContainer: {
+    padding: '20px'
+  },
+  ruleItem: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    marginBottom: '8px'
+  },
+  ruleText: {
+    fontSize: '14px',
+    color: '#000000'
+  },
+  ruleIcon: {
+    fontSize: '16px',
+    color: '#1877f2',
+    backgroundColor: '#FFCFB3',
+  }
 };
 
 export default CrearCuenta;

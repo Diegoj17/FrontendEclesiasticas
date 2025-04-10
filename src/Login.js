@@ -37,7 +37,7 @@ function Login() {
       // Guardar datos en contexto/auth
       login({
         email: response.data.email,
-        displayName: response.data.displayName, // Usar displayName
+        displayName: response.data.displayName,
         token: response.data.idToken
       });
       
@@ -45,7 +45,7 @@ function Login() {
     } catch (error) {
       setError(error.response?.data?.error || "Error desconocido");
     } finally {
-      setIsLoading(false); // Desactivar carga independientemente del resultado
+      setIsLoading(false);
     }
   };
 
