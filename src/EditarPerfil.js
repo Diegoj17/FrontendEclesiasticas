@@ -160,7 +160,7 @@ function EditProfile() {
               <div style={{ ...styles.formGroup, flex: 1, marginRight: '10px' }}>
                 <label htmlFor="name" style={styles.label}>Nombre</label>
                 <input
-                  type="name"
+                  type="text"
                   id="name"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
@@ -171,7 +171,7 @@ function EditProfile() {
               <div style={{ ...styles.formGroup, flex: 1 }}>
                 <label htmlFor="email" style={styles.label}>Apellido</label>
                 <input
-                  type="lastname"
+                  type="text"
                   id="lastname"
                   value={lastname}
                   onChange={(e) => setLastname(e.target.value)}
