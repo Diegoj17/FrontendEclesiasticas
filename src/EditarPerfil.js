@@ -201,11 +201,13 @@ function EditProfile() {
               <div style={styles.inputWrapper}>
                 <input
                   ref={inputRef}
+                  name="password"
                   type="password"
                   value={password}
                   onChange={(e) => {
                     setPassword(e.target.value);
                     validatePassword(e.target.value);
+                    setFormData(prev => ({...prev, password: e.target.value}));
                   }}
                   onBlur={() => handleBlur('password')}
                   onFocus={() => setShowRules(true)}
