@@ -256,7 +256,7 @@ function CrearCuenta() {
                 >
                 {isLoading ? (
             <div style={styles.loadingContainer}>
-              <div style={styles.spinner}></div>
+              <div style={styles.spinner}> </div>
               Creando...
             </div>
           ) : (
@@ -392,7 +392,6 @@ const styles = {
     display: 'flex',
     flexDirection: 'column',
     width: "100%",
-    marginTop: '15px',
   },
   formGroup: {
     marginBottom: '0.5rem',
@@ -407,13 +406,17 @@ const styles = {
     fontWeight: "600",
   },
   input: {
+    justifyContent: "center",
+    alignItems: "center",
+    flexDirection: "column",
+    display: "flex",
+    height: "40px",
+    width: "100%",
     padding: '0.75rem',
-    fontSize: '1rem',
-    width: '100%',
-    borderRadius: '5px',
-    border: '1px solid #ccc',
-    boxSizing: 'border-box',
-    transition: 'all 0.3s ease-in-out',
+    fontSize: "1rem",
+    border: "1px solid #ddd",
+    borderRadius: "4px",
+    boxSizing: "border-box",
     outline: 'none',
     '&:focus': {
       borderColor: '#1877f2',
@@ -423,7 +426,7 @@ const styles = {
   buttonContainer: {
     display: 'flex',
     justifyContent: 'space-between',
-    gap: '0.5rem',
+    gap: '1rem',
   },
   cancelButton: {
     flex: 1,
@@ -450,9 +453,12 @@ const styles = {
     cursor: 'pointer',
     fontWeight: "550",
     transition: 'opacity 0.3s ease',
-    position: 'relative',
-    transform: "none !important",
-
+  },
+  message: {
+    padding: "10px",
+    borderRadius: "4px",
+    marginBottom: "20px",
+    textAlign: "center",
   },
   loadingContent: {
     display: 'flex',
