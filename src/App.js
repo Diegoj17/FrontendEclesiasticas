@@ -69,6 +69,14 @@ function App() {
               </ProtectedRoute>
             }
           />
+            <Route
+            path="/listaActas"
+            element={
+              <ProtectedRoute>
+                    <ListaActas />
+              </ProtectedRoute>
+            }
+          />
           
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
