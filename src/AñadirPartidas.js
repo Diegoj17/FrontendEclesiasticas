@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { useAuth } from "./AuthContext"
 import logo from "./logo.png"
@@ -17,7 +17,10 @@ import {
   FaKey,
   FaChevronDown,
   FaChevronUp,
+  FaTimes,
 } from "react-icons/fa"
+import { useActas } from "./ActaContext"
+
 
 function AñadirPartidas() {
   const navigate = useNavigate()
@@ -27,6 +30,7 @@ function AñadirPartidas() {
   const [isSubmenuOpen, setIsSubmenuOpen] = useState(false)
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const toggleDropdown = () => setIsDropdownOpen(!isDropdownOpen);
+  const [errores, setErrores] = useState({});
 
   // Lista de sacerdotes/oficiantes para el ComboBox
   const sacerdotes = [
@@ -182,7 +186,8 @@ function AñadirPartidas() {
   }
 
   const [formData, setFormData] = useState(initialFormData)
-
+  const [showModal, setShowModal] = useState(false)
+  
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target
 
@@ -222,15 +227,125 @@ function AñadirPartidas() {
     }
   }
 
+  const { 
+    actasTemporales,
+    actasConfirmadas,
+    confirmarActas,
+    actaEditando,
+    setActaEditando,
+    modoEdicion,
+    setModoEdicion,
+    actualizarActaTemporal,
+    cancelarEdicion,
+    agregarActaTemporal,
+    setActasTemporales,
+  } = useActas();
+
+  const validarCampos = () => {
+    const nuevosErrores = {};
+    
+    // Validar campos comunes
+    if (!formData.libro) nuevosErrores.libro = "El libro es requerido";
+    if (!formData.folio) nuevosErrores.folio = "El folio es requerido";
+    if (!formData.acta) nuevosErrores.acta = "El acta es requerida";
+    
+    // Validar según tipo de ceremonia
+    switch(eventoSeleccionado) {
+      case "Bautismo":
+        if (!formData.bautismo.primerNombre) nuevosErrores.primerNombre = "El primer nombre es requerido";
+        if (!formData.bautismo.primerApellido) nuevosErrores.primerApellido = "El primer apellido es requerido";
+        break;
+        
+      case "Confirmación":
+        if (!formData.confirmacion.primerNombre) nuevosErrores.primerNombre = "El primer nombre es requerido";
+        break;
+        
+      case "Matrimonio":
+        if (!formData.matrimonio.novio.primerNombre) nuevosErrores.novioNombre = "El nombre del novio es requerido";
+        break;
+    }
+    
+    setErrores(nuevosErrores);
+    return Object.keys(nuevosErrores).length === 0;
+  };
+
   const handleSubmit = (e) => {
-    e.preventDefault()
-    console.log(formData)
-    // Handle form submission
-    alert(`Partida de ${eventoSeleccionado} guardada exitosamente`)
+    e.preventDefault();
+
+    if (!validarCampos()) {
+      setShowModal(true); // Mostrar modal de errores
+      return;
+    }
+
+    const actaCompleta = {
+      ...formData,
+      tipo: eventoSeleccionado,
+      id: actaEditando?.id || Date.now(),
+      fechaCreacion: actaEditando?.fechaCreacion || new Date().toISOString(),
+      confirmado: false,
+    };
+
+    if (modoEdicion) {
+      // Si estamos editando, actualizamos el acta existente
+      actualizarActaTemporal(actaCompleta);
+      navigate("/listaActas");
+    } else {
+      // Si es nueva, la agregamos a las actas temporales
+      agregarActaTemporal(actaCompleta);
+      setShowModal(true);
+    }
+
+    if (!modoEdicion) {
+      setFormData(initialFormData);
+      setEventoSeleccionado("");
+    }
+
+    // Resetear el formulario
+    setFormData(initialFormData);
+    setEventoSeleccionado("");
+    
+    // Desactivar el modo edición
+    setModoEdicion(false);
+    setActaEditando(null);
   }
 
+  const ErrorMessage = ({ mensaje }) => (
+    <span style={styles.errorText}>{mensaje}</span>
+  );
+
+  useEffect(() => {
+  if (actaEditando && modoEdicion) {
+    // Hacer una copia profunda del acta
+    const actaCopia = JSON.parse(JSON.stringify(actaEditando));
+    
+    // Asegurar que todos los campos anidados existan
+    const mergedData = {
+      ...initialFormData,
+      ...actaCopia,
+      bautismo: {...initialFormData.bautismo, ...actaCopia.bautismo},
+      confirmacion: {...initialFormData.confirmacion, ...actaCopia.confirmacion},
+      matrimonio: {...initialFormData.matrimonio, ...actaCopia.matrimonio}
+    };
+    
+    setFormData(mergedData);
+    setEventoSeleccionado(actaCopia.tipo);
+  }
+}, [actaEditando, modoEdicion]);
+  
+  
+
   const handleEventoChange = (e) => {
-    setEventoSeleccionado(e.target.value)
+    const nuevoEvento = e.target.value;
+    setEventoSeleccionado(nuevoEvento);
+    
+    // Solo resetear el formulario si NO estamos en modo edición
+    if (!modoEdicion) {
+      setFormData(initialFormData);
+    }
+  }
+
+  const handleCloseModal = () => {
+    setShowModal(false)
   }
 
   const handleViewRegistros = () => {
@@ -258,12 +373,18 @@ function AñadirPartidas() {
     console.log("Corregir partida")
   }
 
+  const handleList = () => {
+    navigate("/listaActas")
+  }
+
   const toggleMenu = () => {
     setMenuAbierto(!menuAbierto)
     if (!menuAbierto) {
       setIsSubmenuOpen(false)
     }
   }
+
+  
 
   // Componente para la sección común de registro (libro, folio, acta)
   const CommonRegistroSection = () => (
@@ -343,7 +464,7 @@ function AñadirPartidas() {
 
   // Componente para la sección común del oficiante
   const CommonOficianteSection = () => (
-    <div style={{ ...styles.formSection, flex: "1" }}>
+    <div style={{ ...styles.formSectionOficiante, flex: "1" }}>
       <h2 style={styles.sectionTitle}>Datos del Encargado de Celebrar la Ceremonia</h2>
       <div style={styles.formRow}>
         <div style={styles.formGroup}>
@@ -1130,14 +1251,12 @@ function AñadirPartidas() {
   }
 
   const handleEditProfile = () => {
-    navigate("/editar-perfil");
-    setIsDropdownOpen(false);
-  };
+    console.log("Navegando a editar perfil") // Agregamos un log para depuración
+    setIsDropdownOpen(false) // Cerramos el dropdown
+    navigate("/editarPerfil") // Navegamos a la ruta correcta
+  }
+  
 
-  const handleChangePassword = () => {
-    navigate("/cambiar-contraseña");
-    setIsDropdownOpen(false);
-  };
 
 return (
     <div style={styles.container}>
@@ -1167,10 +1286,6 @@ return (
                         <button style={styles.dropdownItem} onClick={handleEditProfile}>
                           <FaEdit style={styles.dropdownIcon} />
                           <span style={styles.dropdownIconText}>Editar perfil</span>
-                        </button>
-                        <button style={styles.dropdownItem} onClick={handleChangePassword}>
-                          <FaKey style={styles.dropdownIcon} />
-                          <span style={styles.dropdownIconText}>Cambiar contraseña</span>
                         </button>
                       </div>
                     )}
@@ -1204,19 +1319,19 @@ return (
               <button
                 onClick={handleViewRegistros}
                 style={{ ...styles.sidebarIconButton, justifyContent: menuAbierto ? "flex-start" : "center" }}
-                title="Vista de Registros"
+                title="Vista de Actas"
               >
                 <FaFileAlt style={styles.icon} />
-                {menuAbierto && <span style={styles.buttonText}>Vista de Registros</span>}
+                {menuAbierto && <span style={styles.buttonText}>Vista de Actas</span>}
               </button>
 
               <button
                 onClick={handleSearch}
                 style={{ ...styles.sidebarIconButton, justifyContent: menuAbierto ? "flex-start" : "center" }}
-                title="Buscar partidas"
+                title="Buscar Actas"
               >
                 <FaSearch style={styles.icon} />
-                {menuAbierto && <span style={styles.buttonText}>Buscar partidas</span>}
+                {menuAbierto && <span style={styles.buttonText}>Buscar Actas</span>}
               </button>
 
               <button
@@ -1225,19 +1340,19 @@ return (
                   ...styles.sidebarIconButton,
                   justifyContent: menuAbierto ? "flex-start" : "center",
                 }}
-                title="Añadir partidas"
+                title="Añadir Actas"
               >
                 <FaFileMedical style={styles.icon} />
-                {menuAbierto && <span style={styles.buttonText}>Añadir partidas</span>}
+                {menuAbierto && <span style={styles.buttonText}>Añadir Actas</span>}
               </button>
 
               <button
                 onClick={handleCorrect}
                 style={{ ...styles.sidebarIconButton, justifyContent: menuAbierto ? "flex-start" : "center" }}
-                title="Corregir partidas"
+                title="Corregir Actas"
               >
                 <FaEdit style={styles.icon} />
-                {menuAbierto && <span style={styles.buttonText}>Corregir partidas</span>}
+                {menuAbierto && <span style={styles.buttonText}>Corregir Actas</span>}
               </button>
             </div>
 
@@ -1259,15 +1374,58 @@ return (
         >
           {/* Selector de tipo de evento */}
           <div style={styles.filtroContainer}>
+            <div style={styles.filtroLeft}>
             <label htmlFor="evento" style={styles.label}>
               Seleccionar Tipo de Ceremonia:
             </label>
-            <select id="evento" value={eventoSeleccionado} onChange={handleEventoChange} style={styles.select}>
-              <option value="">Seleccione tipo de ceremonia</option>
+            <select
+              id="evento"
+              value={eventoSeleccionado}
+              onChange={handleEventoChange}
+              style={styles.select}
+              >
+              <option value=""></option>
               <option value="Bautismo">Bautizos</option>
               <option value="Confirmación">Confirmaciones</option>
               <option value="Matrimonio">Matrimonios</option>
             </select>
+          </div>
+
+          <div style={styles.topButtonContainer}>
+          {modoEdicion && (
+        <button type="button" onClick={() => {
+          cancelarEdicion();
+          setFormData(initialFormData);
+          setEventoSeleccionado("");
+        }} style={{ ...styles.sidebarButton, backgroundColor: "#FF000F", color: "white" }}>
+          <FaTimes style={styles.buttonIcon} />
+          <span style={styles.buttonText}>Cancelar Edición</span>
+        </button>
+      )}
+    <button
+      type="button"
+      onClick={handleList}
+      style={styles.sidebarButton}
+      title="Revisar Lista"
+      disabled={!eventoSeleccionado}
+    >
+      <FaListAlt style={styles.buttonIcon} />
+      <span style={styles.buttonText}>Revisar Lista</span>
+    </button>
+    
+    <button
+      type="submit"
+      style={{ 
+        ...styles.sidebarButton,
+        opacity: eventoSeleccionado ? 1 : 0.5,
+        cursor: eventoSeleccionado ? "pointer" : "not-allowed",
+      }}
+      disabled={!eventoSeleccionado}
+    >
+      <FaFileMedical style={styles.buttonIcon} />
+      <span style={styles.buttonText}>Guardar</span>
+    </button>
+  </div>
           </div>
 
           {eventoSeleccionado ? (
@@ -1304,17 +1462,6 @@ return (
                 </div>
               </div>
 
-              {/* Botones */}
-              <div style={styles.buttonContainer}>
-                <button type="button" onClick={handleCorrect} style={{ ...styles.sidebarButton }} title="Revisar Lista">
-                  <FaListAlt style={styles.buttonIcon} />
-                  {<span style={styles.buttonText}>Revisar Lista</span>}
-                </button>
-                <button type="submit" style={{ ...styles.sidebarButton }} title="Guardar">
-                  <FaFileMedical style={styles.buttonIcon} />
-                  {<span style={styles.buttonText}>Guardar</span>}
-                </button>
-              </div>
             </form>
           ) : (
             <div style={styles.noSelectionMessage}>
@@ -1327,6 +1474,34 @@ return (
           )}
         </main>
       </div>
+
+      {/* Modal de confirmación */}
+      {showModal && (
+        <div style={styles.modalOverlay}>
+          <div style={styles.modal}>
+            <div style={styles.modalHeader}>
+            <h2 style={styles.modalTitle}>{modoEdicion ? "Acta Actualizada" : "Acta Agregada"}</h2>
+              <button onClick={handleCloseModal} style={styles.closeButton}>
+                <FaTimes />
+              </button>
+            </div>
+            <div style={styles.modalBody}>
+      <p>{modoEdicion
+        ? "El acta ha sido actualizada exitosamente." 
+        : "El acta ha sido agregada exitosamente a la lista temporal."}</p>
+      <p>Puede verla en la sección "Lista de Actas".</p>
+    </div>
+            <div style={styles.modalFooter}>
+              <button onClick={handleCloseModal} style={styles.modalButton}>
+                Aceptar
+              </button>
+              <button onClick={handleList} style={styles.modalButtonSecondary}>
+                Ir a Lista de Actas
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -1338,6 +1513,7 @@ const styles = {
     flexDirection: "column",
     height: "100vh",
     overflow: "hidden",
+    cursor: "default",
   },
   header: {
     backgroundColor: "#385792",
@@ -1409,7 +1585,6 @@ const styles = {
   },
   dropdownMenu: {
     display: 'flex',
-    flexDirection: 'column',
     alignItems: 'center',
     width: '100%',
     position: 'absolute',
@@ -1518,6 +1693,12 @@ const styles = {
     overflow: "hidden",
     position: "relative",
     minHeight: "40px",
+    opacity: 1,
+    ':disabled': {
+      backgroundColor: "#e0e0e0",
+      cursor: "not-allowed",
+      opacity: 0.6,
+    }
   },
   sidebarIconButton: {
     display: "flex",
@@ -1602,13 +1783,23 @@ const styles = {
 
   // Estilos del filtro de selección
   filtroContainer: {
+    display: "flex",
+    justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: "20px",
-    marginLeft: "0.5rem",
     fontSize: "1rem",
     fontWeight: "600",
+    marginBottom: "0.5rem",
+    gap: "35rem",
+  },
+  filtroLeft: {
     display: "flex",
+    alignItems: "center",
     gap: "0rem",
+  },
+  topButtonContainer: {
+    display: "flex",
+    gap: "1rem",
+    alignItems: "center",
   },
   label: {
     fontSize: "1.2rem",
@@ -1624,6 +1815,7 @@ const styles = {
     marginLeft: "1rem",
     width: "220px",
     fontWeight: "550",
+    cursor: "pointer",
   },
 
   // Estilos del formulario
@@ -1631,7 +1823,6 @@ const styles = {
     backgroundColor: "#fff",
     borderRadius: "0.5rem",
     padding: "1rem",
-    boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
   },
   topSectionsContainer: {
     display: "flex",
@@ -1639,6 +1830,7 @@ const styles = {
     flexDirection: "row",
     marginBottom: "20px",
     width: "100%",
+    alignItems: "stretch",
   },
 
   // Estilos de secciones del formulario
@@ -1649,6 +1841,7 @@ const styles = {
     borderRadius: "0.5rem",
     backgroundColor: "#f9f9f9",
     height: "fit-content",
+    width: "100%",
   },
   formSectionRegistro: {
     flex: "1",
@@ -1658,6 +1851,19 @@ const styles = {
     borderRadius: "0.5rem",
     backgroundColor: "#f9f9f9",
     height: "fit-content",
+    width: "100%",
+    minHeight: "150px"
+  },
+  formSectionOficiante: {
+    flex: "1",
+    padding: "0.75rem",
+    border: "1px solid #000000",
+    borderRadius: "0.5rem",
+    backgroundColor: "#f9f9f9",
+    minHeight: "265px",
+    height: "fit-content",
+    marginBottom: "0.5rem",
+
   },
   sectionTitle: {
     fontSize: "1.1rem",
@@ -1676,6 +1882,7 @@ const styles = {
   formGroup: {
     flex: "1 1 auto",
     minWidth: "200px",
+    
   },
   formGroupReg: {
     flex: "1 1 auto",
@@ -1713,7 +1920,7 @@ const styles = {
   },
   formRegistro: {
     display: "block",
-    width: "50%",
+    width: "100%",
     padding: "0.5rem",
     margin: '0 auto',
     border: "1px solid #ced4da",
@@ -1825,6 +2032,8 @@ const styles = {
     fontSize: "0.9rem",
     minWidth: "150px",
   },
+
+
   checkboxGroup: {
     display: "flex",
     alignItems: "center",
@@ -1832,6 +2041,7 @@ const styles = {
   checkbox: {
     marginRight: "5px",
   },
+  
   checkboxLabel: {
     fontSize: "0.9rem",
   },
@@ -1864,7 +2074,79 @@ const styles = {
     textAlign: "center",
     marginTop: "2rem",
   },
+
+  modalOverlay: {
+    position: "fixed",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 2000,
+  },
+  modal: {
+    backgroundColor: "white",
+    borderRadius: "8px",
+    width: "400px",
+    maxWidth: "90%",
+    boxShadow: "0 5px 15px rgba(0, 0, 0, 0.3)",
+    overflow: "hidden",
+  },
+  modalHeader: {
+    padding: "15px 20px",
+    borderBottom: "1px solid #e0e0e0",
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    backgroundColor: "#385792",
+    color: "white",
+  },
+  modalTitle: {
+    margin: 0,
+    fontSize: "1.2rem",
+    fontWeight: "600",
+  },
+  closeButton: {
+    background: "none",
+    border: "none",
+    cursor: "pointer",
+    fontSize: "1.2rem",
+    color: "white",
+  },
+  modalBody: {
+    padding: "20px",
+    fontSize: "1rem",
+  },
+  modalFooter: {
+    padding: "15px 20px",
+    borderTop: "1px solid #e0e0e0",
+    display: "flex",
+    justifyContent: "flex-end",
+    gap: "10px",
+  },
+  modalButton: {
+    padding: "8px 16px",
+    backgroundColor: "#385792",
+    color: "white",
+    border: "none",
+    borderRadius: "4px",
+    cursor: "pointer",
+    fontSize: "0.9rem",
+  },
+  modalButtonSecondary: {
+    padding: "8px 16px",
+    backgroundColor: "#FCCE74",
+    color: "black",
+    border: "none",
+    borderRadius: "4px",
+    cursor: "pointer",
+    fontSize: "0.9rem",
+  },
 }
 
 export default AñadirPartidas
+
 
