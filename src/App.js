@@ -11,10 +11,12 @@ import { AuthProvider } from "./AuthContext"
 import ProtectedRoute from "./ProtectedRoute"
 import AñadirPartidas from './AñadirPartidas';
 import BuscarPartidas from './BuscarPartidas';
+import ListaActas from './ListaActas';
 
 function App() {
   return (
     <AuthProvider>
+      <ActaProvider>
       <Router>
         <ScrollableContainer>
           <Routes>
@@ -82,6 +84,7 @@ function App() {
           </Routes>
         </ScrollableContainer>
       </Router>
+      </ActaProvider>      
     </AuthProvider>
   )
 }
