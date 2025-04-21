@@ -72,7 +72,7 @@ function Principal() {
 
   // Función para navegar a la vista de registros
   const handleViewRegistros = () => {
-    navigate("/registros")
+    navigate("/vistaActas")
   }
 
   // Funciones para los botones
@@ -103,6 +103,7 @@ function Principal() {
     setIsDropdownOpen(false) // Cerramos el dropdown
     navigate("/editarPerfil") // Navegamos a la ruta correcta
   }
+  
 
   const handleDoubleClick = (e) => {
     e.preventDefault();
@@ -160,22 +161,22 @@ function Principal() {
               title="Vista de Registros de Partidas"
             >
               <FaFileAlt style={styles.buttonIcon} />
-              {<span style={styles.buttonText}>Vista de Registros</span>}
+              {<span style={styles.buttonText}>Vista de Actas</span>}
             </button>
 
-            <button onClick={handleSearch} style={{ ...styles.sidebarButton }} title="Buscar partidas">
+            <button onClick={handleSearch} style={{ ...styles.sidebarButton }} title="Buscar Actas">
               <FaSearch style={styles.buttonIcon} />
-              {<span style={styles.buttonText}>Buscar Partidas</span>}
+              {<span style={styles.buttonText}>Buscar Actas</span>}
             </button>
 
-            <button onClick={handleAdd} style={{ ...styles.sidebarButton }} title="Añadir partidas">
+            <button onClick={handleAdd} style={{ ...styles.sidebarButton }} title="Añadir Actas">
               <FaFileMedical style={styles.buttonIcon} />
-              {<span style={styles.buttonText}>Añadir Partidas</span>}
+              {<span style={styles.buttonText}>Crear Actas</span>}
             </button>
 
-            <button onClick={handleCorrect} style={{ ...styles.sidebarButton }} title="Corregir partidas">
+            <button onClick={handleCorrect} style={{ ...styles.sidebarButton }} title="Corregir Actas">
               <FaEdit style={styles.buttonIcon} />
-              {<span style={styles.buttonText}>Corregir Partidas</span>}
+              {<span style={styles.buttonText}>Corregir Actas</span>}
             </button>
           </div>
 
