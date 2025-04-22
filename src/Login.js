@@ -59,6 +59,7 @@ function Login() {
 
 
   return (
+
     <div style={styles.container}>
       {/* Logo en la parte izquierda */}
       <div style={styles.logoContainer}>
@@ -112,6 +113,7 @@ function Login() {
         )}
       </button>
       {error && <div style={styles.error}>{error}</div>}
+      
       {/* Incluir animación CSS global */}
       <style>{`
           @keyframes spin {
@@ -119,6 +121,17 @@ function Login() {
           100% { transform: rotate(360deg); }
           }
       `       }</style>
+      <style>{`
+            @keyframes gradientAnimation {
+                0% { background-position: 0% 50%; }
+                50% { background-position: 100% 50%; }
+                100% { background-position: 0% 50%; }
+            }
+            @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+            }
+        `}</style>
         </form>
         <p style={styles.createAccountLink} onClick={handleCreateAccount}>
           Crear Cuenta
@@ -137,13 +150,15 @@ const styles = {
     alignItems: "center",
     justifyContent: "center",
     minHeight: "100vh",
-    backgroundColor: "#385792",
     fontFamily: "Arial, sans-serif",
     boxSizing: "border-box",
     overflow: "auto",
     position: "relative",
     width: "100%",
     cursor: 'default',
+    background: 'linear-gradient(to bottom, #DFC950 0%, #385792 60%)',
+    animation: 'gradientAnimation 15s ease infinite',
+    backgroundSize: '400% 400%',
   },
   logoContainer: {
     marginRight: '5px',
@@ -155,19 +170,22 @@ const styles = {
     width: "50%",
   },
   logo: {
+    display: "flex",
     width: "100%",
     height: 'auto',
-    maxWidth: '900px ',
+    maxWidth: '800px ',
     objectFit: "contain",
     maxHeight: "80vh",
     marginRight: '150px',
+    alignItems: "center",
+    justifyContent: "center",
   },
   loginContainer: {
-    backgroundColor: 'white',
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
     padding: '3rem',
     marginLeft: '-80px',
     borderRadius: '1.5rem',
-    boxShadow: '0 0 10px rgba(0, 0, 0, 0.1)',
+    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
     width: '50%',
     maxWidth: '400px',
     minWidth: '500px',
@@ -177,12 +195,13 @@ const styles = {
     flexDirection: "column",
     justifyContent: "center",
     
+    
   },
   title: {
     fontSize: '2.5rem',
     marginBottom: '4rem',
     fontWeight: "700",
-    position: "reative",
+    position: "relative",
     textAlign: "center",
     fontFamily: "Arial, sans-serif",
     color: "#333",
@@ -266,6 +285,11 @@ const styles = {
   "@keyframes spin": {
     "0%": { transform: "rotate(0deg)" },
     "100%": { transform: "rotate(360deg)" },
+  },
+  "@keyframes gradientAnimation": {
+    "0%": { backgroundPosition: "0% 50%" },
+    "50%": { backgroundPosition: "100% 50%" },
+    "100%": { backgroundPosition: "0% 50%" },
   },
   
 
