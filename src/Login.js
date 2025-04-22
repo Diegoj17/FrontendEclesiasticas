@@ -120,18 +120,8 @@ function Login() {
           0% { transform: rotate(0deg); }
           100% { transform: rotate(360deg); }
           }
-      `       }</style>
-      <style>{`
-            @keyframes gradientAnimation {
-                0% { background-position: 0% 50%; }
-                50% { background-position: 100% 50%; }
-                100% { background-position: 0% 50%; }
-            }
-            @keyframes spin {
-                0% { transform: rotate(0deg); }
-                100% { transform: rotate(360deg); }
-            }
-        `}</style>
+      `   }
+      </style>
         </form>
         <p style={styles.createAccountLink} onClick={handleCreateAccount}>
           Crear Cuenta
@@ -156,9 +146,7 @@ const styles = {
     position: "relative",
     width: "100%",
     cursor: 'default',
-    background: 'linear-gradient(to bottom, #DFC950 0%, #385792 60%)',
-    animation: 'gradientAnimation 15s ease infinite',
-    backgroundSize: '400% 400%',
+    backgroundColor: "#385792",
   },
   logoContainer: {
     marginRight: '5px',
