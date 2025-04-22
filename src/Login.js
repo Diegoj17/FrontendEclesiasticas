@@ -169,7 +169,7 @@ const styles = {
     justifyContent: "center",
   },
   loginContainer: {
-    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    backgroundColor: '#ffffff',
     padding: '3rem',
     marginLeft: '-80px',
     borderRadius: '1.5rem',
@@ -273,11 +273,6 @@ const styles = {
   "@keyframes spin": {
     "0%": { transform: "rotate(0deg)" },
     "100%": { transform: "rotate(360deg)" },
-  },
-  "@keyframes gradientAnimation": {
-    "0%": { backgroundPosition: "0% 50%" },
-    "50%": { backgroundPosition: "100% 50%" },
-    "100%": { backgroundPosition: "0% 50%" },
   },
   
 
