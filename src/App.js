@@ -8,10 +8,12 @@ import RecuperarContraseña from './RecuperarContraseña';
 import CrearCuenta from './CrearCuenta';
 import EditarPerfil from './EditarPerfil';
 import { AuthProvider } from "./AuthContext"
+import { ActaProvider } from "./ActaContext"
 import ProtectedRoute from "./ProtectedRoute"
 import AñadirPartidas from './AñadirPartidas';
 import BuscarPartidas from './BuscarPartidas';
 import ListaActas from './ListaActas';
+import VistaActas from './VistaActas';
 
 function App() {
   return (
@@ -48,10 +50,10 @@ function App() {
               }
               />
           <Route
-            path="/registros"
+            path="/vistaActas"
             element={
               <ProtectedRoute>
-                    <Registros />
+                    <VistaActas />
               </ProtectedRoute>
             }
           />
@@ -84,7 +86,7 @@ function App() {
           </Routes>
         </ScrollableContainer>
       </Router>
-      </ActaProvider>      
+      </ActaProvider>
     </AuthProvider>
   )
 }
