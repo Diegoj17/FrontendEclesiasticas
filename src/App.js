@@ -2,7 +2,6 @@ import React from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import Login from './Login';
 import Principal from './Principal';
-import Registros from "./Registros"
 import ScrollableContainer from "./ScrollableContainer"
 import RecuperarContraseña from './RecuperarContraseña';
 import CrearCuenta from './CrearCuenta';

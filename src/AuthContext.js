@@ -26,7 +26,7 @@ export function AuthProvider({ children }) {
         apellido: storedUser.apellido || storedUser.displayName?.split(" ")[1] || "",
       })
     }
-  }, [])
+  }, [user])
 
 
   // Función para iniciar sesión
