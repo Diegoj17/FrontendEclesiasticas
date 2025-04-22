@@ -349,7 +349,7 @@ function AñadirPartidas() {
   }
 
   const handleViewRegistros = () => {
-    navigate("/vistaActas")
+    navigate("/registros")
   }
 
   const handleLogout = () => {
@@ -2148,3 +2148,4 @@ const styles = {
 }
 
 export default AñadirPartidas
+

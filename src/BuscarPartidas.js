@@ -583,10 +583,6 @@ return (
                             <FaEdit style={styles.dropdownIcon} />
                             <span style={styles.dropdownIconText}>Editar perfil</span>
                           </button>
-                          <button style={styles.dropdownItem} onClick={handleChangePassword}>
-                            <FaKey style={styles.dropdownIcon} />
-                            <span style={styles.dropdownIconText}>Cambiar contraseña</span>
-                          </button>
                         </div>
                       )}
                     </div>
@@ -636,10 +632,10 @@ return (
                 <button
                   onClick={handleAdd}
                   style={{ ...styles.sidebarIconButton, justifyContent: menuAbierto ? "flex-start" : "center" }}
-                  title="Crear Actas"
+                  title="Añadir Actas"
                 >
                   <FaFileMedical style={styles.icon} />
-                  {menuAbierto && <span style={styles.buttonText}>Crear Actas</span>}
+                  {menuAbierto && <span style={styles.buttonText}>Añadir Actas</span>}
                 </button>
 
                 <button
@@ -728,8 +724,8 @@ return (
                 <>
                   {isLoading ? (
                     <div className="flex justify-content-center">
-                      <i className="pi pi-spin pi-spinner" style={{ fontSize: "2rem" }}></i>
-                      <span style={{ marginLeft: "0.5rem" }}>Buscando...</span>
+                      <i className="pi pi-spin pi-spinner" style={{ fontSize: "1.5rem" }}></i>
+                      <span style={styles.loadingText}>Buscando...</span>
                     </div>
                   ) : (
                     <div className="card">
@@ -1092,8 +1088,8 @@ const styles = {
     display: "flex",
     gap: "1rem",
     alignItems: "center",
-    justifyContent: "center",
     marginLeft: "auto",
+    justifyContent: "space-between",
   },
   printButton: {
     alignItems: "center",
@@ -1134,6 +1130,7 @@ const styles = {
     fontWeight: '600',
     display: 'flex',
     gap: '0rem',
+    
   },
   label: {
     fontSize: '1.2rem',
@@ -1231,11 +1228,13 @@ const styles = {
     boxShadow: "none",
     overflow: "auto",
     marginBottom: "20px",
-    marginLeft: '1rem',
+    marginLeft: '0.5rem',
     fontSize: '1rem',
     fontWeight: '600',
     overflowX: "auto",
     maxHeight: "calc(100vh - 200px)",
+    width: "100%",
+    borderCollapse: "collapse",
   },
 
   columnaTabla: {
@@ -1245,7 +1244,10 @@ const styles = {
     fontSize: '1rem',
     color: 'black',
     textAlign: 'center',
-    padding: '1rem',
+    padding: '0.5rem 1rem',
+    minWidth: "50px",
+    whiteSpace: "nowrap",
+    cursor: "default",
   },
 
   filaTabla: {
@@ -1255,7 +1257,69 @@ const styles = {
     fontSize: '1rem',
     color: 'black',
     textAlign: 'center',
-    padding: '0rem',
+    padding: '0.5rem 1rem',
+    minWidth: "50px",
+    whiteSpace: "nowrap",
+    cursor: "pointer",
+  },
+
+  detailsCell: {
+    padding: "0.5rem 0.5rem",
+    backgroundColor: "#f9f9f9",
+    border: "1px solid #e0e0e0",
+    cursor: "default",
+  },
+  detailsContainer: {
+    padding: "0rem 0.5rem",
+    
+  },
+  detailsTitle: {
+    padding: "0rem 0.5rem",
+    fontSize: "1.1rem",
+    fontWeight: "600",
+    marginBottom: "0.5rem",
+    color: "#385792",
+  },
+  detailsGrid: {
+    display: "flex",
+    flexWrap: "wrap",
+    gap: "0.5rem",
+    marginBottom: "0.5rem",
+    cursor: "default",
+  },
+  detailsSection: {
+    flex: "1 1 calc(33.33% - 1rem)",
+    minWidth: "250px",
+    padding: "0rem 1rem",
+    border: "1px solid #e0e0e0",
+    borderRadius: "0.5rem",
+    backgroundColor: "#ffffff",
+  },
+  sectionTitle: {
+    fontSize: "1.1rem",
+    fontWeight: "600",
+    marginBottom: "0.5rem",
+    color: "#385792",
+  },
+  detailsRow: {
+    display: "flex",
+    justifyContent: "space-between",
+    marginBottom: "0.5rem",
+  },
+  detailsLabel: {
+    fontWeight: "500",
+  },
+  detailsValue: {
+    textAlign: "right",
+  },
+
+  loadingText: {
+    fontSize: "1.2rem",
+    color: "#000000",
+    fontStyle: "italic",
+    whiteSpace: "nowrap",
+    textAlign: "center",
+    justifyContent: "center",
   },
   
 }

@@ -12,8 +12,8 @@ import { ActaProvider } from "./ActaContext"
 import ProtectedRoute from "./ProtectedRoute"
 import AñadirPartidas from './AñadirPartidas';
 import BuscarPartidas from './BuscarPartidas';
-import ListaActas from './ListaActas';
 import VistaActas from './VistaActas';
+import ListaActas from './ListaActas';
 
 function App() {
   return (
@@ -73,7 +73,7 @@ function App() {
               </ProtectedRoute>
             }
           />
-            <Route
+          <Route
             path="/listaActas"
             element={
               <ProtectedRoute>
@@ -88,7 +88,7 @@ function App() {
       </Router>
       </ActaProvider>
     </AuthProvider>
-  )
+  );
 }
 
 export default App
