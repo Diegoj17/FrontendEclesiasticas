@@ -619,36 +619,36 @@ return (
                 <button
                   onClick={handleViewRegistros}
                   style={{ ...styles.sidebarIconButton, justifyContent: menuAbierto ? "flex-start" : "center" }}
-                  title="Vista de Registros"
+                  title="Vista de Actas"
                 >
                   <FaFileAlt style={styles.icon} />
-                  {menuAbierto && <span style={styles.buttonText}>Vista de Registros</span>}
+                  {menuAbierto && <span style={styles.buttonText}>Vista de Actas</span>}
                 </button>
 
                 <button
                   style={{ ...styles.sidebarIconButton, justifyContent: menuAbierto ? "flex-start" : "center" }}
-                  title="Buscar partidas"
+                  title="Buscar Actas"
                 >
                   <FaSearch style={styles.icon} />
-                  {menuAbierto && <span style={styles.buttonText}>Buscar Partidas</span>}
+                  {menuAbierto && <span style={styles.buttonText}>Buscar Actas</span>}
                 </button>
 
                 <button
                   onClick={handleAdd}
                   style={{ ...styles.sidebarIconButton, justifyContent: menuAbierto ? "flex-start" : "center" }}
-                  title="Añadir partidas"
+                  title="Crear Actas"
                 >
                   <FaFileMedical style={styles.icon} />
-                  {menuAbierto && <span style={styles.buttonText}>Añadir Partidas</span>}
+                  {menuAbierto && <span style={styles.buttonText}>Crear Actas</span>}
                 </button>
 
                 <button
                   onClick={handleCorrect}
                   style={{ ...styles.sidebarIconButton, justifyContent: menuAbierto ? "flex-start" : "center" }}
-                  title="Corregir partidas"
+                  title="Corregir Actas"
                 >
                   <FaEdit style={styles.icon} />
-                  {menuAbierto && <span style={styles.buttonText}>Corregir Partidas</span>}
+                  {menuAbierto && <span style={styles.buttonText}>Corregir Actas</span>}
                 </button>
               </div>
 
