@@ -25,7 +25,7 @@ function Login() {
     setError("");
     try {
       const response = await axios.post(
-        'https://eclesiasticasbackend.onrender.com/api/auth/login',
+        'http://eclesiasticasbackend-production.up.railway.app/api/auth/login',
         { email, password }
       );
       

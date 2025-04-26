@@ -33,7 +33,7 @@ function RecuperarContraseña() {
     
     try {
       const response = await axios.post(
-        "https://eclesiasticasbackend.onrender.com/api/auth/reset-password",
+        "http://eclesiasticasbackend-production.up.railway.app/api/auth/reset-password",
         { email },
         { cancelToken: source.token }
       );
