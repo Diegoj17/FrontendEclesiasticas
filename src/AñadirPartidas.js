@@ -1142,47 +1142,7 @@ function AñadirPartidas() {
                   />
                 </div>
               </div>
-              <div style={styles.formRow}>
-                <div style={styles.formGroup}>
-                  <label style={styles.formLabel}>Fecha de Nacimiento</label>
-                  <div style={styles.dateInputs}>
-                    <input
-                      type="text"
-                      name="matrimonio.novia.fechaNacimiento.dia"
-                      placeholder="Día"
-                      value={formData.matrimonio.novia.fechaNacimiento.dia}
-                      onChange={handleChange}
-                      style={styles.dateInput}
-                    />
-                    <input
-                      type="text"
-                      name="matrimonio.novia.fechaNacimiento.mes"
-                      placeholder="Mes"
-                      value={formData.matrimonio.novia.fechaNacimiento.mes}
-                      onChange={handleChange}
-                      style={styles.dateInput}
-                    />
-                    <input
-                      type="text"
-                      name="matrimonio.novia.fechaNacimiento.año"
-                      placeholder="Año"
-                      value={formData.matrimonio.novia.fechaNacimiento.año}
-                      onChange={handleChange}
-                      style={styles.dateInput}
-                    />
-                  </div>
-                </div>
-                <div style={styles.formGroup}>
-                  <label style={styles.formLabel}>Lugar de Nacimiento</label>
-                  <ComboBox
-                    options={ciudadesColombia}
-                    value={formData.matrimonio.novia.lugarNacimiento}
-                    onChange={handleChange}
-                    placeholder="Seleccione o escriba la ciudad"
-                    name="matrimonio.novia.lugarNacimiento"
-                  />
-                </div>
-              </div>
+
               <div style={styles.formRow}>
                 <div style={styles.formGroup}>
                   <label style={styles.formLabel}>Nombres del Padre</label>
@@ -1205,36 +1165,86 @@ function AñadirPartidas() {
                   />
                 </div>
               </div>
+              
               <div style={styles.registroRow}>
-                <label style={styles.formLabel}>Datos de Acta de Bautizo</label>
-                <div style={styles.registroField}>
-                  <label style={styles.formLabel}>Libro</label>
-                  <input
-                    type="text"
-                    name="libro"
-                    value={formData.libro}
-                    onChange={handleChange}
-                    style={styles.formRegistro}
-                  />
+              <div style={{ ...styles.fechaNacimientoContainer, flex: 1 }}>
+                <label style={styles.formLabelNacimiento}>Fecha de Nacimiento</label>
+                <div style={styles.fechaNacimientoRow}>
+                <div style={styles.fechaNacimientoGroup}>
+                <label style={styles.fechaNacimientoLabel}>Dia</label>
+                    <input
+                      type="text"
+                      name="matrimonio.novio.fechaNacimiento.dia"
+                      value={formData.matrimonio.novia.fechaNacimiento.dia}
+                      onChange={handleChange}
+                      style={styles.fechaNacimientoInput}
+                    />
+                  </div>
+                    <div style={styles.fechaNacimientoGroup}>
+                    <label style={styles.fechaNacimientoLabel}>Mes</label>
+                    <input
+                      type="text"
+                      name="matrimonio.novio.fechaNacimiento.mes"
+                      value={formData.matrimonio.novia.fechaNacimiento.mes}
+                      onChange={handleChange}
+                      style={styles.fechaNacimientoInput}
+                    />
+                  </div>
+                    <div style={styles.fechaNacimientoGroup}>
+                    <label style={styles.fechaNacimientoLabel}>Año</label>
+                    <input
+                      type="text"
+                      name="matrimonio.novio.fechaNacimiento.año"
+                      value={formData.matrimonio.novia.fechaNacimiento.año}
+                      onChange={handleChange}
+                      style={styles.fechaNacimientoInput}
+                    />
+                  </div>
+                  </div>
                 </div>
-                <div style={styles.registroField}>
-                  <label style={styles.formLabel}>Folio</label>
-                  <input
-                    type="text"
-                    name="folio"
-                    value={formData.folio}
+              <div style={{ ...styles.bautizoDatosContainer, flex: 1 }}>
+                    <label style={styles.formLabelBautizo}>Datos De Acta De Bautizo</label>
+                    <div style={styles.bautizoDatosRow}>
+                      <div style={styles.bautizoDatosGroup}>
+                        <label style={styles.bautizoDatosLabel}>Libro</label>
+                        <input
+                          type="text"
+                          name="confirmacion.libroBautizo"
+                          value={formData.confirmacion.libroBautizo || ""}
+                          onChange={handleChange}
+                          style={styles.bautizoDatosInput}
+                        />
+                      </div>
+                      <div style={styles.bautizoDatosGroup}>
+                        <label style={styles.bautizoDatosLabel}>Folio</label>
+                        <input
+                          type="text"
+                          name="confirmacion.folioBautizo"
+                          value={formData.confirmacion.folioBautizo || ""}
+                          onChange={handleChange}
+                          style={styles.bautizoDatosInput}
+                        />
+                      </div>
+                      <div style={styles.bautizoDatosGroup}>
+                        <label style={styles.bautizoDatosLabel}>Acta</label>
+                        <input
+                          type="text"
+                          name="confirmacion.actaBautizo"
+                          value={formData.confirmacion.actaBautizo || ""}
+                          onChange={handleChange}
+                          style={styles.bautizoDatosInput}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <div style={styles.formGroup}>
+                  <label style={styles.formLabel}>Lugar de Nacimiento</label>
+                  <ComboBox
+                    options={ciudadesColombia}
+                    value={formData.matrimonio.novio.lugarNacimiento}
                     onChange={handleChange}
-                    style={styles.formRegistro}
-                  />
-                </div>
-                <div style={styles.registroField}>
-                  <label style={styles.formLabel}>Acta</label>
-                  <input
-                    type="text"
-                    name="acta"
-                    value={formData.acta}
-                    onChange={handleChange}
-                    style={styles.formRegistro}
+                    placeholder="Seleccione o escriba la ciudad"
+                    name="matrimonio.novio.lugarNacimiento"
                   />
                 </div>
               </div>
