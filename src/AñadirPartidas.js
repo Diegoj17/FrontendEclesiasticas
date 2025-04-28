@@ -992,33 +992,39 @@ function AñadirPartidas() {
                 </div>
               </div>
               <div style={styles.formRow}>
-                <div style={styles.formGroup}>
-                  <label style={styles.formLabel}>Fecha de Nacimiento</label>
-                  <div style={styles.dateInputs}>
+                <div style={{ ...styles.fechaNacimientoContainer, flex: 1 }}>
+                <label style={styles.formLabelNacimiento}>Fecha de Nacimiento</label>
+                <div style={styles.fechaNacimientoRow}>
+                <div style={styles.fechaNacimientoGroup}>
+                <label style={styles.fechaNacimientoLabel}>Dia</label>
                     <input
                       type="text"
                       name="matrimonio.novio.fechaNacimiento.dia"
-                      placeholder="Día"
                       value={formData.matrimonio.novio.fechaNacimiento.dia}
                       onChange={handleChange}
-                      style={styles.dateInput}
+                      style={styles.fechaNacimientoInput}
                     />
+                  </div>
+                    <div style={styles.fechaNacimientoGroup}>
+                    <label style={styles.fechaNacimientoLabel}>Mes</label>
                     <input
                       type="text"
                       name="matrimonio.novio.fechaNacimiento.mes"
-                      placeholder="Mes"
                       value={formData.matrimonio.novio.fechaNacimiento.mes}
                       onChange={handleChange}
-                      style={styles.dateInput}
+                      style={styles.fechaNacimientoInput}
                     />
+                  </div>
+                    <div style={styles.fechaNacimientoGroup}>
+                    <label style={styles.fechaNacimientoLabel}>Año</label>
                     <input
                       type="text"
                       name="matrimonio.novio.fechaNacimiento.año"
-                      placeholder="Año"
                       value={formData.matrimonio.novio.fechaNacimiento.año}
                       onChange={handleChange}
-                      style={styles.dateInput}
+                      style={styles.fechaNacimientoInput}
                     />
+                  </div>
                   </div>
                 </div>
                 <div style={styles.formGroup}>
@@ -2187,6 +2193,13 @@ const styles = {
     flexDirection: "column",
     alignItems: "center",
   },
+  fechaNacimientoContainer: {
+    marginTop: "0.5rem",
+    width: "100%",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+  },
   nacimientoDatosContainer: {
     marginTop: "0.5rem",
     width: "100%",
@@ -2209,7 +2222,21 @@ const styles = {
     gap: "20px",
     marginTop: "5px",
   },
+  fechaNacimientoRow: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: "20px",
+    marginTop: "5px",
+  },
   nacimientoGroup: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    width: "7rem",
+    marginBottom: "0.5rem",
+  },
+  fechaNacimientoGroup: {
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
@@ -2223,7 +2250,23 @@ const styles = {
     marginBottom: "5px",
     textAlign: "center",
   },
+  fechaNacimientoLabel: {
+    fontSize: "0.9rem",
+    fontWeight: "500",
+    color: "#000000",
+    marginBottom: "5px",
+    textAlign: "center",
+  },
   nacimientoDatosInput: {
+    width: "100%",
+    alignItems: "center",
+    padding: "0.5rem 0.75rem",
+    border: "1px solid #ced4da",
+    borderRadius: "0.5rem",
+    fontSize: "1rem",
+    textAlign: "center",
+  },
+  fechaNacimientoInput: {
     width: "100%",
     alignItems: "center",
     padding: "0.5rem 0.75rem",
