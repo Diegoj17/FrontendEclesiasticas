@@ -591,6 +591,7 @@ function AñadirPartidas() {
                 </div>
               </div>
               <div style={styles.formRow}>
+                {/* Fecha de Nacimiento */}
               <div style={{ ...styles.nacimientoDatosContainer, flex: 1 }}>
               <label style={styles.formLabelNacimiento}>Fecha de Nacimiento</label>
                 <div style={styles.nacimientoRow}>
@@ -629,7 +630,8 @@ function AñadirPartidas() {
                   </div>
                 </div>
                 </div>
-                <div style={{ ...styles.lugarNacimientoContainer, flex: 1 }}></div>
+                <div style={{ ...styles.lugarNacimientoContainer, flex: 1 }}>
+                <div style={styles.formRow}>
                 <div style={styles.formGroup}>
                   <label style={styles.formLabel}>Lugar de Nacimiento</label>
                   <ComboBox
@@ -639,6 +641,7 @@ function AñadirPartidas() {
                     placeholder="Seleccione o escriba la ciudad"
                     name="bautismo.lugarNacimiento"
                   />
+                </div>
                 </div>
                 </div>
             </div>
@@ -735,6 +738,7 @@ function AñadirPartidas() {
                 </div>
               </div>
             </div>
+          </div>
           </>
         )
 
@@ -2172,8 +2176,14 @@ const styles = {
   },
 
   // Estilos para los datos de nacimiento
+  lugarNacimientoContainer: {
+    marginTop: "0.5rem",
+    width: "100%",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+  },
   nacimientoDatosContainer: {
-
     marginTop: "0.5rem",
     width: "100%",
     display: "flex",
