@@ -1055,37 +1055,41 @@ function AñadirPartidas() {
                 </div>
               </div>
               <div style={styles.registroRow}>
-                <label style={styles.formLabel}>Datos de Acta de Bautizo</label>
-                <div style={styles.registroField}>
-                  <label style={styles.formLabel}>Libro</label>
-                  <input
-                    type="text"
-                    name="libro"
-                    value={formData.libro}
-                    onChange={handleChange}
-                    style={styles.formRegistro}
-                  />
-                </div>
-                <div style={styles.registroField}>
-                  <label style={styles.formLabel}>Folio</label>
-                  <input
-                    type="text"
-                    name="folio"
-                    value={formData.folio}
-                    onChange={handleChange}
-                    style={styles.formRegistro}
-                  />
-                </div>
-                <div style={styles.registroField}>
-                  <label style={styles.formLabel}>Acta</label>
-                  <input
-                    type="text"
-                    name="acta"
-                    value={formData.acta}
-                    onChange={handleChange}
-                    style={styles.formRegistro}
-                  />
-                </div>
+              <div style={{ ...styles.bautizoDatosContainer, flex: 1 }}>
+                    <label style={styles.formLabelBautizo}>Datos De Acta De Bautizo</label>
+                    <div style={styles.bautizoDatosRow}>
+                      <div style={styles.bautizoDatosGroup}>
+                        <label style={styles.bautizoDatosLabel}>Libro</label>
+                        <input
+                          type="text"
+                          name="confirmacion.libroBautizo"
+                          value={formData.confirmacion.libroBautizo || ""}
+                          onChange={handleChange}
+                          style={styles.bautizoDatosInput}
+                        />
+                      </div>
+                      <div style={styles.bautizoDatosGroup}>
+                        <label style={styles.bautizoDatosLabel}>Folio</label>
+                        <input
+                          type="text"
+                          name="confirmacion.folioBautizo"
+                          value={formData.confirmacion.folioBautizo || ""}
+                          onChange={handleChange}
+                          style={styles.bautizoDatosInput}
+                        />
+                      </div>
+                      <div style={styles.bautizoDatosGroup}>
+                        <label style={styles.bautizoDatosLabel}>Acta</label>
+                        <input
+                          type="text"
+                          name="confirmacion.actaBautizo"
+                          value={formData.confirmacion.actaBautizo || ""}
+                          onChange={handleChange}
+                          style={styles.bautizoDatosInput}
+                        />
+                      </div>
+                    </div>
+                  </div>
               </div>
             </div>
 
