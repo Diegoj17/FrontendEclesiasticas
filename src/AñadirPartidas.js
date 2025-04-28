@@ -591,7 +591,6 @@ function AñadirPartidas() {
                 </div>
               </div>
               <div style={styles.formRow}>
-              <div style={{ ...styles.nacimientoDatosContainer, flex: 1 }}>
               <label style={styles.formLabelNacimiento}>Fecha de Nacimiento</label>
                 <div style={styles.nacimientoRow}>
                 <div style={styles.nacimientoGroup}>
@@ -733,7 +732,7 @@ function AñadirPartidas() {
                 </div>
               </div>
             </div>
-          </div>
+          
           </>
         )
 
