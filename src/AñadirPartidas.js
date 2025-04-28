@@ -992,7 +992,29 @@ function AñadirPartidas() {
                 </div>
               </div>
               <div style={styles.formRow}>
-                <div style={{ ...styles.fechaNacimientoContainer, flex: 1 }}>
+                <div style={styles.formGroup}>
+                  <label style={styles.formLabel}>Nombres del Padre</label>
+                  <input
+                    type="text"
+                    name="matrimonio.novio.nombrePadre"
+                    value={formData.matrimonio.novio.nombrePadre}
+                    onChange={handleChange}
+                    style={styles.formInput}
+                  />
+                </div>
+                <div style={styles.formGroup}>
+                  <label style={styles.formLabel}>Nombres de la Madre</label>
+                  <input
+                    type="text"
+                    name="matrimonio.novio.nombreMadre"
+                    value={formData.matrimonio.novio.nombreMadre}
+                    onChange={handleChange}
+                    style={styles.formInput}
+                  />
+                </div>
+              </div>
+              <div style={styles.registroRow}>
+              <div style={{ ...styles.fechaNacimientoContainer, flex: 1 }}>
                 <label style={styles.formLabelNacimiento}>Fecha de Nacimiento</label>
                 <div style={styles.fechaNacimientoRow}>
                 <div style={styles.fechaNacimientoGroup}>
@@ -1027,40 +1049,6 @@ function AñadirPartidas() {
                   </div>
                   </div>
                 </div>
-                <div style={styles.formGroup}>
-                  <label style={styles.formLabel}>Lugar de Nacimiento</label>
-                  <ComboBox
-                    options={ciudadesColombia}
-                    value={formData.matrimonio.novio.lugarNacimiento}
-                    onChange={handleChange}
-                    placeholder="Seleccione o escriba la ciudad"
-                    name="matrimonio.novio.lugarNacimiento"
-                  />
-                </div>
-              </div>
-              <div style={styles.formRow}>
-                <div style={styles.formGroup}>
-                  <label style={styles.formLabel}>Nombres del Padre</label>
-                  <input
-                    type="text"
-                    name="matrimonio.novio.nombrePadre"
-                    value={formData.matrimonio.novio.nombrePadre}
-                    onChange={handleChange}
-                    style={styles.formInput}
-                  />
-                </div>
-                <div style={styles.formGroup}>
-                  <label style={styles.formLabel}>Nombres de la Madre</label>
-                  <input
-                    type="text"
-                    name="matrimonio.novio.nombreMadre"
-                    value={formData.matrimonio.novio.nombreMadre}
-                    onChange={handleChange}
-                    style={styles.formInput}
-                  />
-                </div>
-              </div>
-              <div style={styles.registroRow}>
               <div style={{ ...styles.bautizoDatosContainer, flex: 1 }}>
                     <label style={styles.formLabelBautizo}>Datos De Acta De Bautizo</label>
                     <div style={styles.bautizoDatosRow}>
@@ -1096,6 +1084,16 @@ function AñadirPartidas() {
                       </div>
                     </div>
                   </div>
+                  <div style={styles.formGroup}>
+                  <label style={styles.formLabel}>Lugar de Nacimiento</label>
+                  <ComboBox
+                    options={ciudadesColombia}
+                    value={formData.matrimonio.novio.lugarNacimiento}
+                    onChange={handleChange}
+                    placeholder="Seleccione o escriba la ciudad"
+                    name="matrimonio.novio.lugarNacimiento"
+                  />
+                </div>
               </div>
             </div>
 
