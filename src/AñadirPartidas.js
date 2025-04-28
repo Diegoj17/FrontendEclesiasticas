@@ -188,23 +188,23 @@ function AñadirPartidas() {
   const [formData, setFormData] = useState(initialFormData)
   const [showModal, setShowModal] = useState(false)
   
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    
-    // Caso especial para el ComboBox
-    if (e.target.isComboBox) {
+  const handleChange = e => {
+    const { name, value, type, checked, isComboBox } = e.target;
+  
+    // 1) ComboBox sólo si viene isComboBox
+    if (isComboBox) {
       if (name.includes(".")) {
         const parts = name.split(".");
         setFormData(prev => {
-          const newState = { ...prev };
-          let cursor = newState;
+          const next = { ...prev };
+          let cursor = next;
           for (let i = 0; i < parts.length - 1; i++) {
-            const key = parts[i];
-            if (!cursor[key]) cursor[key] = {};
-            cursor = cursor[key];
+            const k = parts[i];
+            if (!cursor[k]) cursor[k] = {};
+            cursor = cursor[k];
           }
-          cursor[parts[parts.length]] = value;
-          return newState;
+          cursor[parts[parts.length - 1]] = value;
+          return next;
         });
       } else {
         setFormData(prev => ({ ...prev, [name]: value }));
@@ -212,38 +212,28 @@ function AñadirPartidas() {
       return;
     }
   
-    // Manejo de campos anidados
+    // 2) El resto de inputs (incluye libro, folio, acta, fechas…)
     if (name.includes(".")) {
       const parts = name.split(".");
-      
       setFormData(prev => {
-        const newState = {...prev};
-        let currentLevel = newState;
-        
+        const next = { ...prev };
+        let cursor = next;
         for (let i = 0; i < parts.length - 1; i++) {
-          const part = parts[i];
-          if (!currentLevel[part]) currentLevel[part] = {};
-          currentLevel = currentLevel[part];
+          const k = parts[i];
+          if (!cursor[k]) cursor[k] = {};
+          cursor = cursor[k];
         }
-        
-        const lastPart = parts[parts.length - 1];
-        currentLevel[lastPart] = type === "checkbox" ? checked : value;
-        
-        return newState;
+        cursor[parts[parts.length - 1]] = type === "checkbox" ? checked : value;
+        return next;
       });
     } else {
-      // Campos normales
       setFormData(prev => ({
         ...prev,
         [name]: type === "checkbox" ? checked : value
       }));
     }
   };
-
   const { 
-    actasTemporales,
-    actasConfirmadas,
-    confirmarActas,
     actaEditando,
     setActaEditando,
     modoEdicion,
@@ -251,7 +241,6 @@ function AñadirPartidas() {
     actualizarActaTemporal,
     cancelarEdicion,
     agregarActaTemporal,
-    setActasTemporales,
   } = useActas();
 
   const validarCampos = () => {
@@ -262,21 +251,6 @@ function AñadirPartidas() {
     if (!formData.folio) nuevosErrores.folio = "El folio es requerido";
     if (!formData.acta) nuevosErrores.acta = "El acta es requerida";
     
-    // Validar según tipo de ceremonia
-    switch(eventoSeleccionado) {
-      case "Bautismo":
-        if (!formData.bautismo.primerNombre) nuevosErrores.primerNombre = "El primer nombre es requerido";
-        if (!formData.bautismo.primerApellido) nuevosErrores.primerApellido = "El primer apellido es requerido";
-        break;
-        
-      case "Confirmación":
-        if (!formData.confirmacion.primerNombre) nuevosErrores.primerNombre = "El primer nombre es requerido";
-        break;
-        
-      case "Matrimonio":
-        if (!formData.matrimonio.novio.primerNombre) nuevosErrores.novioNombre = "El nombre del novio es requerido";
-        break;
-    }
     
     setErrores(nuevosErrores);
     return Object.keys(nuevosErrores).length === 0;
@@ -417,7 +391,6 @@ function AñadirPartidas() {
             value={formData.libro}
             onChange={handleChange}
             style={styles.formRegistro}
-            inputMode="numeric"
           />
         </div>
         <div style={styles.registroGroup}>
@@ -428,7 +401,6 @@ function AñadirPartidas() {
             value={formData.folio}
             onChange={handleChange}
             style={styles.formRegistro}
-            inputMode="numeric"
           />
         </div>
         <div style={styles.registroGroup}>
@@ -439,7 +411,6 @@ function AñadirPartidas() {
             value={formData.acta}
             onChange={handleChange}
             style={styles.formRegistro}
-            inputMode="numeric"
           />
         </div>
       </div>

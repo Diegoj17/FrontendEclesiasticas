@@ -1,153 +1,147 @@
-"use client"
-
-import { useState, useRef, useEffect } from "react"
+import { useState, useRef, useEffect } from "react";
 
 const ComboBox = ({
   label,
   options = [],
-  value,
   onChange,
   placeholder = "Seleccione o escriba...",
   className = "",
   name = "",
 }) => {
-  const [isOpen, setIsOpen] = useState(false)
-  const [inputValue, setInputValue] = useState(value || "")
-  const [filteredOptions, setFilteredOptions] = useState(options)
-  const inputRef = useRef(null)
-  const dropdownRef = useRef(null)
+  const [isOpen, setIsOpen] = useState(false);
+  const [inputValue, setInputValue] = useState("");
+  const [filteredOptions, setFilteredOptions] = useState(options);
+  const inputRef = useRef(null);
+  const dropdownRef = useRef(null);
 
+  // Filtrar opciones al escribir
   useEffect(() => {
     if (inputValue) {
-      const filtered = options.filter((option) => option.toLowerCase().includes(inputValue.toLowerCase()))
-      setFilteredOptions(filtered)
+      setFilteredOptions(
+        options.filter(o =>
+          o.toLowerCase().includes(inputValue.toLowerCase())
+        )
+      );
     } else {
-      setFilteredOptions(options)
+      setFilteredOptions(options);
     }
-  }, [inputValue, options])
+  }, [inputValue, options]);
 
+  // Cerrar dropdown al click fuera
   useEffect(() => {
-    setInputValue(value || "")
-  }, [value])
-
-  useEffect(() => {
-    const handleClickOutside = (event) => {
+    const onClickOutside = e => {
       if (
         dropdownRef.current &&
-        !dropdownRef.current.contains(event.target) &&
+        !dropdownRef.current.contains(e.target) &&
         inputRef.current &&
-        !inputRef.current.contains(event.target)
+        !inputRef.current.contains(e.target)
       ) {
-        setIsOpen(false)
+        setIsOpen(false);
       }
-    }
+    };
+    document.addEventListener("mousedown", onClickOutside);
+    return () => document.removeEventListener("mousedown", onClickOutside);
+  }, []);
 
-    document.addEventListener("mousedown", handleClickOutside)
-    return () => document.removeEventListener("mousedown", handleClickOutside)
-  }, [])
-
-  const handleInputChange = (e) => {
-    const newValue = e.target.value
-    setInputValue(newValue)
+  const handleInputChange = e => {
+    setInputValue(e.target.value);
     onChange({
       target: {
         name,
-        value: newValue,
+        value: e.target.value,
         type: "text",
-        isComboBox: true,
-      },
-    })
-    setIsOpen(true) // Forzar apertura al escribir
-  }
+        isComboBox: true
+      }
+    });
+    setIsOpen(true);
+  };
 
-  const handleOptionClick = (option) => {
-    setInputValue(option)
+  const handleOptionClick = option => {
+    setInputValue(option);
     onChange({
       target: {
         name,
         value: option,
         type: "text",
-        isComboBox: true,
-      },
-    })
-    setIsOpen(false)
-    inputRef.current.focus()
-  }
-
-  const handleInputBlur = () => {
-    setTimeout(() => {
-      if (!document.activeElement?.closest(".combobox-container")) {
-        setIsOpen(false)
+        isComboBox: true
       }
-    }, 200)
-  }
+    });
+    setIsOpen(false);
+    inputRef.current.focus();
+  };
 
-  const handleInputFocus = () => {
-    setIsOpen(true)
-  }
+  // Evito cerrar al blur para poder seguir tecleando
+  // const handleInputBlur = () => { /* ya no lo uso */ };
 
-  const handleKeyDown = (e) => {
-    if (e.key === "Escape") {
-      setIsOpen(false)
+  const handleKeyDown = e => {
+    if (e.key === "Escape") setIsOpen(false);
+    if (e.key === "Enter" && isOpen && filteredOptions.length) {
+      handleOptionClick(filteredOptions[0]);
+      e.preventDefault();
     }
-
-    if (e.key === "Enter" && isOpen && filteredOptions.length > 0) {
-      handleOptionClick(filteredOptions[0])
-      e.preventDefault()
-    }
-  }
+  };
 
   return (
-    <div className={`combobox-container ${className}`} style={styles.container}>
-      {label && (
-        <label htmlFor={`combobox-${name}`} style={styles.label}>
-          {label}
-        </label>
-      )}
-      <div style={styles.inputContainer}>
+    <div className={`combobox-container ${className}`} style={{ position: "relative", width: "100%", marginBottom: "1rem" }}>
+      {label && <label style={{ display: "block", marginBottom: "0.5rem" }}>{label}</label>}
+      <div style={{ position: "relative" }}>
         <input
-          id={`combobox-${name}`}
           ref={inputRef}
           type="text"
           name={name}
           value={inputValue}
-          onBlur={handleInputBlur}
           onChange={handleInputChange}
-          onFocus={handleInputFocus}
           onKeyDown={handleKeyDown}
+          onFocus={() => setIsOpen(true)}
           placeholder={placeholder}
-          style={styles.input}
+          style={{ width: "100%", padding: "0.6rem", border: "1px solid #ccc", borderRadius: "4px" }}
           autoComplete="off"
         />
         <button
           type="button"
-          onClick={() => setIsOpen(!isOpen)}
-          style={styles.toggleButton}
-          tabIndex="-1"
-          aria-label="Toggle options"
+          onClick={() => setIsOpen(open => !open)}
+          style={{ position: "absolute", right: "0.5rem", top: "50%", transform: "translateY(-50%)", background: "transparent", border: "none", cursor: "pointer" }}
+          tabIndex={-1}
         >
           ▼
         </button>
       </div>
 
       {isOpen && filteredOptions.length > 0 && (
-        <ul ref={dropdownRef} style={styles.dropdown}>
-          {filteredOptions.map((option, index) => (
+        <ul
+          ref={dropdownRef}
+          style={{
+            position: "absolute",
+            top: "100%",
+            left: 0,
+            right: 0,
+            maxHeight: "200px",
+            overflowY: "auto",
+            background: "#fff",
+            border: "1px solid #ccc",
+            borderRadius: "4px",
+            marginTop: "0.25rem",
+            zIndex: 1000,
+            padding: 0,
+            listStyle: "none"
+          }}
+        >
+          {filteredOptions.map((opt, i) => (
             <li
-              key={index}
-              onClick={() => handleOptionClick(option)}
-              style={styles.option}
-              onMouseOver={(e) => (e.currentTarget.style.backgroundColor = "#f5f5f5")}
-              onMouseOut={(e) => (e.currentTarget.style.backgroundColor = "white")}
+              key={i}
+              onClick={() => handleOptionClick(opt)}
+              style={{ padding: "0.5rem", cursor: "pointer" }}
+              onMouseEnter={e => (e.currentTarget.style.background = "#f5f5f5")}
+              onMouseLeave={e => (e.currentTarget.style.background = "#fff")}
             >
-              {option}
+              {opt}
             </li>
           ))}
         </ul>
       )}
     </div>
-  )
-}
+  );
+};
 
 // Estilos actualizados
 const styles = {
