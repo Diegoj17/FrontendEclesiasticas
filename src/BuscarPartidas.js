@@ -9,6 +9,9 @@ import { InputText } from "primereact/inputtext"
 import { IconField } from "primereact/iconfield"
 import { InputIcon } from "primereact/inputicon"
 import { Tag } from "primereact/tag"
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
+import html2canvas from "html2canvas";
 import {
   FaFileAlt,
   FaSearch,
@@ -238,7 +241,7 @@ function BuscarPartidas() {
   }
 
   const handleViewRegistros = () => {
-    navigate("/registros")
+    navigate("/vistaActas")
   }
 
   const handleLogout = () => {
@@ -261,6 +264,45 @@ function BuscarPartidas() {
   const handleCorrect = () => {
     console.log("Corregir partida")
   }
+
+  const generarPDFCorto = () => {
+    if (!selectedRow) return;
+    const r = registros.find(r => r.id === selectedRow.id);
+    if (!r) return;
+  
+    const doc = new jsPDF({ unit: "pt", format: "a4", orientation: "portrait" });
+    // Header
+    doc.setFontSize(18);
+    doc.setTextColor("#385792");
+    doc.text("CERTIFICADO DE BAUTISMO", 210, 40, { align: "center" });
+    doc.setFontSize(12);
+    doc.setTextColor(0);
+    doc.text(`Parroquia San Luis Gonzaga — Diócesis de ${r.diocesis}`, 210, 60, { align: "center" });
+  
+    // Tabla breve
+    autoTable(doc, {
+      startY: 90,
+      theme: "grid",
+      head: [["Campo", "Valor"]],
+      body: [
+        ["Nombre completo", `${r.primerNombre} ${r.segundoNombre} ${r.primerApellido} ${r.segundoApellido}`],
+        ["Fecha de bautizo", r.fecha],
+        ["Libro/Acta/Folio", `${r.libro} / ${r.acta} / ${r.folio}`],
+        ["Padrinos", r.padrinos?.join(", ") || "N/A"],
+        ["Celebrante", r.oficiante || r.sacerdote],
+      ],
+      headStyles: { fillColor: "#385792", textColor: "#fff" },
+      styles: { fontSize: 11 },
+      columnStyles: { 0: { cellWidth: 120 }, 1: { cellWidth: 350 } },
+    });
+  
+    // Pie y descarga
+    const fechaEmision = new Date().toLocaleDateString();
+    doc.setFontSize(10);
+    doc.text(`Emitido: ${fechaEmision}`, 40, doc.lastAutoTable.finalY + 30);
+    doc.save(`certificado_bautismo_${r.primerNombre}.pdf`);
+  };
+  
 
   const generarFormatoCorto = () => {
     if (!selectedRow) return
@@ -545,14 +587,11 @@ function BuscarPartidas() {
   }
 
   const handleEditProfile = () => {
-    navigate("/editar-perfil");
-    setIsDropdownOpen(false);
-  };
+    console.log("Navegando a editar perfil")
+    setIsDropdownOpen(false)
+    navigate("/editarPerfil")
+  }
 
-  const handleChangePassword = () => {
-    navigate("/cambiar-contraseña");
-    setIsDropdownOpen(false);
-  };
 
 return (
       <div style={styles.container}>

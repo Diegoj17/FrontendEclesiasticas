@@ -189,43 +189,44 @@ function AñadirPartidas() {
   const [showModal, setShowModal] = useState(false)
   
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target
-
-    if (name.includes(".")) {
-      const parts = name.split(".")
-
-      if (parts.length === 2) {
-        // Manejo para campos simples con un nivel de anidación
-        const [parent, child] = parts
-        setFormData((prev) => ({
-          ...prev,
-          [parent]: {
-            ...prev[parent],
-            [child]: value,
-          },
-        }))
-      } else if (parts.length === 3) {
-        // Manejo para campos con dos niveles de anidación
-        const [parent, child, grandchild] = parts
-        setFormData((prev) => ({
-          ...prev,
-          [parent]: {
-            ...prev[parent],
-            [child]: {
-              ...prev[parent]?.[child],
-              [grandchild]: value,
-            },
-          },
-        }))
-      }
-    } else {
-      // Manejo para campos simples sin anidación
-      setFormData((prev) => ({
+    const { name, value, type, checked } = e.target;
+    
+    // Caso especial para el ComboBox
+    if (e.target.type === "text" && e.target.hasOwnProperty("isComboBox")) {
+      setFormData(prev => ({
         ...prev,
-        [name]: type === "checkbox" ? checked : value,
-      }))
+        [name]: value
+      }));
+      return;
     }
-  }
+  
+    // Manejo de campos anidados
+    if (name.includes(".")) {
+      const parts = name.split(".");
+      
+      setFormData(prev => {
+        const newState = {...prev};
+        let currentLevel = newState;
+        
+        for (let i = 0; i < parts.length - 1; i++) {
+          const part = parts[i];
+          if (!currentLevel[part]) currentLevel[part] = {};
+          currentLevel = currentLevel[part];
+        }
+        
+        const lastPart = parts[parts.length - 1];
+        currentLevel[lastPart] = type === "checkbox" ? checked : value;
+        
+        return newState;
+      });
+    } else {
+      // Campos normales
+      setFormData(prev => ({
+        ...prev,
+        [name]: type === "checkbox" ? checked : value
+      }));
+    }
+  };
 
   const { 
     actasTemporales,
@@ -592,47 +593,42 @@ function AñadirPartidas() {
               </div>
               <div style={styles.formRow}>
                 {/* Fecha de Nacimiento */}
-              <div style={{ ...styles.nacimientoDatosContainer, flex: 1 }}>
+              <div style={{ ...styles.fechaNacimientoContainer, flex: 1 }}>
               <label style={styles.formLabelNacimiento}>Fecha de Nacimiento</label>
-                <div style={styles.nacimientoRow}>
-                <div style={styles.nacimientoGroup}>
-                  <label style={styles.nacimientoDatosLabel}>Dia</label>
+                <div style={styles.fechaNacimientoRow}>
+                <div style={styles.fechaNacimientoGroup}>
+                  <label style={styles.fechaNacimientoLabel}>Dia</label>
                     <input
                       type="text"
                       name="bautismo.fechaNacimiento.dia"
-                      placeholder="Día"
                       value={formData.bautismo.fechaNacimiento.dia}
                       onChange={handleChange}
-                      style={styles.nacimientoInput}
+                      style={styles.fechaNacimientoInput}
                     />
                   </div>
-                  <div style={styles.nacimientoGroup}>
-                  <label style={styles.nacimientoDatosLabel}>Mes</label>
+                  <div style={styles.fechaNacimientoGroup}>
+                  <label style={styles.fechaNacimientoLabel}>Mes</label>
                     <input
                       type="text"
                       name="bautismo.fechaNacimiento.mes"
-                      placeholder="Mes"
                       value={formData.bautismo.fechaNacimiento.mes}
                       onChange={handleChange}
-                      style={styles.nacimientoInput}
+                      style={styles.fechaNacimientoInput}
                     />
                   </div>
-                  <div style={styles.nacimientoGroup}>
-                  <label style={styles.nacimientoDatosLabel}>Año</label>
+                  <div style={styles.fechaNacimientoGroup}>
+                  <label style={styles.fechaNacimientoLabel}>Año</label>
                     <input
                       type="text"
                       name="bautismo.fechaNacimiento.año"
-                      placeholder="Año"
                       value={formData.bautismo.fechaNacimiento.año}
                       onChange={handleChange}
-                      style={styles.nacimientoInput}
+                      style={styles.fechaNacimientoInput}
                     />
                   </div>
                 </div>
                 </div>
-                <div style={{ ...styles.lugarNacimientoContainer, flex: 1 }}>
-                <div style={styles.formRow}>
-                <div style={styles.formGroup}>
+                <div style={{ ...styles.formGroup, flex: 1 }}> 
                   <label style={styles.formLabel}>Lugar de Nacimiento</label>
                   <ComboBox
                     options={ciudadesColombia}
@@ -644,8 +640,6 @@ function AñadirPartidas() {
                 </div>
                 </div>
                 </div>
-            </div>
-
             {/* Datos anexos */}
             <div style={styles.formSection}>
               <h2 style={styles.sectionTitle}>Datos Anexos</h2>
@@ -738,7 +732,6 @@ function AñadirPartidas() {
                 </div>
               </div>
             </div>
-          </div>
           </>
         )
 
@@ -1165,7 +1158,7 @@ function AñadirPartidas() {
                   />
                 </div>
               </div>
-              
+
               <div style={styles.registroRow}>
               <div style={{ ...styles.fechaNacimientoContainer, flex: 1 }}>
                 <label style={styles.formLabelNacimiento}>Fecha de Nacimiento</label>
@@ -1203,7 +1196,7 @@ function AñadirPartidas() {
                   </div>
                 </div>
               <div style={{ ...styles.bautizoDatosContainer, flex: 1 }}>
-                    <label style={styles.formLabelBautizo}>Datos De Acta De Bautizo</label>
+                    <label style={styles.formLabelBautizo}>Datos de Acta De Bautizo</label>
                     <div style={styles.bautizoDatosRow}>
                       <div style={styles.bautizoDatosGroup}>
                         <label style={styles.bautizoDatosLabel}>Libro</label>
@@ -1241,7 +1234,7 @@ function AñadirPartidas() {
                   <label style={styles.formLabel}>Lugar de Nacimiento</label>
                   <ComboBox
                     options={ciudadesColombia}
-                    value={formData.matrimonio.novio.lugarNacimiento}
+                    value={formData.matrimonio.novia.lugarNacimiento}
                     onChange={handleChange}
                     placeholder="Seleccione o escriba la ciudad"
                     name="matrimonio.novio.lugarNacimiento"
@@ -1422,7 +1415,7 @@ function AñadirPartidas() {
                 Seleccionar Tipo de Ceremonia:
               </label>
               <select id="evento" value={eventoSeleccionado} onChange={handleEventoChange} style={styles.select}>
-                <option value=""></option>
+                <option value="">Seleccionar</option>
                 <option value="Bautismo">Bautizos</option>
                 <option value="Confirmación">Confirmaciones</option>
                 <option value="Matrimonio">Matrimonios</option>
@@ -1929,7 +1922,7 @@ const styles = {
   },
   sectionTitle: {
     fontSize: "1.1rem",
-    padding: "0rem 0.5rem",
+    padding: "0rem",
     marginBottom: "0.5rem",
     fontWeight: "700",
     color: "#385792",
@@ -2037,12 +2030,14 @@ const styles = {
   },
 
   noSelectionMessage: {
+    display: "flex",
+    flexDirection: "column",
     backgroundColor: "#fff",
     borderRadius: "0.5rem",
     padding: "2rem",
-    boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
     textAlign: "center",
-    marginTop: "2rem",
+    alignItems: "center",
+    marginTop: "15rem",
   },
 
   modalOverlay: {
