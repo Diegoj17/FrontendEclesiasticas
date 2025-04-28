@@ -188,51 +188,54 @@ function AñadirPartidas() {
   const [formData, setFormData] = useState(initialFormData)
   const [showModal, setShowModal] = useState(false)
   
-  const handleChange = e => {
+  const handleChange = (e) => {
     const { name, value, type, checked, isComboBox } = e.target;
   
-    // 1) ComboBox sólo si viene isComboBox
+    // --- Caso ComboBox ------------------------
     if (isComboBox) {
+      // si viene "confirmacion.monseñor" o similar
       if (name.includes(".")) {
         const parts = name.split(".");
-        setFormData(prev => {
+        setFormData((prev) => {
           const next = { ...prev };
           let cursor = next;
           for (let i = 0; i < parts.length - 1; i++) {
             const k = parts[i];
-            if (!cursor[k]) cursor[k] = {};
+            cursor[k] = { ...cursor[k] };
             cursor = cursor[k];
           }
           cursor[parts[parts.length - 1]] = value;
           return next;
         });
       } else {
-        setFormData(prev => ({ ...prev, [name]: value }));
+        setFormData((prev) => ({ ...prev, [name]: value }));
       }
       return;
     }
   
-    // 2) El resto de inputs (incluye libro, folio, acta, fechas…)
+    // --- Resto de inputs (Libro, Folio, Acta, fechas, textareas...) ---
     if (name.includes(".")) {
       const parts = name.split(".");
-      setFormData(prev => {
+      setFormData((prev) => {
         const next = { ...prev };
         let cursor = next;
         for (let i = 0; i < parts.length - 1; i++) {
           const k = parts[i];
-          if (!cursor[k]) cursor[k] = {};
+          cursor[k] = { ...cursor[k] };
           cursor = cursor[k];
         }
-        cursor[parts[parts.length - 1]] = type === "checkbox" ? checked : value;
+        cursor[parts[parts.length - 1]] =
+          type === "checkbox" ? checked : value;
         return next;
       });
     } else {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        [name]: type === "checkbox" ? checked : value
+        [name]: type === "checkbox" ? checked : value,
       }));
     }
   };
+
   const { 
     actaEditando,
     setActaEditando,
@@ -2126,7 +2129,8 @@ const styles = {
   },
   formRegistro: {
     width: "100%",
-    padding: "0.5rem",
+    alignItems: "center",
+    padding: "0.5rem 0.75rem",
     border: "1px solid #ced4da",
     borderRadius: "0.5rem",
     fontSize: "1rem",

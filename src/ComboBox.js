@@ -3,33 +3,24 @@ import { useState, useRef, useEffect } from "react";
 const ComboBox = ({
   label,
   options = [],
+  value = "",
   onChange,
   placeholder = "Seleccione o escriba...",
-  className = "",
   name = "",
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [inputValue, setInputValue] = useState("");
-  const [filteredOptions, setFilteredOptions] = useState(options);
+  const [inputValue, setInputValue] = useState(value);
   const inputRef = useRef(null);
   const dropdownRef = useRef(null);
 
-  // Filtrar opciones al escribir
+  // Cada vez que cambia la prop value, sincronizo el state interno
   useEffect(() => {
-    if (inputValue) {
-      setFilteredOptions(
-        options.filter(o =>
-          o.toLowerCase().includes(inputValue.toLowerCase())
-        )
-      );
-    } else {
-      setFilteredOptions(options);
-    }
-  }, [inputValue, options]);
+    setInputValue(value);
+  }, [value]);
 
-  // Cerrar dropdown al click fuera
+  // Cerrar dropdown al clicar fuera
   useEffect(() => {
-    const onClickOutside = e => {
+    const handleClickOutside = (e) => {
       if (
         dropdownRef.current &&
         !dropdownRef.current.contains(e.target) &&
@@ -39,75 +30,80 @@ const ComboBox = ({
         setIsOpen(false);
       }
     };
-    document.addEventListener("mousedown", onClickOutside);
-    return () => document.removeEventListener("mousedown", onClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleInputChange = e => {
-    setInputValue(e.target.value);
+  // Filtrar opciones
+  const filtered = options.filter((opt) =>
+    opt.toLowerCase().includes(inputValue.toLowerCase())
+  );
+
+  const handleInputChange = (e) => {
+    const v = e.target.value;
+    setInputValue(v);
     onChange({
-      target: {
-        name,
-        value: e.target.value,
-        type: "text",
-        isComboBox: true
-      }
+      target: { name, value: v, type: "text", isComboBox: true },
     });
     setIsOpen(true);
   };
 
-  const handleOptionClick = option => {
-    setInputValue(option);
+  const handleOptionSelect = (opt) => {
+    setInputValue(opt);
     onChange({
-      target: {
-        name,
-        value: option,
-        type: "text",
-        isComboBox: true
-      }
+      target: { name, value: opt, type: "text", isComboBox: true },
     });
     setIsOpen(false);
     inputRef.current.focus();
   };
 
-  // Evito cerrar al blur para poder seguir tecleando
-  // const handleInputBlur = () => { /* ya no lo uso */ };
-
-  const handleKeyDown = e => {
-    if (e.key === "Escape") setIsOpen(false);
-    if (e.key === "Enter" && isOpen && filteredOptions.length) {
-      handleOptionClick(filteredOptions[0]);
-      e.preventDefault();
-    }
-  };
-
   return (
-    <div className={`combobox-container ${className}`} style={{ position: "relative", width: "100%", marginBottom: "1rem" }}>
-      {label && <label style={{ display: "block", marginBottom: "0.5rem" }}>{label}</label>}
-      <div style={{ position: "relative" }}>
-        <input
-          ref={inputRef}
-          type="text"
-          name={name}
-          value={inputValue}
-          onChange={handleInputChange}
-          onKeyDown={handleKeyDown}
-          onFocus={() => setIsOpen(true)}
-          placeholder={placeholder}
-          style={{ width: "100%", padding: "0.6rem", border: "1px solid #ccc", borderRadius: "4px" }}
-          autoComplete="off"
-        />
-        <button
-          type="button"
-          onClick={() => setIsOpen(open => !open)}
-          style={{ position: "absolute", right: "0.5rem", top: "50%", transform: "translateY(-50%)", background: "transparent", border: "none", cursor: "pointer" }}
-          tabIndex={-1}
+    <div style={{ position: "relative", width: "100%", marginBottom: "1rem" }}>
+      {label && (
+        <label
+          htmlFor={`combo-${name}`}
+          style={{ display: "block", marginBottom: "0.25rem" }}
         >
-          ▼
-        </button>
-      </div>
+          {label}
+        </label>
+      )}
+      <input
+        id={`combo-${name}`}
+        ref={inputRef}
+        type="text"
+        name={name}
+        value={inputValue}
+        placeholder={placeholder}
+        onChange={handleInputChange}
+        onFocus={() => setIsOpen(true)}
+        style={{
+          width: "100%",
+          padding: "0.5rem 2rem 0.5rem 0.5rem",
+          border: "1px solid #ccc",
+          borderRadius: "4px",
+          boxSizing: "border-box",
+        }}
+        autoComplete="off"
+      />
+      <button
+        type="button"
+        onClick={() => setIsOpen((o) => !o)}
+        style={{
+          position: "absolute",
+          right: "0.5rem",
+          top: "50%",
+          transform: "translateY(-50%)",
+          background: "transparent",
+          border: "none",
+          cursor: "pointer",
+          fontSize: "0.8rem",
+        }}
+        tabIndex={-1}
+      >
+        ▼
+      </button>
 
-      {isOpen && filteredOptions.length > 0 && (
+      {isOpen && filtered.length > 0 && (
         <ul
           ref={dropdownRef}
           style={{
@@ -121,18 +117,25 @@ const ComboBox = ({
             border: "1px solid #ccc",
             borderRadius: "4px",
             marginTop: "0.25rem",
-            zIndex: 1000,
+            listStyle: "none",
             padding: 0,
-            listStyle: "none"
+            zIndex: 1000,
           }}
         >
-          {filteredOptions.map((opt, i) => (
+          {filtered.map((opt, i) => (
             <li
               key={i}
-              onClick={() => handleOptionClick(opt)}
-              style={{ padding: "0.5rem", cursor: "pointer" }}
-              onMouseEnter={e => (e.currentTarget.style.background = "#f5f5f5")}
-              onMouseLeave={e => (e.currentTarget.style.background = "#fff")}
+              onMouseDown={() => handleOptionSelect(opt)}
+              style={{
+                padding: "0.5rem",
+                cursor: "pointer",
+              }}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.backgroundColor = "#f5f5f5")
+              }
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.backgroundColor = "#fff")
+              }
             >
               {opt}
             </li>
