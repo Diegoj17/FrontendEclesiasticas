@@ -192,11 +192,23 @@ function AñadirPartidas() {
     const { name, value, type, checked } = e.target;
     
     // Caso especial para el ComboBox
-    if (e.target.type === "text" && e.target.hasOwnProperty("isComboBox")) {
-      setFormData(prev => ({
-        ...prev,
-        [name]: value
-      }));
+    if (e.target.isComboBox) {
+      if (name.includes(".")) {
+        const parts = name.split(".");
+        setFormData(prev => {
+          const newState = { ...prev };
+          let cursor = newState;
+          for (let i = 0; i < parts.length - 1; i++) {
+            const key = parts[i];
+            if (!cursor[key]) cursor[key] = {};
+            cursor = cursor[key];
+          }
+          cursor[parts[parts.length]] = value;
+          return newState;
+        });
+      } else {
+        setFormData(prev => ({ ...prev, [name]: value }));
+      }
       return;
     }
   
@@ -405,6 +417,7 @@ function AñadirPartidas() {
             value={formData.libro}
             onChange={handleChange}
             style={styles.formRegistro}
+            inputMode="numeric"
           />
         </div>
         <div style={styles.registroGroup}>
@@ -415,6 +428,7 @@ function AñadirPartidas() {
             value={formData.folio}
             onChange={handleChange}
             style={styles.formRegistro}
+            inputMode="numeric"
           />
         </div>
         <div style={styles.registroGroup}>
@@ -425,6 +439,7 @@ function AñadirPartidas() {
             value={formData.acta}
             onChange={handleChange}
             style={styles.formRegistro}
+            inputMode="numeric"
           />
         </div>
       </div>
@@ -1301,7 +1316,7 @@ function AñadirPartidas() {
       {/* Barra superior */}
       <header style={styles.header}>
         <img src={logo || "/logo.png"} alt="Logo" style={styles.headerLogo} />
-        <h1 style={styles.headerTitle}>Inscripciones de Partidas</h1>
+        <h1 style={styles.headerTitle}>Inscripciones de Actas</h1>
         <button onClick={handleLogout} style={styles.logoutButton}>
           <FaSignOutAlt style={styles.iconLogout} />
           {<span style={styles.iconLogoutText}> Cerrar Sesión</span>}
@@ -1932,12 +1947,17 @@ const styles = {
   formRow: {
     display: "flex",
     flexWrap: "wrap",
-    gap: "0.5rem",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: "1rem",
     marginBottom: "0.5rem",
+    width: "100%",
+    
   },
   formGroup: {
-    flex: "1 1 auto",
-    minWidth: "200px",
+    flex: "1",
+    minWidth: "300px",
+    marginBottom: "0.5rem",
   },
   formGroupReg: {
     flex: "1 1 auto",
@@ -1987,7 +2007,7 @@ const styles = {
   checkboxContainer: {
     display: "flex",
     alignItems: "center",
-    gap: "15px",
+    gap: "0.5rem",
   },
   formSelect: {
     padding: "8px 12px",
@@ -2002,7 +2022,7 @@ const styles = {
     alignItems: "center",
   },
   checkbox: {
-    marginRight: "5px",
+    marginRight: "0.5rem",
   },
 
   checkboxLabel: {

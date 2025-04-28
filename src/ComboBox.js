@@ -1,4 +1,6 @@
-import { useState, useRef, useEffect } from "react";
+"use client"
+
+import { useState, useRef, useEffect } from "react"
 
 const ComboBox = ({
   label,
@@ -9,26 +11,24 @@ const ComboBox = ({
   className = "",
   name = "",
 }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [inputValue, setInputValue] = useState(value || "");
-  const [filteredOptions, setFilteredOptions] = useState(options);
-  const inputRef = useRef(null);
-  const dropdownRef = useRef(null);
+  const [isOpen, setIsOpen] = useState(false)
+  const [inputValue, setInputValue] = useState(value || "")
+  const [filteredOptions, setFilteredOptions] = useState(options)
+  const inputRef = useRef(null)
+  const dropdownRef = useRef(null)
 
   useEffect(() => {
     if (inputValue) {
-      const filtered = options.filter((option) =>
-        option.toLowerCase().includes(inputValue.toLowerCase())
-      );
-      setFilteredOptions(filtered);
+      const filtered = options.filter((option) => option.toLowerCase().includes(inputValue.toLowerCase()))
+      setFilteredOptions(filtered)
     } else {
-      setFilteredOptions(options);
+      setFilteredOptions(options)
     }
-  }, [inputValue, options]);
+  }, [inputValue, options])
 
   useEffect(() => {
-    setInputValue(value || "");
-  }, [value]);
+    setInputValue(value || "")
+  }, [value])
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -38,58 +38,64 @@ const ComboBox = ({
         inputRef.current &&
         !inputRef.current.contains(event.target)
       ) {
-        setIsOpen(false);
+        setIsOpen(false)
       }
-    };
+    }
 
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [])
 
   const handleInputChange = (e) => {
-    const newValue = e.target.value;
-    setInputValue(newValue);
+    const newValue = e.target.value
+    setInputValue(newValue)
     onChange({
       target: {
         name,
         value: newValue,
         type: "text",
-        isComboBox: true
+        isComboBox: true,
       },
-    });
-    setIsOpen(true); // Mantener abierto mientras se escribe
-  };
+    })
+    setIsOpen(true) // Forzar apertura al escribir
+  }
 
   const handleOptionClick = (option) => {
-    setInputValue(option);
+    setInputValue(option)
     onChange({
       target: {
         name,
         value: option,
         type: "text",
-        isComboBox: true
+        isComboBox: true,
       },
-    });
-    setIsOpen(false);
-    inputRef.current.focus();
-  };
+    })
+    setIsOpen(false)
+    inputRef.current.focus()
+  }
+
+  const handleInputBlur = () => {
+    setTimeout(() => {
+      if (!document.activeElement?.closest(".combobox-container")) {
+        setIsOpen(false)
+      }
+    }, 200)
+  }
 
   const handleInputFocus = () => {
-    setIsOpen(true);
-  };
+    setIsOpen(true)
+  }
 
   const handleKeyDown = (e) => {
     if (e.key === "Escape") {
-      setIsOpen(false);
+      setIsOpen(false)
     }
 
     if (e.key === "Enter" && isOpen && filteredOptions.length > 0) {
-      handleOptionClick(filteredOptions[0]);
-      e.preventDefault();
+      handleOptionClick(filteredOptions[0])
+      e.preventDefault()
     }
-  };
+  }
 
   return (
     <div className={`combobox-container ${className}`} style={styles.container}>
@@ -105,6 +111,7 @@ const ComboBox = ({
           type="text"
           name={name}
           value={inputValue}
+          onBlur={handleInputBlur}
           onChange={handleInputChange}
           onFocus={handleInputFocus}
           onKeyDown={handleKeyDown}
@@ -139,8 +146,8 @@ const ComboBox = ({
         </ul>
       )}
     </div>
-  );
-};
+  )
+}
 
 // Estilos actualizados
 const styles = {
@@ -170,6 +177,10 @@ const styles = {
     color: "#333",
     backgroundColor: "#fff",
     boxSizing: "border-box",
+    "&:focus": {
+      outline: "2px solid #385792",
+      borderColor: "transparent",
+    },
   },
   toggleButton: {
     position: "absolute",
@@ -196,6 +207,9 @@ const styles = {
     listStyle: "none",
     padding: "0",
     margin: "0.25rem 0 0 0",
+    borderTop: "none",
+    borderTopLeftRadius: 0,
+    borderTopRightRadius: 0,
   },
   option: {
     padding: "0.5rem 0.75rem",
@@ -204,6 +218,6 @@ const styles = {
     transition: "background-color 0.2s",
     backgroundColor: "white",
   },
-};
+}
 
-export default ComboBox;
+export default ComboBox

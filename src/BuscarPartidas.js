@@ -265,6 +265,12 @@ function BuscarPartidas() {
     console.log("Corregir partida")
   }
 
+  const handleEditProfile = () => {
+    console.log("Navegando a editar perfil")
+    setIsDropdownOpen(false)
+    navigate("/editarPerfil")
+  }
+
   const generarPDFCorto = () => {
     if (!selectedRow) return;
     const r = registros.find(r => r.id === selectedRow.id);
@@ -586,11 +592,7 @@ function BuscarPartidas() {
     )
   }
 
-  const handleEditProfile = () => {
-    console.log("Navegando a editar perfil")
-    setIsDropdownOpen(false)
-    navigate("/editarPerfil")
-  }
+
 
 
 return (
@@ -598,7 +600,7 @@ return (
         {/* Barra superior */}
         <header style={styles.header}>
           <img src={logo || "/logo.png"} alt="Logo" style={styles.headerLogo} />
-          <h1 style={styles.headerTitle}>Búsqueda de Partidas</h1>
+          <h1 style={styles.headerTitle}>Búsqueda de Actas</h1>
           <button onClick={handleLogout} style={styles.logoutButton}>
             <FaSignOutAlt style={styles.iconLogout} />
             {<span style={styles.iconLogoutText}> Cerrar Sesión</span>}
