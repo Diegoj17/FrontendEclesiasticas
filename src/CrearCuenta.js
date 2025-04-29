@@ -78,7 +78,7 @@ function CrearCuenta() {
 
     try {
       const response = await axios.post(
-        "https://eclesiasticasbackend.onrender.com/api/auth/register",
+        "https://actaseclesiasticas.koyeb.app/api/auth/register",
         {
           email,
           password,

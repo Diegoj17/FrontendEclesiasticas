@@ -773,6 +773,32 @@ function AñadirPartidas() {
                   </div>
                 </div>
 
+                {/* Nueva fila: Lugar de Bautizo + Diócesis */}
+                <div style={styles.formRow}>
+                  <div style={{ ...styles.formGroup, flex: 1 }}>
+                    <label style={styles.formLabel}>Lugar De Bautizo</label>
+                    <ComboBox
+                      options={ciudadesColombia}
+                      value={formData.confirmacion.lugarNacimiento}
+                      onChange={handleChange}
+                      placeholder="Seleccione o escriba la ciudad"
+                      name="confirmacion.lugarNacimiento"
+                      style={{ width: '100%' }}
+                    />
+                  </div>
+                  <div style={{ ...styles.formGroup, flex: 1, marginLeft: '1rem' }}>
+                    <label style={styles.formLabel}>Diócesis Donde Fue Bautizado</label>
+                    <ComboBox
+                      options={ciudadesColombia}
+                      value={formData.confirmacion.diocesis}
+                      onChange={handleChange}
+                      placeholder="Seleccione o escriba la diócesis"
+                      name="confirmacion.diocesis"
+                      style={{ width: '100%' }}
+                    />
+                  </div>
+                </div>
+
                 <div style={styles.formRow}>
                   {/* Fecha de Bautizo */}
                   <div style={{ ...styles.bautizoDatosContainer, flex: 1 }}>
@@ -848,33 +874,8 @@ function AñadirPartidas() {
                     </div>
                   </div>
                 </div>
-
-                {/* Nueva fila: Lugar de Bautizo + Diócesis */}
-                <div style={styles.formRow}>
-                  <div style={{ ...styles.formGroup, flex: 1 }}>
-                    <label style={styles.formLabel}>Lugar De Bautizo</label>
-                    <ComboBox
-                      options={ciudadesColombia}
-                      value={formData.confirmacion.lugarNacimiento}
-                      onChange={handleChange}
-                      placeholder="Seleccione o escriba la ciudad"
-                      name="confirmacion.lugarNacimiento"
-                      style={{ width: '100%' }}
-                    />
-                  </div>
-                  <div style={{ ...styles.formGroup, flex: 1, marginLeft: '1rem' }}>
-                    <label style={styles.formLabel}>Diócesis Donde Fue Bautizado</label>
-                    <ComboBox
-                      options={ciudadesColombia}
-                      value={formData.confirmacion.diocesis}
-                      onChange={handleChange}
-                      placeholder="Seleccione o escriba la diócesis"
-                      name="confirmacion.diocesis"
-                      style={{ width: '100%' }}
-                    />
-                  </div>
-                </div>
               </div>
+              
             <div style={styles.formSection}>
               <h2 style={styles.sectionTitle}>Datos de la Familia</h2>
               <div style={styles.formRow}>
@@ -2276,7 +2277,6 @@ const styles = {
 
   // Estilos para los datos de acta de bautizo
   bautizoDatosContainer: {
-    marginTop: "0.5rem",
     width: "100%",
     display: "flex",
     flexDirection: "column",
@@ -2287,7 +2287,6 @@ const styles = {
     fontSize: "1rem",
     fontWeight: "500",
     color: "#000000",
-    marginBottom: "0.5rem",
     textAlign: "center",
   },
   bautizoDatosRow: {
