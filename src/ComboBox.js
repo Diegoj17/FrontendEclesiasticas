@@ -167,17 +167,13 @@ const styles = {
   },
   input: {
     width: "100%",
-    padding: "0.6rem 0.75rem",
+    padding: "0.75rem 1rem",
     border: "1px solid #ccc",
-    borderRadius: "4px",
+    borderRadius: "0.5rem",
     fontSize: "0.9rem",
     color: "#333",
     backgroundColor: "#fff",
     boxSizing: "border-box",
-    "&:focus": {
-      outline: "2px solid #385792",
-      borderColor: "transparent",
-    },
   },
   toggleButton: {
     position: "absolute",
@@ -204,9 +200,6 @@ const styles = {
     listStyle: "none",
     padding: "0",
     margin: "0.25rem 0 0 0",
-    borderTop: "none",
-    borderTopLeftRadius: 0,
-    borderTopRightRadius: 0,
   },
   option: {
     padding: "0.5rem 0.75rem",
