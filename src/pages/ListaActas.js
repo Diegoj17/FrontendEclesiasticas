@@ -1,15 +1,12 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { useAuth } from "./AuthContext"
-import { useActas } from "./ActaContext"
-import logo from "./logo.png"
+import { useAuth } from "../context/AuthContext"
+import { useActas } from "../context/ActaContext"
+import Header from "../components/layout/Header"
+import DetallesActa from "../components/layout/DetallesActas"
 import {
   FaEdit,
   FaArrowLeft,
-  FaSignOutAlt,
-  FaUserCircle,
-  FaChevronDown,
-  FaChevronUp,
   FaTrash,
   FaCheck,
 } from "react-icons/fa"
@@ -32,55 +29,15 @@ function ListaActas() {
     });
   };
 
-  const handleLogout = () => {
-    logout();
-    navigate("/");
-  };
-
   const handleBack = () => {
-    navigate("/añadirPartidas");
-  };
-
-  const handleEditProfile = () => {
-    navigate("/editarPerfil");
-    setIsDropdownOpen(false);
-  };
-
-  const handleSelectActa = (acta) => {
-    setSelectedActas((prev) => {
-      const exists = prev.find((a) => a.id === acta.id);
-      if (exists) return prev.filter((a) => a.id !== acta.id);
-      return [...prev, { ...acta, selectionTime: Date.now() }];
-    });
-  };
-
-  const handleRowClick = (acta) => {
-    setSelectedActaDetalle((prev) => (prev?.id === acta.id ? null : acta));
-  };
-
-  const handleDeleteSelected = () => {
-    if (selectedActas.length > 0) {
-      eliminarActasTemporales(selectedActas.map((a) => a.id));
-      setSelectedActas([]);
-    }
-  };
-
-  const handleConfirmSelected = () => {
-    if (selectedActas.length > 0) {
-      const ordenIds = selectedActas
-        .sort((a, b) => a.selectionTime - b.selectionTime)
-        .map((a) => a.id);
-
-      confirmarActas(ordenIds);
-      setSelectedActas([]);
-    }
+    navigate('/añadirActas');
   };
 
   const handleEditActa = () => {
     if (selectedActas.length === 1) {
       const actaAEditar = selectedActas[0];
       editarActaTemporal(actaAEditar.id);
-      navigate("/añadirPartidas");
+      navigate('/añadirActas', { state: { acta: actaAEditar } });
     }
   };
 
@@ -139,111 +96,11 @@ function ListaActas() {
     return "";
   };
 
-  const renderDetallesActa = (acta) => {
-    if (acta.tipo === "Bautismo") {
-      return (
-        <div style={styles.detailsGrid}>
-          <div style={styles.detailsSection}>
-            <h4 style={styles.sectionTitle}>Datos del Bautizado</h4>
-            <div style={styles.detailsRow}>
-              <span style={styles.detailsLabel}>Nombre completo:</span>
-              <span style={styles.detailsValue}>
-                {acta.bautismo.primerNombre} {acta.bautismo.segundoNombre} {acta.bautismo.primerApellido}{" "}
-                {acta.bautismo.segundoApellido}
-              </span>
-            </div>
-            <div style={styles.detailsRow}>
-              <span style={styles.detailsLabel}>Fecha de nacimiento:</span>
-              <span style={styles.detailsValue}>
-                {acta.bautismo.fechaNacimiento?.dia}/{acta.bautismo.fechaNacimiento?.mes}/
-                {acta.bautismo.fechaNacimiento?.año}
-              </span>
-            </div>
-            <div style={styles.detailsRow}>
-              <span style={styles.detailsLabel}>Lugar de nacimiento:</span>
-              <span style={styles.detailsValue}>{acta.bautismo.lugarNacimiento}</span>
-            </div>
-          </div>
-          {/* Additional sections omitted for brevity */}
-        </div>
-      );
-    } else if (acta.tipo === "Confirmación") {
-      return (
-        <div style={styles.detailsGrid}>
-          <div style={styles.detailsSection}>
-            <h4 style={styles.sectionTitle}>Datos del Confirmado</h4>
-            <div style={styles.detailsRow}>
-              <span style={styles.detailsLabel}>Nombre completo:</span>
-              <span style={styles.detailsValue}>
-                {acta.confirmacion.primerNombre} {acta.confirmacion.segundoNombre} {acta.confirmacion.primerApellido}{" "}
-                {acta.confirmacion.segundoApellido}
-              </span>
-            </div>
-            {/* Additional sections omitted for brevity */}
-          </div>
-        </div>
-      );
-    } else if (acta.tipo === "Matrimonio") {
-      return (
-        <div style={styles.detailsGrid}>
-          <div style={styles.detailsSection}>
-            <h4 style={styles.sectionTitle}>Datos del Esposo</h4>
-            <div style={styles.detailsRow}>
-              <span style={styles.detailsLabel}>Nombre completo:</span>
-              <span style={styles.detailsValue}>
-                {acta.matrimonio.novio.primerNombre} {acta.matrimonio.novio.segundoNombre}{" "}
-                {acta.matrimonio.novio.primerApellido} {acta.matrimonio.novio.segundoApellido}
-              </span>
-            </div>
-            {/* Additional sections omitted for brevity */}
-          </div>
-        </div>
-      );
-    } else {
-      return (
-        <div style={styles.detailsGrid}>
-          <div style={styles.detailsSection}>
-            <h4 style={styles.sectionTitle}>Información no disponible</h4>
-            <p>No hay información detallada disponible para este tipo de acta.</p>
-          </div>
-        </div>
-      );
-    }
-  };
-
   return (
     <div style={styles.container}>
       {/* Barra superior */}
-      <header style={styles.header}>
-        <div style={styles.headerLeft}>
-          <img src={logo || "/logo.png"} alt="Logo" style={styles.headerLogo} />
-          <h1 style={styles.headerTitle}>Lista de Actas</h1>
-        </div>
-        <div style={styles.headerRight}>
-          <button onClick={handleLogout} style={styles.logoutButton}>
-            <FaSignOutAlt style={styles.iconLogout} />
-            <span style={styles.iconLogoutText}> Cerrar Sesión</span>
-          </button>
-          <div style={styles.userContainer} onClick={toggleDropdown}>
-            <div style={styles.userInfo}>
-              <FaUserCircle size={24} style={styles.userIcon} />
-              <div style={styles.userText}>
-                <span style={styles.userName}>{user?.displayName || "Nombre Usuario"}</span>
-                <span style={styles.userRole}>{user?.role || "Rol"}</span>
-              </div>
-              {isDropdownOpen ? <FaChevronUp /> : <FaChevronDown />}
-            </div>
-            {isDropdownOpen && (
-              <div style={styles.dropdownMenu}>
-                <button style={styles.dropdownItem} onClick={handleEditProfile}>
-                  <FaEdit style={styles.dropdownIcon} />
-                  <span style={styles.dropdownIconText}>Editar perfil</span>
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      </header>
+        <Header title="Lista de Actas" />
+
       <div style={styles.mainContent}>
         <main style={styles.content}>
           <div style={styles.actionsBar}>
@@ -373,12 +230,7 @@ function ListaActas() {
                     {selectedActaDetalle?.id === acta.id && (
                       <tr>
                         <td colSpan="10" style={styles.detailsCell}>
-                          <div style={styles.detailsContainer}>
-                            <h3 style={styles.detailsTitle}>
-                              Detalles de {getPrimerNombre(acta)} {getPrimerApellido(acta)}
-                            </h3>
-                            {renderDetallesActa(acta)}
-                          </div>
+                        <DetallesActa acta={acta} />
                         </td>
                       </tr>
                     )}
@@ -387,7 +239,7 @@ function ListaActas() {
                 {actasTemporales.length === 0 ? (
                   <tr>
                     <td colSpan="9" style={styles.emptyMessage}>
-                      No hay actas temporales. Agregue una nueva acta desde la sección 'Añadir partidas'.
+                      No hay actas temporales. Agregue una nueva acta desde la sección 'Crear Actas'.
                     </td>
                   </tr>
                 ) : null}
@@ -407,112 +259,6 @@ const styles = {
     height: "100vh",
     overflow: "hidden",
     
-  },
-  header: {
-    backgroundColor: "#385792",
-    color: "white",
-    padding: "1rem",
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    height: "70px",
-  },
-  headerLeft: {
-    display: "flex",
-    alignItems: "center",
-    gap: "1rem",
-  },
-  headerRight: {
-    display: "flex",
-    alignItems: "center",
-    gap: "1rem",
-  },
-  headerLogo: {
-    height: "60px",
-    marginRight: "1rem",
-  },
-  headerTitle: {
-    fontSize: "1.5rem",
-    fontWeight: "600",
-  },
-  iconBack: {
-    width: "18px",
-    height: "18px",
-    fill: "white",
-  },
-  iconLogout: {
-    width: "20px",
-    height: "20px",
-    fill: "white",
-  },
-  iconLogoutText: {
-    color: "white",
-  },
-  userContainer: {
-    position: "relative",
-    cursor: "pointer",
-  },
-  userName: {
-    fontSize: "1rem",
-    fontWeight: "600",
-  },
-  userInfo: {
-    display: "flex",
-    alignItems: "center",
-    gap: "0.5rem",
-    padding: "0.5rem 1rem",
-    borderRadius: "4px",
-    transition: "background-color 0.2s",
-  },
-  userIcon: {
-    width: "30px",
-    height: "30px",
-    borderRadius: "50%",
-    backgroundColor: "#fff",
-  },
-  userText: {
-    display: "flex",
-    flexDirection: "column",
-    fontSize: "0.8rem",
-  },
-  roleText: {
-    opacity: 0.8,
-    fontSize: "0.7rem",
-  },
-  dropdownMenu: {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    width: "100%",
-    position: "absolute",
-    right: 0,
-    top: "100%",
-    backgroundColor: "#385792",
-    borderRadius: "4px",
-    minWidth: "100px",
-    zIndex: 1000,
-    textAlign: "left",
-    cursor: "pointer",
-    marginTop: "0.5rem",
-    overflow: "hidden",
-  },
-  dropdownItem: {
-    display: "flex",
-    alignItems: "center",
-    width: "100%",
-    padding: "0.75rem 1rem",
-    border: "none",
-    backgroundColor: "transparent",
-    textAlign: "left",
-    cursor: "pointer",
-    transition: "background-color 0.2s",
-  },
-  dropdownIcon: {
-    marginRight: "0.75rem",
-    color: "#ffffff",
-  },
-  dropdownIconText: {
-    color: "#ffffff",
   },
   buttonText: {
     fontSize: "1rem",
@@ -536,23 +282,6 @@ const styles = {
     cursor: "pointer",
     fontSize: "1rem",
   },
-  logoutButton: {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#FF000F",
-    gap: "0.5rem",
-    color: "white",
-    border: "none",
-    fontSize: "1rem",
-    padding: "0.5rem 1.5rem",
-    borderRadius: "0.5rem",
-    cursor: "pointer",
-    transition: "background-color 0.2s",
-    whiteSpace: "nowrap",
-    overflow: "hidden",
-    position: "relative",
-  },
   content: {
     flex: 1,
     padding: "1.5rem",
@@ -566,7 +295,7 @@ const styles = {
     justifyContent: "space-between",
     alignItems: "center",
     width: "100%",
-    marginBottom: "1rem",
+    marginBottom: "0.5rem",
   },
   actionButtonsContainer: {
     display: "flex",
@@ -662,7 +391,7 @@ const styles = {
     cursor: "default",
   },
   detailsSection: {
-    flex: "1 1 calc(33.33% - 1rem)",
+    flex: "1 1 calc(30% - 1rem)",
     minWidth: "250px",
     padding: "0rem 1rem",
     border: "1px solid #e0e0e0",

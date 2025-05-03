@@ -1,8 +1,6 @@
-
-import React from "react"
-
+"use client"
 import { createContext, useState, useEffect, useContext } from "react"
-import { auth } from "./firebase";
+import { auth } from "../config/firebase"
 
 // Crear el contexto de autenticación
 const AuthContext = createContext(null)
@@ -12,11 +10,9 @@ export function AuthProvider({ children }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [user, setUser] = useState(null)
 
-  
-
   // Al cargar el componente, verificar si hay una sesión guardada
   useEffect(() => {
-    const storedUser = JSON.parse(localStorage.getItem("user"));
+    const storedUser = JSON.parse(localStorage.getItem("user"))
     if (storedUser && !user) {
       setIsAuthenticated(true)
       setUser({
@@ -27,7 +23,6 @@ export function AuthProvider({ children }) {
       })
     }
   }, [user])
-
 
   // Función para iniciar sesión
   const login = (userData) => {
@@ -56,10 +51,6 @@ export function AuthProvider({ children }) {
     localStorage.removeItem("isAuthenticated")
     localStorage.removeItem("user")
     localStorage.removeItem("token")
-  }
-
-  const onUserUpdate = (updatedUser) => {
-    console.log("User updated:", updatedUser)
   }
 
   const updateUser = async (newData) => {
@@ -98,7 +89,7 @@ export function AuthProvider({ children }) {
       console.log("Enviando datos al servidor:", updateData)
 
       // Realizar la solicitud HTTP
-      const response = await fetch('https://actaseclesiasticas.koyeb.app/api/auth/update-profile', {
+      const response = await fetch("https://actaseclesiasticas.koyeb.app/api/user/update-profile", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -130,8 +121,8 @@ export function AuthProvider({ children }) {
       }
 
       if (JSON.stringify(updatedUser) !== JSON.stringify(user)) {
-        setUser(updatedUser);
-        localStorage.setItem("user", JSON.stringify(updatedUser));
+        setUser(updatedUser)
+        localStorage.setItem("user", JSON.stringify(updatedUser))
       }
 
       console.log("Usuario actualizado:", updatedUser)
@@ -150,12 +141,19 @@ export function AuthProvider({ children }) {
     }
   }
 
-  return <AuthContext.Provider value={{
-    isAuthenticated,
-    user,
-    login,
-    logout,
-    updateUser }}>{children}</AuthContext.Provider>
+  return (
+    <AuthContext.Provider
+      value={{
+        isAuthenticated,
+        user,
+        login,
+        logout,
+        updateUser,
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
+  )
 }
 
 // Hook personalizado para usar el contexto de autenticación

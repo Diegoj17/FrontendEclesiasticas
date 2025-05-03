@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import logo from "./logo.png";
+import logo from "../assets/logo.png"
 import axios from 'axios';
 import { FaExclamationCircle, FaCheck, FaUser } from 'react-icons/fa';
 
@@ -310,7 +310,7 @@ const styles = {
     display: 'flex',
     alignItems: 'flex-start',
     justifyContent: 'center',
-    height: '100vh',
+    minHeight: '100vh',
     backgroundColor: '#385792',
     boxSizing: 'border-box',
     padding: '20px 0 0 0',
@@ -321,9 +321,10 @@ const styles = {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    maxWidth: '400px',
+    marginTop: '-0.5rem',
+    maxWidth: '25rem',
     width: '100%',
-    gap: '20px',
+    gap: '0.5rem',
     cursor: 'default',
   },
   logoContainer: {
@@ -334,7 +335,7 @@ const styles = {
     cursor: 'default',
   },
   logo: {
-    width: '200px',
+    width: '12.5rem',
     height: 'auto',
     objectFit: 'contain',
     transition: 'all 0.3s ease',
@@ -410,9 +411,9 @@ const styles = {
     alignItems: "center",
     flexDirection: "column",
     display: "flex",
-    height: "40px",
+    height: "2.5rem",
     width: "100%",
-    padding: '0.75rem',
+    padding: '0.75rem 0.5rem',
     fontSize: "1rem",
     border: "1px solid #ddd",
     borderRadius: "4px",

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import logo from "./logo.png";
+import logo from "../assets/logo.png"
 import axios from 'axios';
 import { FaKey } from 'react-icons/fa';
 
@@ -33,7 +33,7 @@ function RecuperarContraseña() {
     
     try {
       const response = await axios.post(
-        "http://eclesiasticasbackend-production.up.railway.app/api/auth/reset-password",
+        "https://actaseclesiasticas.koyeb.app/api/user/reset-password",
         { email },
         { cancelToken: source.token }
       );
@@ -182,12 +182,12 @@ const styles = {
     display: 'flex',
     alignItems: 'flex-start',
     justifyContent: 'center',
-    height: '100vh',
+    minHeight: '100vh',
     backgroundColor: '#385792',
-    padding: '20px',
+    padding: '20px 0 0 0',
     boxSizing: 'border-box',
-    paddingTop: '40px',
     cursor: 'default',
+    gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
   },
   formContainer: {
     display: 'flex',
@@ -195,7 +195,8 @@ const styles = {
     alignItems: 'center',
     maxWidth: '400px',
     width: '100%',
-    gap: '20px',
+    marginTop: '-0.5rem',
+    gap: '0.5rem',
     cursor: 'default',
   },
   logoContainer: {
@@ -206,7 +207,7 @@ const styles = {
     cursor: 'default',
   },
   logo: {
-    width: '200px',
+    width: '12.5rem',
     height: 'auto',
     objectFit: 'contain',
     transition: 'all 0.3s ease',

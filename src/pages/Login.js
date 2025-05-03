@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react"
 import axios from "axios"
 import { useNavigate } from "react-router-dom"
-import logo from "./logo.png" // Asegúrate de que la ruta del logo sea correcta
-import { useAuth } from "./AuthContext"
+import logo from "../assets/logo.png"
+import { useAuth } from "../context/AuthContext"
 
 function Login() {
   const [email, setEmail] = useState("")
@@ -25,7 +25,7 @@ function Login() {
     setError("");
     try {
       const response = await axios.post(
-        'https://actaseclesiasticas.koyeb.app/api/auth/login',
+        'https://actaseclesiasticas.koyeb.app/api/user/login',
         { email, password }
       );
       

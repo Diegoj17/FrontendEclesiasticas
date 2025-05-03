@@ -1,20 +1,33 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
-import Login from './Login';
-import Principal from './Principal';
+
 import ScrollableContainer from "./ScrollableContainer"
-import RecuperarContraseña from './RecuperarContraseña';
-import CrearCuenta from './CrearCuenta';
-import EditarPerfil from './EditarPerfil';
-import { AuthProvider } from "./AuthContext"
-import { ActaProvider } from "./ActaContext"
-import ProtectedRoute from "./ProtectedRoute"
-import AñadirPartidas from './AñadirPartidas';
-import BuscarPartidas from './BuscarPartidas';
-import VistaActas from './VistaActas';
-import ListaActas from './ListaActas';
+
+import { AuthProvider, useAuth } from "./context/AuthContext"
+import { ActaProvider } from "./context/ActaContext"
+import Login from "./pages/Login"
+import CrearCuenta from './pages/CrearCuenta';
+import RecuperarContraseña from './pages/RecuperarContraseña';
+import Principal from "./pages/Principal"
+import EditarPerfil from './pages/EditarPerfil';
+import AñadirActas from './pages/AñadirActas';
+import BuscarActas from './pages/BuscarActas';
+import VistaActas from './pages/VistaActas';
+import ListaActas from './pages/ListaActas';
+import CorregirActas from './pages/CorregirActas';
+
 
 function App() {
+  const ProtectedRoute = ({ children }) => {
+    const { isAuthenticated } = useAuth()
+  
+    if (!isAuthenticated) {
+      return <Navigate to="/" replace />
+    }
+  
+    return children
+  }
+
   return (
     <AuthProvider>
       <ActaProvider>
@@ -40,6 +53,7 @@ function App() {
               <EditarPerfil/>
               }
               />
+              <Route path="/" element={<Principal />} />
             <Route
               path="/Principal"
               element={
@@ -57,18 +71,18 @@ function App() {
             }
           />
           <Route
-            path="/buscarPartidas"
+            path="/buscarActas"
             element={
               <ProtectedRoute>
-                    <BuscarPartidas />
+                    <BuscarActas />
               </ProtectedRoute>
             }
           />
           <Route
-            path="/añadirPartidas"
+            path="/añadirActas"
             element={
               <ProtectedRoute>
-                    <AñadirPartidas />
+                    <AñadirActas />
               </ProtectedRoute>
             }
           />
@@ -77,6 +91,15 @@ function App() {
             element={
               <ProtectedRoute>
                     <ListaActas />
+              </ProtectedRoute>
+            }
+          />
+          
+          <Route
+            path="/corregirActas"
+            element={
+              <ProtectedRoute>
+                    <CorregirActas />
               </ProtectedRoute>
             }
           />

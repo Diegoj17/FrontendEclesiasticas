@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from "react"
 import { useNavigate } from "react-router-dom"
-import { useAuth } from "./AuthContext"
+import { useAuth } from "../context/AuthContext"
 import { FaArrowLeft, FaUser, FaSave, FaExclamationCircle, FaCheck } from "react-icons/fa"
-import logo from "./logo.png";
+import logo from "../assets/logo.png"
 
 function EditProfile() {
   const navigate = useNavigate();
@@ -679,4 +679,3 @@ const styles = {
 }
 
 export default EditProfile
-
