@@ -25,7 +25,7 @@ function Login() {
     setError("");
     try {
       const response = await axios.post(
-        'https://actaseclesiasticas.koyeb.app/api/user/login',
+        'https://actaseclesiasticas.koyeb.app/api/auth/login',
         { email, password }
       );
       
