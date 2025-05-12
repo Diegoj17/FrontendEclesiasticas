@@ -73,18 +73,6 @@ function Sidebar({menuAbierto, setMenuAbierto, currentPage, onViewActas, onSearc
             <FaFileMedical style={styles.icon} />
             {menuAbierto && <span style={styles.buttonText}>Añadir Actas</span>}
           </button>
-
-          <button
-            onClick={onCorrect}
-            style={{
-              ...styles.sidebarIconButton,
-              justifyContent: menuAbierto ? "flex-start" : "center",
-            }}
-            title="Corregir Actas"
-          >
-            <FaEdit style={styles.icon} />
-            {menuAbierto && <span style={styles.buttonText}>Corregir Actas</span>}
-          </button>
         </div>
 
         {/* Botón "Atrás" al final del menú */}

@@ -1,34 +1,84 @@
-import React from "react"
+"use client"
 import ComboBox from "../ui/ComboBox"
 
-function CommonOficianteSection({ formData, handleChange, sacerdotes, testigos }) {
+function CommonOficianteSection({
+  formData,
+  handleChange,
+  sacerdotes = [],
+  testigos = [],
+  loading = false,
+  error = null,
+  agregarSacerdote = () => {},
+}) {
+  // Valores predeterminados en caso de que no se proporcionen props
+  const localSacerdotes = [
+    "Padre José Martínez",
+    "Padre Antonio López",
+    "Padre Miguel Ángel Pérez",
+    "Padre Francisco Rodríguez",
+    "Padre Juan Carlos Gómez",
+    "Otro",
+  ]
+
+  const localTestigos = ["María González", "Juan Pérez", "Ana Rodríguez", "Carlos Sánchez", "Laura Martínez", "Otro"]
+
+  // Usar los valores proporcionados o los valores predeterminados
+  const sacerdotesList = sacerdotes.length > 0 ? sacerdotes : localSacerdotes
+  const testigosList = testigos.length > 0 ? testigos : localTestigos
+
+  // Manejar el cambio en el ComboBox
+  const handleComboBoxChange = (e) => {
+    const { name, value } = e.target
+
+    // Llamar al manejador de cambios original
+    handleChange(e)
+
+    // Si el valor no es "Otro" y no está en la lista, agregarlo
+    if (value !== "Otro" && value.trim() !== "") {
+      if (name === "oficiante" && !sacerdotesList.includes(value)) {
+        agregarSacerdote(value, "sacerdote")
+      } else if (name === "doyFe" && !testigosList.includes(value)) {
+        agregarSacerdote(value, "testigo")
+      }
+    }
+  }
+
   return (
     <div style={styles.section}>
       <h2 style={styles.sectionTitle}>Datos del Encargado de Celebrar la Ceremonia</h2>
-      <div style={styles.formRow}>
-        <div style={styles.formGroup}>
-          <ComboBox
-            label="Nombres del Sacerdote"
-            options={sacerdotes}
-            value={formData.oficiante}
-            onChange={handleChange}
-            placeholder="Seleccione o escriba el nombre"
-            name="oficiante"
-          />
-        </div>
-      </div>
-      <div style={styles.formRow}>
-        <div style={styles.formGroup}>
-          <ComboBox
-            label="Doy Fe"
-            options={testigos}
-            value={formData.doyFe}
-            onChange={handleChange}
-            placeholder="Seleccione o escriba el nombre"
-            name="doyFe"
-          />
-        </div>
-      </div>
+
+      {loading ? (
+        <div style={styles.loadingContainer}>Cargando lista de sacerdotes...</div>
+      ) : error ? (
+        <div style={styles.errorContainer}>{error}</div>
+      ) : (
+        <>
+          <div style={styles.formRow}>
+            <div style={styles.formGroup}>
+              <ComboBox
+                label="Sacerdote"
+                options={sacerdotesList}
+                value={formData.oficiante}
+                onChange={handleComboBoxChange}
+                placeholder="Seleccione o escriba el nombre"
+                name="oficiante"
+              />
+            </div>
+          </div>
+          <div style={styles.formRow}>
+            <div style={styles.formGroup}>
+              <ComboBox
+                label="Doy Fe"
+                options={testigosList}
+                value={formData.doyFe}
+                onChange={handleComboBoxChange}
+                placeholder="Seleccione o escriba el nombre"
+                name="doyFe"
+              />
+            </div>
+          </div>
+        </>
+      )}
     </div>
   )
 }
@@ -65,6 +115,20 @@ const styles = {
     flex: "1",
     minWidth: "300px",
     marginBottom: "0.5rem",
+  },
+  loadingContainer: {
+    padding: "1rem",
+    textAlign: "center",
+    color: "#666",
+    fontStyle: "italic",
+  },
+  errorContainer: {
+    padding: "1rem",
+    textAlign: "center",
+    color: "#d32f2f",
+    backgroundColor: "#ffebee",
+    borderRadius: "0.25rem",
+    marginBottom: "1rem",
   },
 }
 

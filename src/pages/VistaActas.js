@@ -3,21 +3,12 @@ import { useNavigate } from "react-router-dom"
 import { useAuth } from "../context/AuthContext"
 import Header from "../components/layout/Header"
 import Sidebar from "../components/layout/Sidebar"
+import ActaService from "../services/ActaService"
 import { FilterMatchMode, FilterOperator } from "primereact/api"
-import DataTable from "../components/layout/DataTable"
-import { Column } from "primereact/column"
-import { FaFileAlt,
-  FaSearch,
-  FaFileMedical,
-  FaEdit,
-  FaChevronRight,
-  FaArrowLeft,
-  FaBars,
-  FaSignOutAlt,
-  FaUserCircle,
-  FaChevronUp,
-  FaChevronDown,
-  FaKey, } from "react-icons/fa"
+import DataTableExpandle from "../components/layout/DataTableExpandle"
+import DetallesActas from "../components/layout/DetallesActas"
+
+
 
 function VistaActas() {
 
@@ -25,8 +16,6 @@ function VistaActas() {
   const { user, logout } = useAuth()
   const [ceremoniaSeleccionada, setCeremoniaSeleccionada] = useState('Todos');
   const [menuAbierto, setMenuAbierto] = useState(false)
-  const [isSubmenuOpen, setIsSubmenuOpen] = useState(false)
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
   const [filters, setFilters] = useState({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS },
@@ -40,169 +29,44 @@ function VistaActas() {
     ceremonia: { value: null, matchMode: FilterMatchMode.EQUALS }
   })
   
-  // Datos de ejemplo para la tabla
-  const [registros] = useState([
-    {
-      id: 1,
-      nombre: "Pedro Perez",
-      cedula: "1234567890",
-      libro: "1",
-      folio: "2",
-      acta: "3",
-      ceremonia: "Bautismo",
-      fechaEvento: "24/05/2024",
-      sacerdote: "Juan Rodriguez",
-      fechaNacimiento: "24/05/2004",
-      lugarNacimiento: "Cucuta",
-      padre: "Angel Perez",
-      madre: "Maria Lopez",
-      abueloPaterno: "Pedro Gomez",
-      abueloMaterno: "Alfredo Ramirez",
-      abuelaPaterna: "Ana Gomez",
-      abuelaMaterna: "Ana Ramirez",
-      padrino: "Pedro Gomez",
-      madrina: "Ana Ramirez",
-    },
-    {
-      id: 2,
-      nombre: "Martin Sanchez",
-      cedula: "0987654321",
-      libro: "2",
-      folio: "3",
-      acta: "3",
-      evento: "Matrimonio",
-      fecha: "15/04/2015",
-      sacerdote: "David Martinez",
-      ceremonia: "Bautismo",
-    },
-    {
-      id: 3,
-      nombre: "José Contreras",
-      cedula: "9876543210",
-      libro: "3",
-      folio: "4",
-      acta: "4",
-      ceremonia: "Confirmacion",
-      fecha: "7/11/2010",
-      sacerdote: "Pedro Hernandez",
-    },
-    {
-      id: 4,
-      nombre: "Carlos Martinez",
-      cedula: "1234567890",
-      libro: "4",
-      folio: "5",
-      acta: "5",
-      ceremonia: "Bautismo",
-      fecha: "23/7/2007",
-      sacerdote: "Juan Perez",
-    },
-    {
-      id: 5,
-      nombre: "Pedro Perez",
-      cedula: "1234567890",
-      libro: "1",
-      folio: "2",
-      acta: "3",
-      evento: "Bautismo",
-      fechaEvento: "24/05/2024",
-      sacerdote: "Juan Rodriguez",
-      fechaNacimiento: "24/05/2004",
-      lugarNacimiento: "Cucuta",
-      padre: "Angel Perez",
-      madre: "Maria Lopez",
-      abueloPaterno: "Pedro Gomez",
-      abueloMaterno: "Alfredo Ramirez",
-      abuelaPaterna: "Ana Gomez",
-      abuelaMaterna: "Ana Ramirez",
-      padrino: "Pedro Gomez",
-      madrina: "Ana Ramirez",
-      estadoCivil: "Soltero",
-    },
-    {
-      id: 6,
-      primerNombre: "Martin",
-      segundoNombre: "Alberto",
-      primerApellido: "Sanchez",
-      cedula: "0987654321",
-      libro: "2",
-      folio: "3",
-      acta: "3",
-      evento: "Matrimonio",
-      fecha: "15/04/2015",
-      sacerdote: "David Martinez",
-    },
-    {
-      id: 7,
-      nombre: "José Contreras",
-      cedula: "9876543210",
-      libro: "3",
-      folio: "4",
-      acta: "4",
-      evento: "Defunción",
-      fecha: "7/11/2010",
-      sacerdote: "Pedro Hernandez",
-    },
-    {
-      id: 8,
-      nombre: "Carlos Martinez",
-      cedula: "1234567890",
-      libro: "4",
-      folio: "5",
-      acta: "5",
-      evento: "Primera Comunión",
-      fecha: "23/7/2007",
-      sacerdote: "Juan Perez",
-    },
-    {
-      id: 9,
-      nombre: "Pedro Perez",
-      cedula: "1234567890",
-      libro: "1",
-      folio: "2",
-      acta: "3",
-      evento: "Bautismo",
-      fechaEvento: "24/05/2024",
-      sacerdote: "Juan Rodriguez",
-      fechaNacimiento: "24/05/2004",
-      lugarNacimiento: "Cucuta",
-      padre: "Angel Perez",
-      madre: "Maria Lopez",
-      abueloPaterno: "Pedro Gomez",
-      abueloMaterno: "Alfredo Ramirez",
-      abuelaPaterna: "Ana Gomez", 
-      abuelaMaterna: "Ana Ramirez",
-      padrino: "Pedro Gomez",
-      madrina: "Ana Ramirez",
-      estadoCivil: "Soltero",    
-    },
-    {
-      id: 10,
-      nombre: "Martin Sanchez",
-      cedula: "0987654321",
-      libro: "2",
-      folio: "3",
-      acta: "3",
-      ceremonia: "Matrimonio",
-      fecha: "15/04/2015",
-      sacerdote: "David Martinez",    
-    },
-    {
-      id: 11,
-      nombre: "Martin Sanchez",
-      cedula: "0987654321",
-      libro: "2",
-      folio: "3",
-      acta: "3",
-      evento: "Matrimonio",
-      fecha: "15/04/2015",
-      sacerdote: "David Martinez",    
-    },
-  ])
 
-  const registrosFiltrados = ceremoniaSeleccionada === 'Todos'
-  ? registros
-  : registros.filter(registro => registro.ceremonia === ceremoniaSeleccionada);
+  const [registros, setRegistros] = useState([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
+  const [selectedRow, setSelectedRow] = useState(null)
+
+
+useEffect(() => {
+    fetchActas()
+  }, [ceremoniaSeleccionada])
+
+  const fetchActas = async () => {
+    try {
+      setLoading(true)
+      let actas
+
+      if (ceremoniaSeleccionada === "Todos") {
+        actas = await ActaService.getAllActas()
+      } else {
+        actas = await ActaService.getActasByTipo(ceremoniaSeleccionada)
+      }
+
+      console.log("Actas obtenidas:", actas)
+
+      // Transformar los datos al formato esperado por la tabla
+      const actasFormateadas = ActaService.transformActasForTable(actas)
+
+      console.log("Actas formateadas:", actasFormateadas)
+
+      setRegistros(actasFormateadas)
+      setLoading(false)
+      setError(null)
+    } catch (error) {
+      console.error("Error al cargar las actas:", error)
+      setError("Error al cargar las Actas. Por favor, intente de nuevo.")
+      setLoading(false)
+    }
+  }
 
   const handleBack = () => {
     navigate('/Principal')
@@ -275,19 +139,33 @@ function VistaActas() {
   
           {/* Tabla de registros */}
           <div style={styles.tableContainer}>
-            <div className="card" style={{ flex: 1, minHeight: 0 }}>
-              <DataTable
-                  registrosFiltrados={registrosFiltrados}
-                  filters={filters}
-                  onFilter={(e) => setFilters(e.filters)}
-                  
-                />
+            {loading ? (
+              <div style={styles.loadingContainer}>
+                <i className="pi pi-spin pi-spinner" style={{ fontSize: "1.5rem" }}></i>
+                <span style={styles.loadingText}>Cargando Actas...</span>
               </div>
+            ) : error ? (
+              <div style={styles.errorContainer}>
+                <p>{error}</p>
+                <button onClick={fetchActas} style={styles.reloadButton}>
+                  Intentar de nuevo
+                </button>
+              </div>
+            ) : (
+              <DataTableExpandle
+                registrosFiltrados={registros}
+                filters={filters}
+                onFilter={(e) => setFilters(e.filters)}
+                expandedRowTemplate={(rowData) => <DetallesActas acta={rowData} />}
+                selectedRow={selectedRow}
+                setSelectedRow={setSelectedRow}
+              />
+            )}
           </div>
-          </main>
-        </div>
+        </main>
       </div>
-  );
+    </div>
+  )
 }
 
 const styles = {
@@ -365,7 +243,6 @@ const styles = {
     flexDirection: "column",
     flex: 1,
     minHeight: 0,
-    border: "1px solid #000000",
     boxShadow: "none",
     overflow: "auto",
     marginBottom: "0.5rem",
@@ -399,6 +276,37 @@ const styles = {
     padding: '12px',
     borderRight: '1px solid #000',
     cursor: 'default',
+  },
+  loadingContainer: {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '0.5rem'
+  },
+  errorContainer: {
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "center",
+    alignItems: "center",
+    height: "200px",
+    width: "100%",
+    color: "red",
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+  },
+  reloadButton: {
+    marginTop: "1rem",
+    padding: "0.5rem 1rem",
+    backgroundColor: "#FCCE74",
+    border: "none",
+    borderRadius: "0.25rem",
+    cursor: "pointer",
   },
 
 }

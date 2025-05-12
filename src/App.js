@@ -95,15 +95,6 @@ function App() {
             }
           />
           
-          <Route
-            path="/corregirActas"
-            element={
-              <ProtectedRoute>
-                    <CorregirActas />
-              </ProtectedRoute>
-            }
-          />
-          
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </ScrollableContainer>

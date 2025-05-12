@@ -1,5 +1,3 @@
-import React from 'react';
-
 const DetallesActas = ({ acta }) => {
     if (!acta) return <div>No se ha seleccionado un acta</div>;
 

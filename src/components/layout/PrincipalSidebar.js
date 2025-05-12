@@ -31,14 +31,6 @@ function PrincipalSidebar({ currentPage, menuAbierto, setMenuAbierto, onViewActa
               <span style={styles.buttonText}>Crear Actas</span>
             </button>
     
-            <button 
-              onClick={onCorrect} 
-              style={styles.sidebarButton} 
-              title="Corregir Actas"
-            >
-              <FaEdit style={styles.buttonIcon} />
-              <span style={styles.buttonText}>Corregir Actas</span>
-            </button>
           </div>
     
           {/* Botón de cierre de sesión */}

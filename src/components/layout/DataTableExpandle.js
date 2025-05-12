@@ -4,28 +4,18 @@ import { Column } from "primereact/column"
 import 'primereact/resources/themes/saga-blue/theme.css';
 import 'primereact/resources/primereact.min.css';
 import 'primeicons/primeicons.css';
-import { Tag } from 'primereact/tag';
 
-// Removed the invalid useState call here
-const CustomDataTable = ({ 
+const DataTableExpandle = ({
   registrosFiltrados, 
   filters, 
   onFilter, 
   selectedRow, 
   setSelectedRow,
   expandedRowTemplate,
-  expandedRow,
-  setExpandedRow
-}) => {
-  const [expandedRows, setExpandedRows] = useState({});
+  }) => {
+  const [expandedRows, setExpandedRows] = useState({})
+  
 
-  const onRowClick = (e) => {
-    const id = e.data.id;
-    const currentlyExpanded = expandedRows[id] === true;
-    setExpandedRows(currentlyExpanded ? {} : { [id]: true });
-    // también seleccionamos la fila para resaltar
-    setSelectedRow(e.data);
-  };
   const getEventoColor = (ceremonia) => {
     switch(ceremonia) {
       case 'Bautismo': return '#B3E5FC';
@@ -35,9 +25,19 @@ const CustomDataTable = ({
     }
   };
 
+  const onRowClick = (e) => {
+    const id = e.data.id;
+    const currentlyExpanded = expandedRows[id] === true;
+    setExpandedRows(currentlyExpanded ? {} : { [id]: true });
+    // también seleccionamos la fila para resaltar
+    if (typeof setSelectedRow === "function") {
+      setSelectedRow(e.data)
+    }
+  };
+
+
   return (
-    <div className="card" style={styles.tableContainer}>
-      <div className="card" style={{ flex: 1, minHeight: 0 }}>
+    <div style={styles.tableContainer}>
       <DataTable
         value={registrosFiltrados}
         dataKey="id"
@@ -55,15 +55,15 @@ const CustomDataTable = ({
         selection={selectedRow}
         onSelectionChange={e => setSelectedRow(e.value)}
         onRowClick={onRowClick}
-        emptyMessage="No se encontraron actas que coincidan con la búsqueda."
+        emptyMessage="No se encontraron actas."
         tableStyle={styles.tabla}
         // Control de expansión personalizado
-        expandedRows={expandedRow ? [expandedRow] : []}
-        onRowToggle={(e) => setExpandedRow(e.data.length > 0 ? e.data[0] : null)}
-        rowExpansionTemplate={expandedRowTemplate}
+        expandedRows={expandedRows}
+        onRowToggle={(e) => setExpandedRows(e.data)}
+        rowExpansionTemplate={(rowData) => expandedRowTemplate(rowData)}
         // Resalta fila seleccionada
         rowClassName={data => data.id === selectedRow?.id ? 'p-highlight' : ''}
-      >  
+      >
         
         <Column
           field="id"
@@ -150,9 +150,8 @@ const CustomDataTable = ({
         />
       </DataTable>
     </div>
-    </div>
-  );
-};
+  )
+}
 
 const styles = {
   tableContainer: {
@@ -206,4 +205,4 @@ const styles = {
     },
   };
   
-  export default CustomDataTable
+  export default DataTableExpandle

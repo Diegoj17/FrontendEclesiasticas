@@ -12,6 +12,7 @@ import ConfirmacionOficianteSection from "../components/forms/ConfirmacionOficia
 import BautismoForm from "../components/forms/BautismoForm"
 import ConfirmacionForm from "../components/forms/ConfirmacionForm"
 import MatrimonioForm from "../components/forms/MatrimonioForm"
+import ActaService from "../services/ActaService"
 import { FaTimes, FaListAlt, FaFileMedical } from "react-icons/fa"
 
 function AñadirPartidas() {
@@ -22,21 +23,9 @@ function AñadirPartidas() {
   const [menuAbierto, setMenuAbierto] = useState(false)
   const [errores, setErrores] = useState({})
   const [sidebarAbierto, setSidebarAbierto] = useState(true)
+  const [showChangeTypeModal, setShowChangeTypeModal] = useState(false);
+  const [newEventType, setNewEventType] = useState("");
 
-  // Lista de sacerdotes/oficiantes para el ComboBox
-  const sacerdotes = [
-    "Padre José Martínez",
-    "Padre Antonio López",
-    "Padre Miguel Ángel Pérez",
-    "Padre Francisco Rodríguez",
-    "Padre Juan Carlos Gómez",
-  ]
-
-  // Lista de testigos para el ComboBox
-  const testigos = ["María González", "Juan Pérez", "Ana Rodríguez", "Carlos Sánchez", "Laura Martínez"]
-
-  // Lista de monseñores para el ComboBox
-  const monseñores = ["Monseñor Pedro Gómez", "Monseñor Luis Fernández", "Monseñor Carlos Herrera"]
 
   const ciudadesColombia = [
     "Bogotá",
@@ -73,6 +62,206 @@ function AñadirPartidas() {
     "San Andrés",
   ]
 
+  // Función para mapear datos entre diferentes tipos de actas
+  const mapDataBetweenTypes = (currentData, currentType, newType) => {
+    const commonData = {
+      libro: currentData.libro,
+      folio: currentData.folio,
+      acta: currentData.acta,
+      oficiante: currentData.oficiante,
+      doyFe: currentData.doyFe,
+      notaMarginal: currentData.notaMarginal,
+      fechaCeremonia: currentData.fechaCeremonia,
+    };
+
+    // 1. BAUTISMO → CONFIRMACIÓN
+  if (currentType === "Bautismo" && newType === "Confirmación") {
+    return {
+      ...commonData,
+      confirmacion: {
+        primerNombre: currentData.bautismo.primerNombre,
+        segundoNombre: currentData.bautismo.segundoNombre,
+        primerApellido: currentData.bautismo.primerApellido,
+        segundoApellido: currentData.bautismo.segundoApellido,
+        fechaNacimiento: currentData.bautismo.fechaNacimiento,
+        lugarNacimiento: currentData.bautismo.lugarNacimiento,
+        nombrePadre: currentData.bautismo.nombrePadre,
+        nombreMadre: currentData.bautismo.nombreMadre,
+        padrino: currentData.bautismo.padrino,
+        madrina: currentData.bautismo.madrina,
+        // Campos específicos de confirmación
+        fechaBautismo: { dia: "", mes: "", año: "" }, // Se deja para llenar manualmente
+        lugarBautismo: currentData.bautismo.lugarNacimiento, // Se sugiere el mismo lugar
+        monseñor: "",
+        sacerdote: "",
+      }
+    };
+  }
+
+  // 2. BAUTISMO → MATRIMONIO
+  if (currentType === "Bautismo" && newType === "Matrimonio") {
+    return {
+      ...commonData,
+      matrimonio: {
+        novio: {
+          primerNombre: currentData.bautismo.primerNombre,
+          segundoNombre: currentData.bautismo.segundoNombre,
+          primerApellido: currentData.bautismo.primerApellido,
+          segundoApellido: currentData.bautismo.segundoApellido,
+          fechaNacimiento: currentData.bautismo.fechaNacimiento,
+          lugarNacimiento: currentData.bautismo.lugarNacimiento,
+          nombrePadre: currentData.bautismo.nombrePadre,
+          nombreMadre: currentData.bautismo.nombreMadre,
+        },
+        novia: {
+          primerNombre: "",
+          segundoNombre: "",
+          primerApellido: "",
+          segundoApellido: "",
+          fechaNacimiento: { dia: "", mes: "", año: "" },
+          lugarNacimiento: "",
+          nombrePadre: "",
+          nombreMadre: "",
+        },
+        testigo1: "", 
+        testigo2: "", 
+        testigo3: "",
+        testigo4: "",
+      }
+    };
+  }
+
+  // 3. CONFIRMACIÓN → BAUTISMO
+  if (currentType === "Confirmación" && newType === "Bautismo") {
+    return {
+      ...commonData,
+      bautismo: {
+        primerNombre: currentData.confirmacion.primerNombre,
+        segundoNombre: currentData.confirmacion.segundoNombre,
+        primerApellido: currentData.confirmacion.primerApellido,
+        segundoApellido: currentData.confirmacion.segundoApellido,
+        fechaNacimiento: currentData.confirmacion.fechaNacimiento,
+        lugarNacimiento: currentData.confirmacion.lugarNacimiento,
+        nombrePadre: currentData.confirmacion.nombrePadre,
+        nombreMadre: currentData.confirmacion.nombreMadre,
+        padrino: currentData.confirmacion.padrino,
+        madrina: currentData.confirmacion.madrina,
+        // Campos específicos de bautismo
+        abueloPaterno: "",
+        abuelaPaterna: "",
+        abueloMaterno: "",
+        abuelaMaterna: "",
+      }
+    };
+  }
+
+    // Mapeo de datos específicos entre tipos
+    if (currentType === "Bautismo" && newType === "Confirmación" ) {
+      return {
+        ...commonData,
+        confirmacion: {
+          primerNombre: currentData.bautismo.primerNombre,
+          segundoNombre: currentData.bautismo.segundoNombre,
+          primerApellido: currentData.bautismo.primerApellido,
+          segundoApellido: currentData.bautismo.segundoApellido,
+          fechaNacimiento: currentData.bautismo.fechaNacimiento,
+          lugarNacimiento: currentData.bautismo.lugarNacimiento,
+          nombrePadre: currentData.bautismo.nombrePadre,
+          nombreMadre: currentData.bautismo.nombreMadre,
+          padrino: currentData.bautismo.padrino,
+          madrina: currentData.bautismo.madrina,
+          // Campos específicos de confirmación se inicializan vacíos
+          fechaBautismo: { dia: "", mes: "", año: "" },
+          lugarBautismo: "",
+          monseñor: "",
+          sacerdote: "",
+        }
+      };
+    }
+
+    // 4. CONFIRMACIÓN → MATRIMONIO
+  if (currentType === "Confirmación" && newType === "Matrimonio") {
+    return {
+      ...commonData,
+      matrimonio: {
+        novio: {
+          primerNombre: "",
+          segundoNombre: "",
+          primerApellido: "",
+          segundoApellido: "",
+          fechaNacimiento: "",
+          lugarNacimiento: "",
+          nombrePadre: "",
+          nombreMadre: "",
+        },
+        novia: {
+          primerNombre: "",
+          segundoNombre: "",
+          primerApellido: "",
+          segundoApellido: "",
+          fechaNacimiento: { dia: "", mes: "", año: "" },
+          lugarNacimiento: "",
+          nombrePadre: "",
+          nombreMadre: "",
+        },
+        testigo1: "",
+        testigo2: "",
+        testigo3: "",
+        testigo4: "",
+      }
+    };
+  }
+
+  // 5. MATRIMONIO → BAUTISMO (usamos datos del novio por defecto)
+  if (currentType === "Matrimonio" && newType === "Bautismo") {
+    return {
+      ...commonData,
+      bautismo: {
+        primerNombre: currentData.matrimonio.novio.primerNombre,
+        segundoNombre: currentData.matrimonio.novio.segundoNombre,
+        primerApellido: currentData.matrimonio.novio.primerApellido,
+        segundoApellido: currentData.matrimonio.novio.segundoApellido,
+        fechaNacimiento: currentData.matrimonio.novio.fechaNacimiento,
+        lugarNacimiento: currentData.matrimonio.novio.lugarNacimiento,
+        nombrePadre: currentData.matrimonio.novio.nombrePadre,
+        nombreMadre: currentData.matrimonio.novio.nombreMadre,
+        padrino: currentData.matrimonio.testigo1 || "", // Testigo1 como padrino
+        madrina: currentData.matrimonio.testigo2 || "", // Testigo2 como madrina
+        abueloPaterno: "",
+        abuelaPaterna: "",
+        abueloMaterno: "",
+        abuelaMaterna: "",
+      }
+    };
+  }
+
+  // 6. MATRIMONIO → CONFIRMACIÓN (usamos datos del novio por defecto)
+  if (currentType === "Matrimonio" && newType === "Confirmación") {
+    return {
+      ...commonData,
+      confirmacion: {
+        primerNombre: currentData.matrimonio.novio.primerNombre,
+        segundoNombre: currentData.matrimonio.novio.segundoNombre,
+        primerApellido: currentData.matrimonio.novio.primerApellido,
+        segundoApellido: currentData.matrimonio.novio.segundoApellido,
+        fechaNacimiento: currentData.matrimonio.novio.fechaNacimiento,
+        lugarNacimiento: currentData.matrimonio.novio.lugarNacimiento,
+        nombrePadre: currentData.matrimonio.novio.nombrePadre,
+        nombreMadre: currentData.matrimonio.novio.nombreMadre,
+        padrino: currentData.matrimonio.testigo1 || "",
+        madrina: currentData.matrimonio.testigo2 || "",
+        fechaBautismo: { dia: "", mes: "", año: "" },
+        lugarBautismo: currentData.matrimonio.novio.lugarNacimiento,
+        monseñor: "",
+        sacerdote: "",
+      }
+    };
+  }
+
+  // Caso por defecto (si no hay mapeo específico)
+  return commonData;
+};
+    
   // Estado inicial para todos los tipos de formularios
   const initialFormData = {
     // Datos comunes para todos los formularios
@@ -178,6 +367,9 @@ function AñadirPartidas() {
 
   const [formData, setFormData] = useState(initialFormData)
   const [showModal, setShowModal] = useState(false)
+  const [modalMessage, setModalMessage] = useState("")
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  
 
   const handleChange = (e) => {
     const { name, value, type, checked, isComboBox } = e.target
@@ -236,6 +428,20 @@ function AñadirPartidas() {
     agregarActaTemporal,
   } = useActas()
 
+  const { actasTemporales, actasConfirmadas} = useActas();
+
+  useEffect(() => {
+    if (!modoEdicion) {
+      const todosIds = [
+        ...actasConfirmadas.map(a => a.id),
+        ...actasTemporales.map(a => a.id),
+      ];
+      const maxId = todosIds.length ? Math.max(...todosIds) : 0;
+      setFormData(fd => ({ ...fd, id: maxId + 1 }));
+    }
+  }, [modoEdicion, actasTemporales, actasConfirmadas]);
+  
+
   const validarCampos = () => {
     const nuevosErrores = {}
 
@@ -248,44 +454,73 @@ function AñadirPartidas() {
     return Object.keys(nuevosErrores).length === 0
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
 
     if (!validarCampos()) {
-      setShowModal(true) // Mostrar modal de errores
+      setModalMessage("Por favor, complete todos los campos requeridos.")
+      setShowModal(true)
       return
     }
 
-    const actaCompleta = {
-      ...formData,
-      tipo: eventoSeleccionado,
-      id: actaEditando?.id || Date.now(),
-      fechaCreacion: actaEditando?.fechaCreacion || new Date().toISOString(),
-      confirmado: false,
-    }
+    setIsSubmitting(true)
 
-    if (modoEdicion) {
-      // Si estamos editando, actualizamos el acta existente
-      actualizarActaTemporal(actaCompleta)
-      navigate("/listaActas")
-    } else {
-      // Si es nueva, la agregamos a las actas temporales
-      agregarActaTemporal(actaCompleta)
+    try {
+      const actaCompleta = {
+        ...formData,
+        tipo: eventoSeleccionado,
+        id: actaEditando?.id || Date.now(),
+        fechaCreacion: actaEditando?.fechaCreacion || new Date().toISOString(),
+        confirmado: false,
+      }
+
+      if (modoEdicion) {
+        // Si estamos editando, actualizamos el acta existente
+        actualizarActaTemporal(actaCompleta)
+
+        // Si el acta ya está confirmada, actualizarla en el servidor
+        if (actaEditando.confirmado) {
+          try {
+            if (eventoSeleccionado === "Bautismo") {
+              await ActaService.createBautizo(actaCompleta)
+            } else if (eventoSeleccionado === "Confirmación") {
+              await ActaService.createConfirmacion(actaCompleta)
+            } else if (eventoSeleccionado === "Matrimonio") {
+              await ActaService.createMatrimonio(actaCompleta)
+            }
+            setModalMessage("Acta actualizada correctamente.")
+          } catch (error) {
+            console.error("Error al actualizar acta:", error)
+            setModalMessage("Error al actualizar acta. Se guardó localmente.")
+          }
+        } else {
+          setModalMessage("Acta actualizada correctamente en la lista temporal.")
+        }
+
+        setShowModal(true)
+        navigate("/listaActas")
+      } else {
+        // Si es nueva, la agregamos a las actas temporales
+        agregarActaTemporal(actaCompleta)
+        setModalMessage("Acta agregada correctamente a la lista temporal.")
+        setShowModal(true)
+      }
+
+      if (!modoEdicion) {
+        setFormData(initialFormData)
+        setEventoSeleccionado("")
+      }
+
+      // Desactivar el modo edición
+      setModoEdicion(false)
+      setActaEditando(null)
+    } catch (error) {
+      console.error("Error al guardar acta:", error)
+      setModalMessage("Error al guardar acta. Por favor, intente de nuevo.")
       setShowModal(true)
+    } finally {
+      setIsSubmitting(false)
     }
-
-    if (!modoEdicion) {
-      setFormData(initialFormData)
-      setEventoSeleccionado("")
-    }
-
-    // Resetear el formulario
-    setFormData(initialFormData)
-    setEventoSeleccionado("")
-
-    // Desactivar el modo edición
-    setModoEdicion(false)
-    setActaEditando(null)
   }
 
   useEffect(() => {
@@ -308,20 +543,30 @@ function AñadirPartidas() {
   }, [actaEditando, modoEdicion])
 
   const handleEventoChange = (e) => {
-    const nuevoEvento = e.target.value
-    setEventoSeleccionado(nuevoEvento)
-
-    // Solo resetear el formulario si NO estamos en modo edición
-    if (!modoEdicion) {
-      setFormData(initialFormData)
-    }
+  const nuevoEvento = e.target.value;
+  
+  if (modoEdicion && eventoSeleccionado !== nuevoEvento) {
+    setNewEventType(nuevoEvento); // Guardar el nuevo tipo temporalmente
+    setShowChangeTypeModal(true);  // Mostrar modal de confirmación
+  } else {
+    setEventoSeleccionado(nuevoEvento);
+    if (!modoEdicion) setFormData(initialFormData); // Resetear solo si no es edición
   }
+};
+  const confirmChangeEventType = () => {
+  const mappedData = mapDataBetweenTypes(formData, eventoSeleccionado, newEventType);
+  
+  setEventoSeleccionado(newEventType);
+  setFormData({
+    ...initialFormData, // Resetea campos no mapeados
+    ...mappedData      // Aplica los datos transferidos
+  });
+  setShowChangeTypeModal(false);
+};
 
   const handleCloseModal = () => {
     setShowModal(false)
   }
-
-
 
   // Renderizar el formulario específico según el tipo de ceremonia seleccionado
   const renderFormularioEspecifico = () => {
@@ -360,11 +605,6 @@ function AñadirPartidas() {
 
   const handleBack = () => {
     navigate('/Principal')
-  }
-
-  const handleLogout = () => {
-    logout()
-    navigate("/")
   }
 
   return (
@@ -440,46 +680,35 @@ function AñadirPartidas() {
               </button>
 
               <button
-                type="submit"
-                style={{
-                  ...styles.sidebarButton,
-                  opacity: eventoSeleccionado ? 1 : 0.5,
-                  cursor: eventoSeleccionado ? "pointer" : "not-allowed",
-                }}
-                disabled={!eventoSeleccionado}
-                onClick={handleSubmit}
-              >
-                <FaFileMedical style={styles.buttonIcon} />
-                <span style={styles.buttonText}>Guardar</span>
-              </button>
+                  type="submit"
+                  style={{
+                    ...styles.sidebarButton,
+                    opacity: eventoSeleccionado && !isSubmitting ? 1 : 0.5,
+                    cursor: eventoSeleccionado && !isSubmitting ? "pointer" : "not-allowed",
+                  }}
+                  disabled={!eventoSeleccionado || isSubmitting}
+                  onClick={handleSubmit}
+                >
+                  <FaFileMedical style={styles.buttonIcon} />
+                  <span style={styles.buttonText}>{isSubmitting ? "Guardando..." : "Guardar"}</span>
+                </button>
             </div>
           </div>
 
           {eventoSeleccionado ? (
-            <form onSubmit={handleSubmit} style={styles.form}>
-              {/* Contenedor para las dos secciones superiores */}
-              <div style={styles.topSectionsContainer}>
-                {/* Sección común de registro (libro, folio, acta) */}
-                <CommonRegistroSection formData={formData} handleChange={handleChange} />
+              <form onSubmit={handleSubmit} style={styles.form}>
+                {/* Contenedor para las dos secciones superiores */}
+                <div style={styles.topSectionsContainer}>
+                  {/* Sección común de registro (libro, folio, acta) */}
+                  <CommonRegistroSection formData={formData} handleChange={handleChange} />
 
-                {/* Sección de oficiante según el tipo de ceremonia */}
-                {eventoSeleccionado === "Confirmación" ? (
-                  <ConfirmacionOficianteSection
-                    formData={formData}
-                    handleChange={handleChange}
-                    monseñores={monseñores}
-                    sacerdotes={sacerdotes}
-                    testigos={testigos}
-                  />
-                ) : (
-                  <CommonOficianteSection
-                    formData={formData}
-                    handleChange={handleChange}
-                    sacerdotes={sacerdotes}
-                    testigos={testigos}
-                  />
-                )}
-              </div>
+                  {/* Sección de oficiante según el tipo de ceremonia */}
+                  {eventoSeleccionado === "Confirmación" ? (
+                    <ConfirmacionOficianteSection formData={formData} handleChange={handleChange} />
+                  ) : (
+                    <CommonOficianteSection formData={formData} handleChange={handleChange} />
+                  )}
+                </div>
 
               {/* Renderizar el formulario específico según el tipo de ceremonia */}
               {renderFormularioEspecifico()}
@@ -542,6 +771,33 @@ function AñadirPartidas() {
           </div>
         </div>
       )}
+
+      {/* Modal de confirmación para cambiar tipo en edición */}
+      {showChangeTypeModal && (
+        <div style={styles.modalOverlay}>
+          <div style={styles.modal}>
+            <div style={styles.modalHeader}>
+              <h2 style={styles.modalTitle}>Cambiar tipo de ceremonia</h2>
+              <button onClick={() => setShowChangeTypeModal(false)} style={styles.closeButton}>
+                <FaTimes />
+              </button>
+            </div>
+            <div style={styles.modalBody}>
+              <p>¿Está seguro de cambiar el tipo de ceremonia?</p>
+              <p>Algunos datos específicos del formulario anterior se perderán, pero se conservarán los datos comunes (libro, folio, acta, etc.).</p>
+            </div>
+            <div style={styles.modalFooter}>
+              <button onClick={() => setShowChangeTypeModal(false)} style={styles.modalButtonSecondary}>
+                Cancelar
+              </button>
+              <button onClick={confirmChangeEventType} style={styles.modalButton}>
+                Confirmar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   )
 }
@@ -561,6 +817,8 @@ const styles = {
     overflow: "hidden",
   },
   content: {
+    display: "flex",
+    flexDirection: "column",
     flex: 1,
     padding: "0.5rem 0rem",
     overflow: "auto",
@@ -703,12 +961,15 @@ const styles = {
   noSelectionMessage: {
     display: "flex",
     flexDirection: "column",
-    backgroundColor: "#fff",
-    borderRadius: "0.5rem",
-    padding: "2rem",
-    textAlign: "center",
     alignItems: "center",
-    marginTop: "15rem",
+    justifyContent: 'center',
+    textAlign: "center",
+    height: "100%", 
+    width: "100%", 
+    padding: "2rem", 
+    minHeight: "300px", 
+    flex: 1,
+    
   },
   modalOverlay: {
     position: "fixed",

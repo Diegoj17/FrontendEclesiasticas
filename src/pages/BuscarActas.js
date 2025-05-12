@@ -3,9 +3,10 @@ import { useNavigate } from "react-router-dom"
 import { useAuth } from "../context/AuthContext"
 import Header from "../components/layout/Header"
 import Sidebar from "../components/layout/Sidebar"
+import ActaService from "../services/ActaService"
 import { FilterMatchMode, FilterOperator } from "primereact/api"
 import DataTableExpandle from "../components/layout/DataTableExpandle"
-import DetallesActa from "../components/layout/DetallesActas"
+import ExpandedRowTemplate from "../components/layout/ExpandedRowTemplate"
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { FaPrint, FaSearch, FaTimes, FaEdit } from "react-icons/fa"
@@ -20,115 +21,18 @@ function BuscarPartidas() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [selectedActas, setSelectedActas] = useState([]);
   const toggleDropdown = () => setIsDropdownOpen(!isDropdownOpen);
+  const [registros, setRegistros] = useState([])
+  const [error, setError] = useState(null)
+  const [showAdvancedSearch, setShowAdvancedSearch] = useState(false)
   
+  // Estado para búsqueda avanzada
+  const [advancedSearch, setAdvancedSearch] = useState({
+    primerNombre: "",
+    segundoNombre: "",
+    primerApellido: "",
+    segundoApellido: "",
+  })
 
-  // Datos de ejemplo para la tabla
-  const [registros] = useState([
-    {
-      id: 2,
-      tipo: "Bautismo", // Campo REQUERIDO
-      bautismo: { // Estructura esperada por DetallesActas.js
-        primerNombre: "Pedro",
-        segundoNombre: "José",
-        primerApellido: "Perez",
-        segundoApellido: "Gomez",
-        fechaNacimiento: { dia: 24, mes: 5, año: 2004 },
-        lugarNacimiento: "Caracas",
-        nombrePadre: "Carlos Perez",
-        nombreMadre: "Maria Gomez",
-        abueloPaterno: "José Perez",
-        abuelaPaterna: "Ana Ruiz",
-        abueloMaterno: "Pedro Gomez",
-        abuelaMaterna: "Luisa Martinez",
-        padrino: "Juan Perez",
-        madrina: "Ana Gomez"
-      },
-      libro: "5",
-      folio: "4",
-      acta: "3",
-      ceremonia: "Bautismo",
-      oficiante: "P. Juan Rodriguez",
-      fechaCeremonia: { dia: 24, mes: 5, año: 2004 },
-      diocesis: "Caracas",
-      notaMarginal: "Ninguna"
-    },
-    {
-      id: 3,
-      primerNombre: "Pedro",
-      segundoNombre: "José",
-      primerApellido: "Perez",
-      segundoApellido: "Gomez",
-      cedula: "1234567890",
-      libro: "5",
-      folio: "4",
-      acta: "3",
-      evento: "Bautismo",
-      ceremonia: "Bautismo",
-      fecha: "24/05/2004",
-      sacerdote: "Juan Rodriguez",
-      padre: "Carlos Perez",
-      madre: "Maria Gomez",
-      abueloPaterno: "José Perez",
-      abueloMaterno: "Pedro Gomez",
-      abuelaPaterna: "Ana Ruiz",
-      abuelaMaterna: "Luisa Martinez",
-      padrinos: ["Juan Perez", "Ana Gomez"],
-      oficiante: "P. Juan Rodriguez",
-      párroco: "P. Miguel Hernandez",
-      diocesis: "Caracas",
-    },
-    {
-      id: 2,
-      primerNombre: "Martin",
-      segundoNombre: "Antonio",
-      primerApellido: "Sanchez",
-      segundoApellido: "Rodriguez",
-      cedula: "0987654321",
-      libro: "2",
-      folio: "3",
-      acta: "3",
-      evento: "Matrimonio",
-      ceremonia: "Matrimonio",
-      fecha: "15/04/2015",
-      sacerdote: "David Martinez",
-      padre: "Luis Sanchez",
-      madre: "Carmen Rodriguez",
-      abueloPaterno: "Antonio Sanchez",
-      abueloMaterno: "Martin Rodriguez",
-      abuelaPaterna: "Rosa Perez",
-      abuelaMaterna: "Teresa Gomez",
-      padrinos: ["Pedro Sanchez", "Maria Rodriguez"],
-      oficiante: "P. David Martinez",
-      párroco: "P. Miguel Hernandez",
-      diocesis: "Caracas",
-    },
-    {
-      id: 4,
-      primerNombre: "José",
-      segundoNombre: "Luis",
-      primerApellido: "Contreras",
-      segundoApellido: "Hernandez",
-      cedula: "9876543210",
-      libro: "3",
-      folio: "4",
-      acta: "4",
-      evento: "Defunción",
-      ceremonia: "Defunción",
-      fecha: "7/11/2010",
-      sacerdote: "Pedro Hernandez",
-      padre: "Manuel Contreras",
-      madre: "Josefina Hernandez",
-      abueloPaterno: "Luis Contreras",
-      abueloMaterno: "José Hernandez",
-      abuelaPaterna: "Marta Lopez",
-      abuelaMaterna: "Juana Diaz",
-      padrinos: ["Carlos Contreras", "Luisa Hernandez"],
-      oficiante: "P. Pedro Hernandez",
-      párroco: "P. Miguel Hernandez",
-      diocesis: "Caracas",
-    },
-    
-  ])
 
   // Configuración de filtros para PrimeReact DataTable
   const [filters, setFilters] = useState({
@@ -160,9 +64,9 @@ function BuscarPartidas() {
     }
   }, [selectedRow]);
   
-  // Búsqueda en tiempo real
+  // Búsqueda en tiempo real con el término simple
   useEffect(() => {
-    if (searchTerm.trim() === "") {
+    if (searchTerm.trim() === "" || showAdvancedSearch) {
       setRegistrosFiltrados([])
       setIsLoading(false)
       return
@@ -170,19 +74,144 @@ function BuscarPartidas() {
 
     setIsLoading(true)
 
-    const timeoutId = setTimeout(() => {
-      const resultados = registros.filter((registro) => {
-        const fullName =
-          `${registro.primerNombre} ${registro.segundoNombre} ${registro.primerApellido} ${registro.segundoApellido}`.toLowerCase()
-        return fullName.includes(searchTerm.toLowerCase())
-      })
+    const timeoutId = setTimeout(async () => {
+      try {
+        // Usar el servicio para buscar actas por nombre
+        const resultados = await ActaService.searchByName(searchTerm)
 
-      setRegistrosFiltrados(resultados)
-      setIsLoading(false)
+        // Transformar los resultados al formato esperado por la tabla
+        const actasFormateadas = transformarResultadosBusqueda(resultados)
+
+        setRegistrosFiltrados(actasFormateadas)
+        setRegistros(actasFormateadas)
+        setIsLoading(false)
+      } catch (error) {
+        console.error("Error al buscar actas:", error)
+        setError("Error al buscar actas. Por favor, intente de nuevo.")
+        setIsLoading(false)
+      }
     }, 300)
 
     return () => clearTimeout(timeoutId)
-  }, [searchTerm, registros])
+  }, [searchTerm, showAdvancedSearch])
+  
+  // Función para transformar los resultados de búsqueda
+  const transformarResultadosBusqueda = (resultados) => {
+    const actasFormateadas = []
+
+    // Agregar matrimonios
+    if (resultados.matrimonios && resultados.matrimonios.length > 0) {
+      resultados.matrimonios.forEach((matrimonio) => {
+        actasFormateadas.push({
+          id: matrimonio.id,
+          tipo: "Matrimonio",
+          primerNombre: matrimonio.personaA?.nombre?.split(" ")[0] || "",
+          segundoNombre: matrimonio.personaA?.nombre?.split(" ")[1] || "",
+          primerApellido: matrimonio.personaA?.nombre?.split(" ")[2] || "",
+          segundoApellido: matrimonio.personaA?.nombre?.split(" ")[3] || "",
+          libro: matrimonio.acta?.libro || "",
+          folio: matrimonio.acta?.folio || "",
+          acta: matrimonio.acta?.numeroActa || "",
+          ceremonia: "Matrimonio",
+          // Otros campos específicos de matrimonio
+        })
+      })
+    }
+
+    // Agregar bautizos
+    if (resultados.bautizos && resultados.bautizos.length > 0) {
+      resultados.bautizos.forEach((bautizo) => {
+        actasFormateadas.push({
+          id: bautizo.id,
+          tipo: "Bautismo",
+          primerNombre: bautizo.idBautizado?.nombre?.split(" ")[0] || "",
+          segundoNombre: bautizo.idBautizado?.nombre?.split(" ")[1] || "",
+          primerApellido: bautizo.idBautizado?.nombre?.split(" ")[2] || "",
+          segundoApellido: bautizo.idBautizado?.nombre?.split(" ")[3] || "",
+          libro: bautizo.acta?.libro || "",
+          folio: bautizo.acta?.folio || "",
+          acta: bautizo.acta?.numeroActa || "",
+          ceremonia: "Bautismo",
+          // Otros campos específicos de bautizo
+        })
+      })
+    }
+
+    // Agregar confirmaciones
+    if (resultados.confirmaciones && resultados.confirmaciones.length > 0) {
+      resultados.confirmaciones.forEach((confirmacion) => {
+        actasFormateadas.push({
+          id: confirmacion.id,
+          tipo: "Confirmación",
+          primerNombre: confirmacion.confirmante?.nombre?.split(" ")[0] || "",
+          segundoNombre: confirmacion.confirmante?.nombre?.split(" ")[1] || "",
+          primerApellido: confirmacion.confirmante?.nombre?.split(" ")[2] || "",
+          segundoApellido: confirmacion.confirmante?.nombre?.split(" ")[3] || "",
+          libro: confirmacion.acta?.libro || "",
+          folio: confirmacion.acta?.folio || "",
+          acta: confirmacion.acta?.numeroActa || "",
+          ceremonia: "Confirmación",
+          // Otros campos específicos de confirmación
+        })
+      })
+    }
+
+    return actasFormateadas
+  }
+
+  // Manejar búsqueda avanzada
+  const handleAdvancedSearch = async () => {
+    if (
+      !advancedSearch.primerNombre &&
+      !advancedSearch.segundoNombre &&
+      !advancedSearch.primerApellido &&
+      !advancedSearch.segundoApellido
+    ) {
+      setError("Debe proporcionar al menos un criterio de búsqueda")
+      return
+    }
+
+    setIsLoading(true)
+    setError(null)
+
+    try {
+      // Filtrar parámetros vacíos
+      const params = {}
+      if (advancedSearch.primerNombre) params.primerNombre = advancedSearch.primerNombre
+      if (advancedSearch.segundoNombre) params.segundoNombre = advancedSearch.segundoNombre
+      if (advancedSearch.primerApellido) params.primerApellido = advancedSearch.primerApellido
+      if (advancedSearch.segundoApellido) params.segundoApellido = advancedSearch.segundoApellido
+
+      const resultados = await ActaService.searchByFullName(params)
+      const actasFormateadas = transformarResultadosBusqueda(resultados)
+
+      setRegistrosFiltrados(actasFormateadas)
+      setRegistros(actasFormateadas)
+    } catch (error) {
+      console.error("Error en búsqueda avanzada:", error)
+      setError("Error al realizar la búsqueda avanzada. Por favor, intente de nuevo.")
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleAdvancedSearchChange = (e) => {
+    const { name, value } = e.target
+    setAdvancedSearch((prev) => ({
+      ...prev,
+      [name]: value,
+    }))
+  }
+
+  const clearAdvancedSearch = () => {
+    setAdvancedSearch({
+      primerNombre: "",
+      segundoNombre: "",
+      primerApellido: "",
+      segundoApellido: "",
+    })
+    setRegistrosFiltrados([])
+  }
 
   const handleBack = () => {
     navigate('/Principal')
@@ -444,16 +473,6 @@ function BuscarPartidas() {
     printWindow.print()
   }
 
-  const expandedRowTemplate = (data) => {
-    return (
-      <div className="p-3">
-        <DetallesActa acta={data} />
-      </div>
-    );
-  };
-
-
-
 
 return (
       <div style={styles.container}>
@@ -563,20 +582,16 @@ return (
 
                     <div style={styles.loadingContainer}>
                       <i className="pi pi-spin pi-spinner" style={{ fontSize: "1.5rem" }}></i>
-                      <span style={styles.loadingText}>Buscando...</span>
+                      <span style={styles.loadingText}>Buscando Actas...</span>
                     </div>
 
                   ) : (
                     <div className="card">
                       <DataTableExpandle
-                        registrosFiltrados={registrosFiltrados}
+                        registrosFiltrados={registros}
                         filters={filters}
-                        onFilter={e => setFilters(e.filters)}
-                        expandedRowTemplate={expandedRowTemplate}
-                        expandedRow={expandedRow}
-                        setExpandedRow={setExpandedRow}
-                        selectedRow={selectedRow}
-                        setSelectedRow={setSelectedRow}
+                        onFilter={(e) => setFilters(e.filters)}
+                        expandedRowTemplate={(rowData) => <ExpandedRowTemplate {...rowData} />}
                       /> 
                     </div>
                   )}
