@@ -1,5 +1,3 @@
-"use client"
-
 import { useEffect, useState } from "react"
 import { BrowserRouter as Router, Route, Routes, Navigate, useLocation, useNavigate } from "react-router-dom"
 
