@@ -9,11 +9,14 @@ const AuthContext = createContext(null)
 export function AuthProvider({ children }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [user, setUser] = useState(null)
+  const [isInitialized, setIsInitialized] = useState(false)
+  
 
   // Al cargar el componente, verificar si hay una sesión guardada
   useEffect(() => {
     const storedUser = JSON.parse(localStorage.getItem("user"))
-    if (storedUser && !user) {
+
+    if (storedUser) {
       setIsAuthenticated(true)
       setUser({
         ...storedUser,
@@ -21,9 +24,23 @@ export function AuthProvider({ children }) {
         nombre: storedUser.nombre || storedUser.displayName?.split(" ")[0] || "",
         apellido: storedUser.apellido || storedUser.displayName?.split(" ")[1] || "",
       })
-    }
-  }, [user])
 
+      // Asegurarse de que la ruta actual se mantenga al recargar
+      const currentPath = window.location.pathname
+
+      // Si estamos en una ruta específica (no en login, crear cuenta, etc.)
+      if (currentPath !== "/" && currentPath !== "/crearCuenta" && currentPath !== "/recuperarContraseña") {
+        // Guardar la ruta actual en localStorage para persistencia
+        localStorage.setItem("lastPath", currentPath)
+        console.log("Ruta inicial guardada en localStorage:", currentPath)
+      }
+    }
+
+    // Marcar la inicialización como completada
+    setIsInitialized(true)
+  }, [])
+
+  
   // Función para iniciar sesión
   const login = (userData) => {
     const [nombre, apellido] = (userData.displayName || "").split(" ")
@@ -149,6 +166,7 @@ export function AuthProvider({ children }) {
         login,
         logout,
         updateUser,
+        isInitialized,
       }}
     >
       {children}
