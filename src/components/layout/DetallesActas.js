@@ -90,7 +90,7 @@ const DetallesActas = ({ acta }) => {
               <h4 style={styles.sectionTitle}>Datos del Padre</h4>
               <div style={styles.detailsRow}>
                 <span style={styles.detailsLabel}>Padre:</span>
-                <span style={styles.detailsValue}>{datos.nombresPadre || "No disponible"}</span>
+                <span style={styles.detailsValue}>{datos.idBautizado.nombresPadre || "No disponible"}</span>
               </div>
               <div style={styles.detailsRow}>
                 <span style={styles.detailsLabel}>Abuelo Paterno:</span>
@@ -105,7 +105,7 @@ const DetallesActas = ({ acta }) => {
               <h4 style={styles.sectionTitle}>Datos de la Madre</h4>
               <div style={styles.detailsRow}>
                 <span style={styles.detailsLabel}>Madre:</span>
-                <span style={styles.detailsValue}>{datos.nombresMadre || "No disponible"}</span>
+                <span style={styles.detailsValue}>{datos.idBautizado.nombresMadre || "No disponible"}</span>
               </div>
               <div style={styles.detailsRow}>
                 <span style={styles.detailsLabel}>Abuelo Materno:</span>
@@ -130,22 +130,22 @@ const DetallesActas = ({ acta }) => {
             <div style={styles.detailsSection}>
               <h4 style={styles.sectionTitle}>Datos de la Ceremonia</h4>
               <div style={styles.detailsRow}>
-                <span style={styles.detailsLabel}>Oficiante:</span>
-                <span style={styles.detailsValue}>{datos.oficiante || datos.nombresSacerdote || "No disponible"}</span>
+                <span style={styles.detailsLabel}>Sacerdote:</span>
+                <span style={styles.detailsValue}>{datos.idSacerdote.nombre || datos.nombresSacerdote || "No disponible"}</span>
               </div>
               <div style={styles.detailsRow}>
                 <span style={styles.detailsLabel}>Doy Fe:</span>
-                <span style={styles.detailsValue}>{datos.doyFe || datos.nombresDoyFe || "No disponible"}</span>
+                <span style={styles.detailsValue}>{datos.idDoyfe.nombre || datos.nombresDoyFe || "No disponible"}</span>
               </div>
               <div style={styles.detailsRow}>
                 <span style={styles.detailsLabel}>Fecha ceremonia:</span>
-                <span style={styles.detailsValue}>{datos.fecha || "No disponible"}</span>
+                <span style={styles.detailsValue}>{datos.idActa.fecha || "No disponible"}</span>
               </div>
             </div>
             <div style={styles.detailsSection}>
               <h4 style={styles.sectionTitle}>Nota Marginal</h4>
               <div style={styles.detailsRow}>
-                <span style={styles.detailsValue}>{datos.notaMarginal || "No disponible"}</span>
+                <span style={styles.detailsValue}>{datos.idActa.notas || "No disponible"}</span>
               </div>
             </div>
           </div>
@@ -185,22 +185,22 @@ const DetallesActas = ({ acta }) => {
               <h4 style={styles.sectionTitle}>Datos de la Familia</h4>
               <div style={styles.detailsRow}>
                 <span style={styles.detailsLabel}>Padre:</span>
-                <span style={styles.detailsValue}>{datos.nombresPadre || "No disponible"}</span>
+                <span style={styles.detailsValue}>{datos.idConfirmante.nombresPadre || "No disponible"}</span>
               </div>
               <div style={styles.detailsRow}>
                 <span style={styles.detailsLabel}>Madre:</span>
-                <span style={styles.detailsValue}>{datos.nombresMadre || "No disponible"}</span>
+                <span style={styles.detailsValue}>{datos.idConfirmante.nombresMadre || "No disponible"}</span>
               </div>
               <div style={styles.detailsRow}>
                 <span style={styles.detailsLabel}>Padrino:</span>
                 <span style={styles.detailsValue}>
-                  {datos.nombrespadrino || datos.nombrepadrinos || "No disponible"}
+                  {datos.nombrespadrino || datos.idPadrino.nombre1 || "No disponible"}
                 </span>
               </div>
               <div style={styles.detailsRow}>
                 <span style={styles.detailsLabel}>Madrina:</span>
                 <span style={styles.detailsValue}>
-                  {datos.nombresmadrina || datos.nombremadrinas || "No disponible"}
+                  {datos.nombresmadrina || datos.idMadrina.nombre1  || "No disponible"}
                 </span>
               </div>
             </div>
@@ -208,25 +208,25 @@ const DetallesActas = ({ acta }) => {
               <h4 style={styles.sectionTitle}>Datos de la Ceremonia</h4>
               <div style={styles.detailsRow}>
                 <span style={styles.detailsLabel}>Monseñor:</span>
-                <span style={styles.detailsValue}>{datos.nombresmonsr || datos.monsenor || "No disponible"}</span>
+                <span style={styles.detailsValue}>{datos.idMonsr.nombre || datos.monsenor || "No disponible"}</span>
               </div>
               <div style={styles.detailsRow}>
-                <span style={styles.detailsLabel}>Oficiante:</span>
-                <span style={styles.detailsValue}>{datos.oficiante || datos.nombresSacerdote || "No disponible"}</span>
+                <span style={styles.detailsLabel}>Sacerdote:</span>
+                <span style={styles.detailsValue}>{datos.idSacerdote.nombre || datos.nombresSacerdote || "No disponible"}</span>
               </div>
               <div style={styles.detailsRow}>
                 <span style={styles.detailsLabel}>Doy Fe:</span>
-                <span style={styles.detailsValue}>{datos.doyFe || datos.nombresDoyFe || "No disponible"}</span>
+                <span style={styles.detailsValue}>{datos.idDoyfe.nombre || datos.nombresDoyFe || "No disponible"}</span>
               </div>
               <div style={styles.detailsRow}>
                 <span style={styles.detailsLabel}>Fecha ceremonia:</span>
-                <span style={styles.detailsValue}>{datos.fecha || "No disponible"}</span>
+                <span style={styles.detailsValue}>{datos.idActa.fecha || "No disponible"}</span>
               </div>
             </div>
             <div style={styles.detailsSection}>
               <h4 style={styles.sectionTitle}>Nota Marginal</h4>
               <div style={styles.detailsRow}>
-                <span style={styles.detailsValue}>{datos.notaMarginal || "No disponible"}</span>
+                <span style={styles.detailsValue}>{datos.idActa.notas || "No disponible"}</span>
               </div>
             </div>
           </div>

@@ -40,14 +40,14 @@ class ActaService {
 
       // Determinar el endpoint correcto según el tipo de acta
       let endpoint
-      if (tipoNormalizado === "bautismo" || tipoNormalizado === "bautizo") {
-        endpoint = `https://actaseclesiasticas.koyeb.app/api/bautizos/all`
+      if (tipoNormalizado === "bautismo" || tipoNormalizado === "bautizo" || tipoNormalizado === "BAUTIZO") {
+        endpoint = `https://actaseclesiasticas.koyeb.app/api/bautizos`
         console.log("Obteniendo bautizos desde:", endpoint)
       } else if (tipoNormalizado === "confirmacion" || tipoNormalizado === "confirmación") {
-        endpoint = `https://actaseclesiasticas.koyeb.app/api/confirmaciones/all`
+        endpoint = `https://actaseclesiasticas.koyeb.app/api/confirmaciones`
         console.log("Obteniendo confirmaciones desde:", endpoint)
       } else if (tipoNormalizado === "matrimonio") {
-        endpoint = `https://actaseclesiasticas.koyeb.app/api/matrimonios/all`
+        endpoint = `https://actaseclesiasticas.koyeb.app/api/matrimonios`
         console.log("Obteniendo matrimonios desde:", endpoint)
       } else {
         // Si el tipo no es reconocido, usar el endpoint genérico
