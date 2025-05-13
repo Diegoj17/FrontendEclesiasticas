@@ -1,30 +1,44 @@
-"use client"
-import ComboBox from "../ui/ComboBox"
+import ComboBox from "../ui/ComboboxSacerdote"
+import SacerdoteService from "../../services/SacerdoteService"
+import { useState, useEffect } from "react"
 
 function CommonOficianteSection({
   formData,
   handleChange,
   sacerdotes = [],
   testigos = [],
-  loading = false,
-  error = null,
+  loading: externalLoading = false,
+  error: externalError = null,
   agregarSacerdote = () => {},
 }) {
-  // Valores predeterminados en caso de que no se proporcionen props
-  const localSacerdotes = [
-    "Padre José Martínez",
-    "Padre Antonio López",
-    "Padre Miguel Ángel Pérez",
-    "Padre Francisco Rodríguez",
-    "Padre Juan Carlos Gómez",
-    "Otro",
-  ]
+  const [loading, setLoading] = useState(externalLoading)
+  const [error, setError] = useState(externalError)
+  const [sacerdotesList, setSacerdotesList] = useState([])
 
-  const localTestigos = ["María González", "Juan Pérez", "Ana Rodríguez", "Carlos Sánchez", "Laura Martínez", "Otro"]
+  // Cargar sacerdotes al montar el componente
+  useEffect(() => {
+    const fetchSacerdotes = async () => {
+      // Si ya tenemos sacerdotes proporcionados, usarlos
+      if (sacerdotes.length > 0) {
+        setSacerdotesList(sacerdotes)
+        return
+      }
 
-  // Usar los valores proporcionados o los valores predeterminados
-  const sacerdotesList = sacerdotes.length > 0 ? sacerdotes : localSacerdotes
-  const testigosList = testigos.length > 0 ? testigos : localTestigos
+      try {
+        setLoading(true)
+        setError(null)
+        const options = await SacerdoteService.getAllSacerdotes()
+        setSacerdotesList(options)
+      } catch (err) {
+        console.error("Error al cargar sacerdotes:", err)
+        setError("No se pudieron cargar los sacerdotes")
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchSacerdotes()
+  }, [sacerdotes])
 
   // Manejar el cambio en el ComboBox
   const handleComboBoxChange = (e) => {
@@ -37,7 +51,7 @@ function CommonOficianteSection({
     if (value !== "Otro" && value.trim() !== "") {
       if (name === "oficiante" && !sacerdotesList.includes(value)) {
         agregarSacerdote(value, "sacerdote")
-      } else if (name === "doyFe" && !testigosList.includes(value)) {
+      } else if (name === "doyFe" && !sacerdotesList.includes(value)) {
         agregarSacerdote(value, "testigo")
       }
     }
@@ -58,7 +72,7 @@ function CommonOficianteSection({
               <ComboBox
                 label="Sacerdote"
                 options={sacerdotesList}
-                value={formData.oficiante}
+                value={formData.oficiante || ""}
                 onChange={handleComboBoxChange}
                 placeholder="Seleccione o escriba el nombre"
                 name="oficiante"
@@ -69,8 +83,8 @@ function CommonOficianteSection({
             <div style={styles.formGroup}>
               <ComboBox
                 label="Doy Fe"
-                options={testigosList}
-                value={formData.doyFe}
+                options={sacerdotesList}
+                value={formData.doyFe || ""}
                 onChange={handleComboBoxChange}
                 placeholder="Seleccione o escriba el nombre"
                 name="doyFe"

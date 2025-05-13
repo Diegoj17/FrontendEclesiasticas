@@ -1,5 +1,6 @@
-"use client"
-import ComboBox from "../ui/ComboBox"
+import ComboBox from "../ui/ComboboxSacerdote"
+import { useState, useEffect } from "react"
+import SacerdoteService from "../../services/SacerdoteService"
 
 function ConfirmacionOficianteSection({
   formData,
@@ -7,28 +8,38 @@ function ConfirmacionOficianteSection({
   sacerdotes = [],
   monsenores = [],
   testigos = [],
-  loading = false,
-  error = null,
+  loading: externalLoading = false,
+  error: externalError = null,
   agregarSacerdote = () => {},
 }) {
-  // Valores predeterminados en caso de que no se proporcionen props
-  const localSacerdotes = [
-    "Padre José Martínez",
-    "Padre Antonio López",
-    "Padre Miguel Ángel Pérez",
-    "Padre Francisco Rodríguez",
-    "Padre Juan Carlos Gómez",
-    "Otro",
-  ]
+  const [loading, setLoading] = useState(externalLoading)
+  const [error, setError] = useState(externalError)
+  const [sacerdotesList, setSacerdotesList] = useState([])
 
-  const localMonsenores = ["Monseñor Pedro Gómez", "Monseñor Luis Fernández", "Monseñor Carlos Herrera", "Otro"]
+  // Cargar sacerdotes al montar el componente
+  useEffect(() => {
+    const fetchSacerdotes = async () => {
+      // Si ya tenemos sacerdotes proporcionados, usarlos
+      if (sacerdotes.length > 0) {
+        setSacerdotesList(sacerdotes)
+        return
+      }
 
-  const localTestigos = ["María González", "Juan Pérez", "Ana Rodríguez", "Carlos Sánchez", "Laura Martínez", "Otro"]
+      try {
+        setLoading(true)
+        setError(null)
+        const options = await SacerdoteService.getAllSacerdotes()
+        setSacerdotesList(options)
+      } catch (err) {
+        console.error("Error al cargar sacerdotes:", err)
+        setError("No se pudieron cargar los sacerdotes")
+      } finally {
+        setLoading(false)
+      }
+    }
 
-  // Usar los valores proporcionados o los valores predeterminados
-  const sacerdotesList = sacerdotes.length > 0 ? sacerdotes : localSacerdotes
-  const monsenoresList = monsenores.length > 0 ? monsenores : localMonsenores
-  const testigosList = testigos.length > 0 ? testigos : localTestigos
+    fetchSacerdotes()
+  }, [sacerdotes])
 
   // Manejar el cambio en el ComboBox
   const handleComboBoxChange = (e) => {
@@ -41,9 +52,9 @@ function ConfirmacionOficianteSection({
     if (value !== "Otro" && value.trim() !== "") {
       if (name === "confirmacion.sacerdote" && !sacerdotesList.includes(value)) {
         agregarSacerdote(value, "sacerdote")
-      } else if (name === "confirmacion.monseñor" && !monsenoresList.includes(value)) {
+      } else if (name === "confirmacion.monseñor" && !sacerdotesList.includes(value)) {
         agregarSacerdote(value, "monsenor")
-      } else if (name === "confirmacion.doyFe" && !testigosList.includes(value)) {
+      } else if (name === "confirmacion.doyFe" && !sacerdotesList.includes(value)) {
         agregarSacerdote(value, "testigo")
       }
     }
@@ -63,12 +74,11 @@ function ConfirmacionOficianteSection({
             <div style={styles.formGroup}>
               <ComboBox
                 label="Monseñor"
-                options={monsenoresList}
+                options={sacerdotesList}
                 value={formData.confirmacion?.monseñor || ""}
                 onChange={handleComboBoxChange}
                 placeholder="Seleccione o escriba el nombre"
                 name="confirmacion.monseñor"
-                fullWidth
               />
             </div>
           </div>
@@ -81,7 +91,6 @@ function ConfirmacionOficianteSection({
                 onChange={handleComboBoxChange}
                 placeholder="Seleccione o escriba el nombre"
                 name="confirmacion.sacerdote"
-                fullWidth
               />
             </div>
           </div>
@@ -89,12 +98,11 @@ function ConfirmacionOficianteSection({
             <div style={styles.formGroup}>
               <ComboBox
                 label="Doy Fe"
-                options={testigosList}
+                options={sacerdotesList}
                 value={formData.confirmacion?.doyFe || ""}
                 onChange={handleComboBoxChange}
                 placeholder="Seleccione o escriba el nombre"
                 name="confirmacion.doyFe"
-                fullWidth
               />
             </div>
           </div>

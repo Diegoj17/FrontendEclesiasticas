@@ -7,13 +7,46 @@ const ComboBox = ({
   onChange,                      // para el valor “oficial”
   placeholder = "Seleccione...",
   name = "",
-  onCustomValueChange,           // sólo para el campo custom
+  onCustomValueChange,
+  loadOptions, // función para cargar opciones dinámicamente
+  autoLoadOptions = false,           // sólo para el campo custom
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [inputValue, setInputValue] = useState(value);
   const [showCustomInput, setShowCustomInput] = useState(value === "Otro");
   const [customValue, setCustomValue] = useState("");
   const containerRef = useRef(null);
+  const [localOptions, setLocalOptions] = useState(options)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
+
+  // Cargar opciones dinámicamente si se proporciona loadOptions
+  useEffect(() => {
+    if (autoLoadOptions && loadOptions && typeof loadOptions === "function") {
+      const fetchOptions = async () => {
+        try {
+          setLoading(true)
+          setError(null)
+          const fetchedOptions = await loadOptions()
+          setLocalOptions(fetchedOptions)
+          setLoading(false)
+        } catch (err) {
+          console.error("Error al cargar opciones:", err)
+          setError("No se pudieron cargar las opciones")
+          setLoading(false)
+        }
+      }
+
+      fetchOptions()
+    }
+  }, [loadOptions, autoLoadOptions])
+
+  // Actualizar opciones locales cuando cambian las props
+  useEffect(() => {
+    if (options && options.length > 0) {
+      setLocalOptions(options)
+    }
+  }, [options])
 
   // Sincroniza sólo inputValue => cuando cambia la prop `value`
   /*
@@ -33,9 +66,8 @@ const ComboBox = ({
     return () => document.removeEventListener("mousedown", onClick);
   }, []);
 
-  const filtered = options.filter(opt =>
-    opt.toLowerCase().includes(inputValue.toLowerCase())
-  );
+  const filtered = localOptions.filter(
+    (opt) => opt.toLowerCase().includes(inputValue.toLowerCase()))
 
   const handleInputChange = e => {
     const v = e.target.value;
@@ -68,12 +100,12 @@ const ComboBox = ({
 
   useEffect(() => {
     // Si el valor real no está en las opciones
-    if (value && !options.includes(value)) { 
-      setInputValue("Otro");
-      setCustomValue(value);
-      setShowCustomInput(true);
+    if (value && localOptions.length > 0 && !localOptions.includes(value)) {
+      setInputValue("Otro")
+      setCustomValue(value)
+      setShowCustomInput(true)
     }
-  }, [value, options]);
+  }, [value, localOptions])
 
   return (
     <div style={styles.container}>
@@ -88,12 +120,19 @@ const ComboBox = ({
           type="text"
           name={name}
           value={inputValue}
-          placeholder={placeholder}
+          placeholder={
+            loading ? "Cargando..." : error ? "Error al cargar" : placeholder}
           onChange={handleInputChange}
           onFocus={() => setIsOpen(true)}
           autoComplete="off"
+          disabled={loading}
         />
-        <button type="button" onClick={() => setIsOpen((o) => !o)} style={styles.toggleButton} tabIndex={-1}>
+        <button 
+          type="button" 
+          onClick={() => setIsOpen((o) => !o)} 
+          style={styles.toggleButton} 
+          tabIndex={-1}>
+          disabled={loading}
           ▼
         </button>
       </div>

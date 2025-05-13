@@ -26,6 +26,285 @@ class ActaService {
     }
   }
 
+  /**
+   * Obtiene actas por tipo
+   * @param {string} tipo Tipo de acta (Bautismo, Confirmacion, Matrimonio)
+   * @returns {Promise} Promesa con la lista de actas del tipo especificado
+   */
+  async getActasByTipo(tipo) {
+    try {
+      const token = localStorage.getItem("token")
+
+      // Normalizar el tipo para manejar diferentes variaciones
+      const tipoNormalizado = tipo.toLowerCase()
+
+      // Determinar el endpoint correcto según el tipo de acta
+      let endpoint
+      if (tipoNormalizado === "bautismo" || tipoNormalizado === "bautizo") {
+        endpoint = `https://actaseclesiasticas.koyeb.app/api/bautizos/all`
+        console.log("Obteniendo bautizos desde:", endpoint)
+      } else if (tipoNormalizado === "confirmacion" || tipoNormalizado === "confirmación") {
+        endpoint = `https://actaseclesiasticas.koyeb.app/api/confirmaciones/all`
+        console.log("Obteniendo confirmaciones desde:", endpoint)
+      } else if (tipoNormalizado === "matrimonio") {
+        endpoint = `https://actaseclesiasticas.koyeb.app/api/matrimonios/all`
+        console.log("Obteniendo matrimonios desde:", endpoint)
+      } else {
+        // Si el tipo no es reconocido, usar el endpoint genérico
+        endpoint = `${API_URL}/actas/tipo/${tipo}`
+        console.log("Tipo no reconocido, usando endpoint genérico:", endpoint)
+      }
+
+      const response = await axios.get(endpoint, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+
+      console.log(`Respuesta de ${tipo}:`, response.data)
+      return response.data
+    } catch (error) {
+      console.error(`Error al obtener actas de tipo ${tipo}:`, error)
+      throw error
+    }
+  }
+
+  /**
+   * Transforma los datos de actas para mostrar en la tabla
+   * @param {Array} actas Lista de actas a transformar
+   * @returns {Array} Lista de actas transformadas para la tabla
+   */
+  transformActasForTable(actas) {
+    if (!Array.isArray(actas)) {
+      console.error("transformActasForTable: actas no es un array válido", actas)
+      return []
+    }
+
+    return actas.map((acta) => {
+      console.log("Procesando acta:", acta)
+
+      // Determinar el tipo de ceremonia basado en los datos
+      let ceremonia = ""
+
+      // Verificar si el acta tiene un campo tipo explícito
+      if (acta.tipo) {
+        const tipoRaw = acta.tipo.toString().toLowerCase()
+        if (["bautizo", "bautismo"].includes(tipoRaw)) {
+          ceremonia = "Bautismo"
+        } else if (["confirmacion", "confirmación"].includes(tipoRaw)) {
+          ceremonia = "Confirmacion"
+        } else if (tipoRaw === "matrimonio") {
+          ceremonia = "Matrimonio"
+        }
+      } else {
+        // Si no tiene campo tipo, intentar determinar por la estructura
+        if (acta.bautizo || acta.bautismo) {
+          ceremonia = "Bautismo"
+        } else if (acta.confirmacion) {
+          ceremonia = "Confirmacion"
+        } else if (acta.matrimonio || acta.novio || acta.novia) {
+          ceremonia = "Matrimonio"
+        }
+      }
+
+      // Base de campos comunes
+      const transformedActa = {
+        id: acta.id ?? "",
+        acta: acta.numeroActa ?? acta.numero ?? "",
+        libro: acta.libro ?? "",
+        folio: acta.folio ?? "",
+        ceremonia,
+        fecha: acta.fecha ?? "",
+        notaMarginal: acta.notaMarginal ?? "",
+        oficiante: acta.nombresSacerdote ?? acta.oficiante ?? "",
+        doyFe: acta.nombresDoyFe ?? acta.doyFe ?? "",
+
+        // Nombres de la persona central
+        primerNombre: acta.nombre1 ?? acta.primerNombre ?? "",
+        segundoNombre: acta.nombre2 ?? acta.segundoNombre ?? "",
+        primerApellido: acta.apellido1 ?? acta.primerApellido ?? "",
+        segundoApellido: acta.apellido2 ?? acta.segundoApellido ?? "",
+      }
+
+      // Campos específicos según el tipo de ceremonia
+      if (ceremonia === "Bautismo") {
+        Object.assign(transformedActa, this.extractBautismoFields(acta))
+      } else if (ceremonia === "Confirmacion") {
+        Object.assign(transformedActa, this.extractConfirmacionFields(acta))
+      } else if (ceremonia === "Matrimonio") {
+        Object.assign(transformedActa, this.extractMatrimonioFields(acta))
+      }
+
+      return transformedActa
+    })
+  }
+
+  /**
+   * Extrae los campos específicos de un bautismo
+   * @param {Object} acta Acta de bautismo
+   * @returns {Object} Campos específicos de bautismo
+   */
+  extractBautismoFields(acta) {
+    // Si los datos están anidados en un objeto bautizo o bautismo
+    const bautismoData = acta.bautizo || acta.bautismo || acta
+
+    return {
+      fechaNacimiento: bautismoData.fechaNacimiento ?? "",
+      lugarNacimiento: bautismoData.lugarNacimiento ?? "",
+      nombresPadre: bautismoData.nombresPadre ?? bautismoData.nombrePadre ?? "",
+      nombresMadre: bautismoData.nombresMadre ?? bautismoData.nombreMadre ?? "",
+      abueloPaterno: bautismoData.abueloPaterno ?? "",
+      abuelaPaterna: bautismoData.abuelaPaterna ?? "",
+      abueloMaterno: bautismoData.abueloMaterno ?? "",
+      abuelaMaterna: bautismoData.abuelaMaterna ?? "",
+      nombrepadrinos: bautismoData.nombrepadrinos ?? bautismoData.padrino ?? "",
+      nombremadrinas: bautismoData.nombremadrinas ?? bautismoData.madrina ?? "",
+    }
+  }
+
+  /**
+   * Extrae los campos específicos de una confirmación
+   * @param {Object} acta Acta de confirmación
+   * @returns {Object} Campos específicos de confirmación
+   */
+  extractConfirmacionFields(acta) {
+    // Si los datos están anidados en un objeto confirmacion
+    const confirmacionData = acta.confirmacion || acta
+
+    return {
+      fechaConfirmacion: confirmacionData.fechaConfirmacion ?? confirmacionData.fechaNacimiento ?? "",
+      monsenor: confirmacionData.nombresmonsr ?? confirmacionData.monseñor ?? "",
+      padrino: confirmacionData.nombrespadrino ?? confirmacionData.padrino ?? "",
+      madrina: confirmacionData.nombresmadrina ?? confirmacionData.madrina ?? "",
+    }
+  }
+
+  /**
+   * Extrae los campos específicos de un matrimonio
+   * @param {Object} acta Acta de matrimonio
+   * @returns {Object} Campos específicos de matrimonio
+   */
+  extractMatrimonioFields(acta) {
+    // Si los datos están anidados en un objeto matrimonio
+    const matrimonioData = acta.matrimonio || acta
+    const novio = matrimonioData.novio || {}
+    const novia = matrimonioData.novia || {}
+
+    // Construir nombre completo de la esposa
+    const nombreCompletoEsposa = [
+      novia.primerNombre || matrimonioData.novia_nombre1 || "",
+      novia.segundoNombre || matrimonioData.novia_nombre2 || "",
+      novia.primerApellido || matrimonioData.novia_apellido1 || "",
+      novia.segundoApellido || matrimonioData.novia_apellido2 || "",
+    ]
+      .filter(Boolean)
+      .join(" ")
+
+    return {
+      nombreCompletoEsposa,
+      fechaNacimientoEsposo: novio.fechaNacimiento || matrimonioData.novio_fechaNacimiento || "",
+      lugarNacimientoEsposo: novio.lugarNacimiento || matrimonioData.novio_lugarNacimiento || "",
+      padreEsposo: novio.nombrePadre || matrimonioData.novio_nombresPadre || "",
+      madreEsposo: novio.nombreMadre || matrimonioData.novio_nombresMadre || "",
+      fechaNacimientoEsposa: novia.fechaNacimiento || matrimonioData.novia_fechaNacimiento || "",
+      lugarNacimientoEsposa: novia.lugarNacimiento || matrimonioData.novia_lugarNacimiento || "",
+      padreEsposa: novia.nombrePadre || matrimonioData.novia_nombresPadre || "",
+      madreEsposa: novia.nombreMadre || matrimonioData.novia_nombresMadre || "",
+      testigo1: matrimonioData.testigo1 || "",
+      testigo2: matrimonioData.testigo2 || "",
+      testigo3: matrimonioData.testigo3 || "",
+      testigo4: matrimonioData.testigo4 || "",
+    }
+  }
+
+  /**
+   * Obtiene los detalles de un bautizo por ID
+   * @param {string} id ID del bautizo
+   * @returns {Promise} Promesa con los detalles del bautizo
+   */
+  async getBautizoById(id) {
+    try {
+      const token = localStorage.getItem("token")
+      console.log(`Fetching bautizo with ID ${id} using token: ${token ? "Token present" : "No token"}`)
+      console.log(`Consultando endpoint: https://actaseclesiasticas.koyeb.app/api/bautizos/${id}`)
+
+      const response = await axios.get(`https://actaseclesiasticas.koyeb.app/api/bautizos/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+
+      console.log("Bautizo response:", response.data)
+      return response.data
+    } catch (error) {
+      console.error(`Error al obtener bautizo con ID ${id}:`, error)
+      if (error.response) {
+        console.error("Response data:", error.response.data)
+        console.error("Response status:", error.response.status)
+      }
+      throw error
+    }
+  }
+
+  /**
+   * Obtiene los detalles de una confirmación por ID
+   * @param {string} id ID de la confirmación
+   * @returns {Promise} Promesa con los detalles de la confirmación
+   */
+  async getConfirmacionById(id) {
+    try {
+      const token = localStorage.getItem("token")
+      console.log(`Fetching confirmacion with ID ${id} using token: ${token ? "Token present" : "No token"}`)
+      console.log(`Consultando endpoint: https://actaseclesiasticas.koyeb.app/api}/confirmaciones/${id}`)
+
+      const response = await axios.get(`https://actaseclesiasticas.koyeb.app/api/confirmaciones/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+
+      console.log("Confirmacion response:", response.data)
+      return response.data
+    } catch (error) {
+      console.error(`Error al obtener confirmación con ID ${id}:`, error)
+      if (error.response) {
+        console.error("Response data:", error.response.data)
+        console.error("Response status:", error.response.status)
+      }
+      throw error
+    }
+  }
+
+  /**
+   * Obtiene los detalles de un matrimonio por ID
+   * @param {string} id ID del matrimonio
+   * @returns {Promise} Promesa con los detalles del matrimonio
+   */
+  async getMatrimonioById(id) {
+    try {
+      const token = localStorage.getItem("token")
+      console.log(`Fetching matrimonio with ID ${id} using token: ${token ? "Token present" : "No token"}`)
+      console.log(`Consultando endpoint: https://actaseclesiasticas.koyeb.app/api/matrimonios/${id}`)
+
+      const response = await axios.get(`https://actaseclesiasticas.koyeb.app/api/matrimonios/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+
+      console.log("Matrimonio response:", response.data)
+      return response.data
+    } catch (error) {
+      console.error(`Error al obtener matrimonio con ID ${id}:`, error)
+      if (error.response) {
+        console.error("Response data:", error.response.data)
+        console.error("Response status:", error.response.status)
+      }
+      throw error
+    }
+  }
+
+  /*
   getBautizoById(id) {
   return axios.get(`https://actaseclesiasticas.koyeb.app/api/bautizos/${id}`)
     .then(res => res.data);
@@ -83,11 +362,12 @@ getMatrimonioById(id) {
     }
   }
 
+  
   /**
    * Busca actas por tipo
    * @param {string} tipo Tipo de acta (Bautismo, Confirmación, Matrimonio)
    * @returns {Promise} Promesa con la lista de actas del tipo especificado
-   */
+  
   async getActasByTipo(tipo) {
     try {
       const token = localStorage.getItem("token")
@@ -787,7 +1067,7 @@ parseFecha(fechaStr) {
   const [dia, mes, año] = fechaStr.split('-');
   return { dia, mes, año: año.length === 2 ? `20${año}` : año };
 }
-  */
+  
 
 transformActasForTable(actas) {
   if (!Array.isArray(actas)){
@@ -875,6 +1155,93 @@ transformActasForTable(actas) {
     return t;
   });
 }
+
+*/
+
+transformActasForTable(actas) {
+    if (!Array.isArray(actas)) {
+      console.error("transformActasForTable: actas no es un array válido", actas)
+      return []
+    }
+
+    return actas.map((acta) => {
+      console.log("Procesando acta:", acta)
+
+      const tipoRaw = (acta.tipo || "").toString().toLowerCase()
+      let ceremonia = ""
+      if (["bautizo", "bautismo"].includes(tipoRaw)) ceremonia = "Bautismo"
+      else if (["confirmacion", "confirmación"].includes(tipoRaw)) ceremonia = "Confirmacion"
+      else if (tipoRaw === "matrimonio") ceremonia = "Matrimonio"
+
+      // Base de campos comunes
+      const t = {
+        id: acta.id ?? "",
+        acta: acta.numeroActa ?? "",
+        libro: acta.libro ?? "",
+        folio: acta.folio ?? "",
+        ceremonia,
+        fecha: acta.fecha ?? "",
+        notaMarginal: acta.notaMarginal ?? "",
+        oficiante: acta.nombresSacerdote ?? "",
+        doyFe: acta.nombresDoyFe ?? "",
+
+        // Nombres de la persona central
+        primerNombre: acta.nombre1 ?? "",
+        segundoNombre: acta.nombre2 ?? "",
+        primerApellido: acta.apellido1 ?? acta.nombre3 ?? "",
+        segundoApellido: acta.apellido2 ?? acta.nombre4 ?? "",
+      }
+
+      // Campos de Bautismo
+      if (ceremonia === "Bautismo") {
+        Object.assign(t, {
+          fechaNacimiento: acta.fechaNacimiento ?? "",
+          lugarNacimiento: acta.lugarNacimiento ?? "",
+          nombresPadre: acta.nombresPadre ?? "",
+          nombresMadre: acta.nombresMadre ?? "",
+          abueloPaterno: acta.abueloPaterno ?? "",
+          abuelaPaterna: acta.abuelaPaterna ?? "",
+          abueloMaterno: acta.abueloMaterno ?? "",
+          abuelaMaterna: acta.abuelaMaterna ?? "",
+          nombrepadrinos: acta.nombrepadrinos ?? "",
+          nombremadrinas: acta.nombremadrinas ?? "",
+        })
+      }
+
+      // Campos de Confirmacion
+      if (ceremonia === "Confirmacion") {
+        Object.assign(t, {
+          fechaConfirmacion: acta.fechaConfirmacion ?? acta.fechaNacimiento ?? "",
+          monsenor: acta.nombresmonsr ?? "",
+          padrino: acta.nombrespadrino ?? "",
+          madrina: acta.nombresmadrina ?? "",
+        })
+      }
+
+      // Campos de Matrimonio
+      if (ceremonia === "Matrimonio") {
+        Object.assign(t, {
+          nombreCompletoEsposa: [acta.novia_nombre1, acta.novia_nombre2, acta.novia_nombre3, acta.novia_nombre4]
+            .filter(Boolean)
+            .join(" "),
+          fechaNacimientoEsposo: acta.novio_fechaNacimiento ?? "",
+          lugarNacimientoEsposo: acta.novio_lugarNacimiento ?? "",
+          padreEsposo: acta.novio_nombresPadre ?? "",
+          madreEsposo: acta.novio_nombresMadre ?? "",
+          fechaNacimientoEsposa: acta.novia_fechaNacimiento ?? "",
+          lugarNacimientoEsposa: acta.novia_lugarNacimiento ?? "",
+          padreEsposa: acta.novia_nombresPadre ?? "",
+          madreEsposa: acta.novia_nombresMadre ?? "",
+          testigo1: acta.testigo1 ?? "",
+          testigo2: acta.testigo2 ?? "",
+          testigo3: acta.testigo3 ?? "",
+          testigo4: acta.testigo4 ?? "",
+        })
+      }
+
+      return t
+    })
+  }
 
 }
 

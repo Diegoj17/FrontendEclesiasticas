@@ -35,34 +35,51 @@ function VistaActas() {
 
 
 useEffect(() => {
-    fetchActas();
-  }, [ceremoniaSeleccionada]);
+    fetchActas()
+  }, [ceremoniaSeleccionada])
 
   const fetchActas = async () => {
-    setLoading(true);
-    setError(null);
+    setLoading(true)
+    setError(null)
     try {
-      let actasRaw;
+      let actasRaw
 
       if (ceremoniaSeleccionada === "Todos") {
-        actasRaw = await ActaService.getAllActas();
+        actasRaw = await ActaService.getAllActas()
       } else {
-        actasRaw = await ActaService.getActasByTipo(ceremoniaSeleccionada);
+        actasRaw = await ActaService.getActasByTipo(ceremoniaSeleccionada)
       }
 
-      console.log("Actas obtenidas:", actasRaw);
-      const actasFormateadas = ActaService.transformActasForTable(actasRaw);
-      console.log("Actas formateadas:", actasFormateadas);
+      console.log("Actas obtenidas:", actasRaw)
+      const actasFormateadas = ActaService.transformActasForTable(actasRaw)
+      console.log("Actas formateadas:", actasFormateadas)
 
-      setRegistros(actasFormateadas);
-      setLoading(false)
+      setRegistros(actasFormateadas)
     } catch (err) {
-      console.error("Error al cargar actas:", err);
-      setError("No se pudieron cargar las actas.");
+      console.error("Error al cargar actas:", err)
+      setError("No se pudieron cargar las actas.")
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
+
+  // Función para manejar la selección de una fila y mostrar detalles
+  const handleRowSelect = (rowData) => {
+    console.log("Fila seleccionada:", rowData)
+    setSelectedRow(rowData)
+
+    // Imprimir todos los campos del acta para depuración
+    console.log("Acta seleccionada (todos los campos):", rowData)
+  }
+
+  // Función para renderizar el template de fila expandida con detalles mejorados
+  const expandedRowTemplate = (rowData) => {
+    return (
+      <div style={styles.expandedRowContainer}>
+        <DetallesActas acta={rowData} />
+      </div>
+    )
+  }
 
   const handleBack = () => {
     navigate('/Principal')
@@ -83,6 +100,11 @@ useEffect(() => {
 
   const handleCorrect = () => {
     navigate('/corregirActas')
+  }
+
+  const handleCeremoniaChange = (e) => {
+    setCeremoniaSeleccionada(e.target.value)
+    console.log("Ceremonia seleccionada:", e.target.value)
   }
   
   return (
@@ -123,7 +145,7 @@ useEffect(() => {
             <select
               id="ceremonia"
               value={ceremoniaSeleccionada}
-              onChange={(e) => setCeremoniaSeleccionada(e.target.value)}
+              onChange={handleCeremoniaChange}
               style={styles.select}
             >
               <option value="Todos">Todos</option>
@@ -153,9 +175,9 @@ useEffect(() => {
                 registrosFiltrados={registros}
                 filters={filters}
                 onFilter={(e) => setFilters(e.filters)}
-                expandedRowTemplate={(rowData) => <DetallesActas acta={rowData} />}
+                expandedRowTemplate={expandedRowTemplate}
                 selectedRow={selectedRow}
-                setSelectedRow={setSelectedRow}
+                setSelectedRow={handleRowSelect}
                 responsiveLayout="scroll"
               />
             )}
