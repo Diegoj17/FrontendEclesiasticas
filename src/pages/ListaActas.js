@@ -4,7 +4,7 @@ import { useAuth } from "../context/AuthContext"
 import { useActas } from "../context/ActaContext"
 import Header from "../components/layout/Header"
 import ExpandedRowTemplate from "../components/layout/ExpandedRowTemplate"
-import DetallesActas from "../components/layout/DetallesActas"
+import DetallesActasLista from "../components/layout/DetallesActasLista"
 import {
   FaEdit,
   FaArrowLeft,
@@ -344,7 +344,7 @@ function ListaActas() {
                     {selectedActaDetalle?.id === acta.id && (
                       <tr>
                         <td colSpan="10" style={styles.detailsCell}>
-                          <DetallesActas acta={acta} />
+                          <DetallesActasLista acta={acta} />
                         </td>
                       </tr>
                     )}

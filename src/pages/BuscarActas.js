@@ -7,6 +7,7 @@ import ActaService from "../services/ActaService"
 import { FilterMatchMode, FilterOperator } from "primereact/api"
 import DataTableExpandle from "../components/layout/DataTableExpandle"
 import ExpandedRowTemplate from "../components/layout/ExpandedRowTemplate"
+import DetallesActas from "../components/layout/DetallesActas"
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { FaPrint, FaSearch, FaTimes, FaEdit } from "react-icons/fa"
@@ -591,7 +592,9 @@ return (
                         registrosFiltrados={registros}
                         filters={filters}
                         onFilter={(e) => setFilters(e.filters)}
-                        expandedRowTemplate={(rowData) => <ExpandedRowTemplate {...rowData} />}
+                        expandedRowTemplate={(rowData) => <DetallesActas {...rowData} />}
+                        selectedRow={selectedRow}
+                        setSelectedRow={setSelectedRow}
                       /> 
                     </div>
                   )}

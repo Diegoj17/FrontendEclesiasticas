@@ -43,37 +43,33 @@ export const SacerdoteProvider = ({ children }) => {
           },
         })
 
+        console.log("Sacerdotes API response:", response.data);
+
         if (response.data && Array.isArray(response.data)) {
           // Procesar los datos recibidos
-          const sacerdotesList = response.data.map((s) => `${s.persona?.nombre || "Sin nombre"}`)
+          const sacerdotesList = response.data
+            .filter(s => s.persona && s.persona.nombre1)
+            .map(s => s.persona.nombre1);
 
           // Filtrar monseñores (ejemplo: aquellos que tienen "Monseñor" en su nombre)
           const monsenoresList = response.data
-            .filter((s) => s.persona?.nombre?.includes("Monseñor"))
-            .map((s) => s.persona?.nombre || "Sin nombre")
+            .filter(s => s.persona && s.persona.nombre1 && s.persona.nombre1.toLowerCase().includes("monseñor"))
+            .map(s => s.persona.nombre1);
 
           // Para testigos, podríamos usar la misma lista de sacerdotes o una lista específica
-          // Aquí usamos la misma lista como ejemplo
-          const testigosList = [...sacerdotesList]
+          const testigosList = [...sacerdotesList];
 
           // Añadir la opción "Otro" a cada lista
-          setSacerdotes([...sacerdotesList, "Otro"])
-          setMonsenores([...monsenoresList, "Otro"])
-          setTestigos([...testigosList, "Otro"])
+          setSacerdotes([...new Set([...sacerdotesList, "Otro"])]);
+          setMonsenores([...new Set([...monsenoresList, "Otro"])]);
+          setTestigos([...new Set([...testigosList, "Otro"])]);
+          
+          console.log("Sacerdotes loaded:", sacerdotesList);
         } else {
           // Si no hay datos o el formato es incorrecto, usar listas predeterminadas
-          setSacerdotes([
-            "Padre José Martínez",
-            "Padre Antonio López",
-            "Padre Miguel Ángel Pérez",
-            "Padre Francisco Rodríguez",
-            "Padre Juan Carlos Gómez",
-            "Otro",
-          ])
-
-          setMonsenores(["Monseñor Pedro Gómez", "Monseñor Luis Fernández", "Monseñor Carlos Herrera", "Otro"])
-
-          setTestigos(["María González", "Juan Pérez", "Ana Rodríguez", "Carlos Sánchez", "Laura Martínez", "Otro"])
+          setSacerdotes(["Otro"]);
+          setMonsenores(["Otro"]);
+          setTestigos(["Otro"]);
         }
 
         setLoading(false)
@@ -81,19 +77,10 @@ export const SacerdoteProvider = ({ children }) => {
         console.error("Error al cargar sacerdotes:", error)
         setError("Error al cargar la lista de sacerdotes")
 
-        // Cargar listas predeterminadas en caso de error
-        setSacerdotes([
-          "Padre José Martínez",
-          "Padre Antonio López",
-          "Padre Miguel Ángel Pérez",
-          "Padre Francisco Rodríguez",
-          "Padre Juan Carlos Gómez",
-          "Otro",
-        ])
-
-        setMonsenores(["Monseñor Pedro Gómez", "Monseñor Luis Fernández", "Monseñor Carlos Herrera", "Otro"])
-
-        setTestigos(["María González", "Juan Pérez", "Ana Rodríguez", "Carlos Sánchez", "Laura Martínez", "Otro"])
+        // Cargar listas mínimas en caso de error
+        setSacerdotes(["Otro"]);
+        setMonsenores(["Otro"]);
+        setTestigos(["Otro"]);
 
         setLoading(false)
       }
@@ -104,48 +91,83 @@ export const SacerdoteProvider = ({ children }) => {
     if (token) {
       fetchSacerdotes()
     } else {
-      // Si no hay token, usar listas predeterminadas
-      setSacerdotes([
-        "Padre José Martínez",
-        "Padre Antonio López",
-        "Padre Miguel Ángel Pérez",
-        "Padre Francisco Rodríguez",
-        "Padre Juan Carlos Gómez",
-        "Otro",
-      ])
-
-      setMonsenores(["Monseñor Pedro Gómez", "Monseñor Luis Fernández", "Monseñor Carlos Herrera", "Otro"])
-
-      setTestigos(["María González", "Juan Pérez", "Ana Rodríguez", "Carlos Sánchez", "Laura Martínez", "Otro"])
-
+      // Si no hay token, usar listas mínimas
+      setSacerdotes(["Otro"]);
+      setMonsenores(["Otro"]);
+      setTestigos(["Otro"]);
       setLoading(false)
     }
   }, [])
 
   // Función para agregar un nuevo sacerdote a la lista
-  const agregarSacerdote = (nombre, tipo = "sacerdote") => {
+  const agregarSacerdote = async (nombre, tipo = "sacerdote") => {
     if (!nombre || nombre.trim() === "") return
 
     const nombreFormateado = nombre.trim()
+    const token = localStorage.getItem("token")
 
-    switch (tipo) {
-      case "sacerdote":
-        if (!sacerdotes.includes(nombreFormateado)) {
-          setSacerdotes((prev) => [...prev.filter((s) => s !== "Otro"), nombreFormateado, "Otro"])
+    try {
+      // Crear el sacerdote en el backend
+      const response = await axios.post(
+        `${API_URL}/sacerdotes/simple`,
+        { nombre: nombreFormateado },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
         }
-        break
-      case "monsenor":
-        if (!monsenores.includes(nombreFormateado)) {
-          setMonsenores((prev) => [...prev.filter((s) => s !== "Otro"), nombreFormateado, "Otro"])
-        }
-        break
-      case "testigo":
-        if (!testigos.includes(nombreFormateado)) {
-          setTestigos((prev) => [...prev.filter((s) => s !== "Otro"), nombreFormateado, "Otro"])
-        }
-        break
-      default:
-        break
+      )
+
+      console.log("Sacerdote creado:", response.data)
+
+      // Actualizar la lista local según el tipo
+      switch (tipo) {
+        case "sacerdote":
+          if (!sacerdotes.includes(nombreFormateado)) {
+            setSacerdotes((prev) => [...prev.filter((s) => s !== "Otro"), nombreFormateado, "Otro"])
+          }
+          break
+        case "monsenor":
+          if (!monsenores.includes(nombreFormateado)) {
+            setMonsenores((prev) => [...prev.filter((s) => s !== "Otro"), nombreFormateado, "Otro"])
+          }
+          break
+        case "testigo":
+          if (!testigos.includes(nombreFormateado)) {
+            setTestigos((prev) => [...prev.filter((s) => s !== "Otro"), nombreFormateado, "Otro"])
+          }
+          break
+        default:
+          break
+      }
+
+      return response.data
+    } catch (error) {
+      console.error("Error al crear sacerdote:", error)
+      
+      // Aún así, actualizar la lista local para mejorar la experiencia del usuario
+      switch (tipo) {
+        case "sacerdote":
+          if (!sacerdotes.includes(nombreFormateado)) {
+            setSacerdotes((prev) => [...prev.filter((s) => s !== "Otro"), nombreFormateado, "Otro"])
+          }
+          break
+        case "monsenor":
+          if (!monsenores.includes(nombreFormateado)) {
+            setMonsenores((prev) => [...prev.filter((s) => s !== "Otro"), nombreFormateado, "Otro"])
+          }
+          break
+        case "testigo":
+          if (!testigos.includes(nombreFormateado)) {
+            setTestigos((prev) => [...prev.filter((s) => s !== "Otro"), nombreFormateado, "Otro"])
+          }
+          break
+        default:
+          break
+      }
+      
+      return null
     }
   }
 

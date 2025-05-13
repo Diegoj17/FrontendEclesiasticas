@@ -15,6 +15,7 @@ const DataTableExpandle = ({
   }) => {
   const [expandedRows, setExpandedRows] = useState({})
   
+  const capitalize = s => s ? s.charAt(0).toUpperCase() + s.slice(1).toLowerCase() : '';
 
   const getEventoColor = (ceremonia) => {
     switch(ceremonia) {
@@ -46,6 +47,7 @@ const DataTableExpandle = ({
         sortMode="multiple"
         scrollable
         scrollHeight="flex"
+        responsiveLayout="scroll"
         style={{ flex: 1, minHeight: 0 }}
         filters={filters}
         onFilter={onFilter}
@@ -78,6 +80,7 @@ const DataTableExpandle = ({
           header="Primer Nombre"
           headerStyle={styles.columnaTabla}
           bodyStyle={styles.filaTabla}
+          body={(rowData) => capitalize(rowData.primerNombre)}
           sortable
           style={{ width: "20%" }}
         />
@@ -86,6 +89,7 @@ const DataTableExpandle = ({
           header="Segundo Nombre"
           headerStyle={styles.columnaTabla}
           bodyStyle={styles.filaTabla}
+          body={(rowData) => capitalize(rowData.segundoNombre)}
           sortable
           style={{ width: "20%" }}
         />
@@ -94,6 +98,7 @@ const DataTableExpandle = ({
           header="Primer Apellido"
           headerStyle={styles.columnaTabla}
           bodyStyle={styles.filaTabla}
+          body={(rowData) => capitalize(rowData.primerApellido)}
           sortable
           style={{ width: "20%" }}
         />
@@ -102,6 +107,7 @@ const DataTableExpandle = ({
           header="Segundo Apellido"
           headerStyle={styles.columnaTabla}
           bodyStyle={styles.filaTabla}
+          body={(rowData) => capitalize(rowData.segundoApellido)}
           sortable
           style={{ width: "20%" }}
         />
@@ -159,13 +165,12 @@ const styles = {
     flexDirection: "column",
     flex: 1,
     minHeight: 0,
+    backgroundColor: '#FFFFFF',
     },
     tabla: {
       width: "100%",
-      backgroundColor: '#FCCE74',
+      backgroundColor: '#FFFFFF',
       border: '1px solid #000000',
-      fontWeight: '600',
-      fontSize: '1rem',
       marginBottom: "0.5rem",
       color: 'black',
       overflow: "auto",

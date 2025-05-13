@@ -8,8 +8,6 @@ import { FilterMatchMode, FilterOperator } from "primereact/api"
 import DataTableExpandle from "../components/layout/DataTableExpandle"
 import DetallesActas from "../components/layout/DetallesActas"
 
-
-
 function VistaActas() {
 
   const navigate = useNavigate()
@@ -37,36 +35,34 @@ function VistaActas() {
 
 
 useEffect(() => {
-    fetchActas()
-  }, [ceremoniaSeleccionada])
+    fetchActas();
+  }, [ceremoniaSeleccionada]);
 
   const fetchActas = async () => {
+    setLoading(true);
+    setError(null);
     try {
-      setLoading(true)
-      let actas
+      let actasRaw;
 
       if (ceremoniaSeleccionada === "Todos") {
-        actas = await ActaService.getAllActas()
+        actasRaw = await ActaService.getAllActas();
       } else {
-        actas = await ActaService.getActasByTipo(ceremoniaSeleccionada)
+        actasRaw = await ActaService.getActasByTipo(ceremoniaSeleccionada);
       }
 
-      console.log("Actas obtenidas:", actas)
+      console.log("Actas obtenidas:", actasRaw);
+      const actasFormateadas = ActaService.transformActasForTable(actasRaw);
+      console.log("Actas formateadas:", actasFormateadas);
 
-      // Transformar los datos al formato esperado por la tabla
-      const actasFormateadas = ActaService.transformActasForTable(actas)
-
-      console.log("Actas formateadas:", actasFormateadas)
-
-      setRegistros(actasFormateadas)
+      setRegistros(actasFormateadas);
       setLoading(false)
-      setError(null)
-    } catch (error) {
-      console.error("Error al cargar las actas:", error)
-      setError("Error al cargar las Actas. Por favor, intente de nuevo.")
-      setLoading(false)
+    } catch (err) {
+      console.error("Error al cargar actas:", err);
+      setError("No se pudieron cargar las actas.");
+    } finally {
+      setLoading(false);
     }
-  }
+  };
 
   const handleBack = () => {
     navigate('/Principal')
@@ -135,6 +131,7 @@ useEffect(() => {
               <option value="Confirmacion">Confirmaciones</option>
               <option value="Matrimonio">Matrimonios</option>
             </select>
+            
           </div>
   
           {/* Tabla de registros */}
@@ -159,6 +156,7 @@ useEffect(() => {
                 expandedRowTemplate={(rowData) => <DetallesActas acta={rowData} />}
                 selectedRow={selectedRow}
                 setSelectedRow={setSelectedRow}
+                responsiveLayout="scroll"
               />
             )}
           </div>
@@ -209,7 +207,7 @@ const styles = {
   filtroContainer: {
     alignItems: "center",
     marginBottom: "0.5rem",
-    marginLeft: '1rem',
+    marginLeft: '0.5rem',
     fontSize: '1rem',
     fontWeight: '600',
     display: 'flex',
@@ -233,7 +231,7 @@ const styles = {
     fontSize: '1rem',
     borderRadius: '0.5rem',
     border: '1px solid #ced4da',
-    marginLeft: '1rem',
+    marginLeft: '0.5rem',
     width: '220px',
     fontWeight: '550',
     cursor: 'pointer',

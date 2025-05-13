@@ -1,90 +1,79 @@
-import { useState, useRef, useEffect } from "react"
+import { useState, useRef, useEffect } from "react";
 
 const ComboBox = ({
   label,
   options = [],
-  value = "",
-  onChange,
-  placeholder = "Seleccione o escriba...",
+  value = "",                    // valor “oficial” (o “Otro”)
+  onChange,                      // para el valor “oficial”
+  placeholder = "Seleccione...",
   name = "",
+  onCustomValueChange,           // sólo para el campo custom
 }) => {
-  const [isOpen, setIsOpen] = useState(false)
-  const [inputValue, setInputValue] = useState(value)
-  const [showCustomInput, setShowCustomInput] = useState(false)
-  const [customValue, setCustomValue] = useState("")
-  const inputRef = useRef(null)
-  const dropdownRef = useRef(null)
-  const customInputRef = useRef(null)
+  const [isOpen, setIsOpen] = useState(false);
+  const [inputValue, setInputValue] = useState(value);
+  const [showCustomInput, setShowCustomInput] = useState(value === "Otro");
+  const [customValue, setCustomValue] = useState("");
+  const containerRef = useRef(null);
 
-  // Cada vez que cambia la prop value, sincronizo el state interno
+  // Sincroniza sólo inputValue => cuando cambia la prop `value`
+  /*
   useEffect(() => {
-    setInputValue(value)
-    // Si el valor es "Otro", mostrar el campo personalizado
-    setShowCustomInput(value === "Otro")
-  }, [value])
+    setInputValue(value);
+    setShowCustomInput(value === "Otro");
+  }, [value]);
+  */
 
-  // Cerrar dropdown al clicar fuera
+  // Cerrar dropdown clic fuera
   useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(e.target) &&
-        inputRef.current &&
-        !inputRef.current.contains(e.target) &&
-        (!customInputRef.current || !customInputRef.current.contains(e.target))
-      ) {
-        setIsOpen(false)
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside)
-    return () => document.removeEventListener("mousedown", handleClickOutside)
-  }, [])
+    const onClick = e => {
+      if (containerRef.current?.contains(e.target)) return;
+      setIsOpen(false);
+    };
+    document.addEventListener("mousedown", onClick);
+    return () => document.removeEventListener("mousedown", onClick);
+  }, []);
 
-  // Enfocar el campo personalizado cuando se muestra
-  useEffect(() => {
-    if (showCustomInput && customInputRef.current) {
-      customInputRef.current.focus()
-    }
-  }, [showCustomInput])
+  const filtered = options.filter(opt =>
+    opt.toLowerCase().includes(inputValue.toLowerCase())
+  );
 
-  // Filtrar opciones
-  const filtered = options.filter((opt) => opt.toLowerCase().includes(inputValue.toLowerCase()))
-
-  const handleInputChange = (e) => {
-    const v = e.target.value
-    setInputValue(v)
-    onChange({
-      target: { name, value: v, type: "text", isComboBox: true },
-    })
-    setIsOpen(true)
-  }
+  const handleInputChange = e => {
+    const v = e.target.value;
+    setInputValue(v);
+    setIsOpen(true);
+    // si el usuario está borrando o escribiendo algo distinto a “Otro”, será valor normal
+    setShowCustomInput(v === "Otro");
+    onChange({ target: { name, value: v, isComboBox: true } });
+  };
 
   const handleOptionSelect = (opt) => {
-    setInputValue(opt)
-    onChange({
-      target: { name, value: opt, type: "text", isComboBox: true },
-    })
-
-    // Si selecciona "Otro", mostrar el campo personalizado
     if (opt === "Otro") {
-      setShowCustomInput(true)
-      setCustomValue("")
+      setInputValue("Otro"); // Mostrar "Otro" en el input principal
+      setShowCustomInput(true);
+      onChange({ target: { name, value: "", isComboBox: true }}); // Resetear valor real
     } else {
-      setShowCustomInput(false)
+      setInputValue(opt);
+      setShowCustomInput(false);
+      onChange({ target: { name, value: opt, isComboBox: true } });
     }
+    setIsOpen(false);
+  };
 
-    setIsOpen(false)
-    inputRef.current.focus()
-  }
+  const handleCustomChange = (e) => {
+    const v = e.target.value;
+    setCustomValue(v);
+    // Actualizar directamente el campo principal
+    onChange({ target: { name, value: v, isComboBox: true} }); 
+  };
 
-  const handleCustomInputChange = (e) => {
-    const v = e.target.value
-    setCustomValue(v)
-    // Actualizar el valor real que se enviará al formulario
-    onChange({
-      target: { name, value: v, type: "text", isComboBox: true },
-    })
-  }
+  useEffect(() => {
+    // Si el valor real no está en las opciones
+    if (value && !options.includes(value)) { 
+      setInputValue("Otro");
+      setCustomValue(value);
+      setShowCustomInput(true);
+    }
+  }, [value, options]);
 
   return (
     <div style={styles.container}>
@@ -95,15 +84,13 @@ const ComboBox = ({
       )}
       <div style={styles.inputContainer}>
         <input
-          id={`combo-${name}`}
-          ref={inputRef}
+          style={styles.input}
           type="text"
           name={name}
           value={inputValue}
           placeholder={placeholder}
           onChange={handleInputChange}
           onFocus={() => setIsOpen(true)}
-          style={styles.input}
           autoComplete="off"
         />
         <button type="button" onClick={() => setIsOpen((o) => !o)} style={styles.toggleButton} tabIndex={-1}>
@@ -112,7 +99,7 @@ const ComboBox = ({
       </div>
 
       {isOpen && filtered.length > 0 && (
-        <ul ref={dropdownRef} style={styles.dropdown}>
+        <ul style={styles.dropdown}>
           {filtered.map((opt, i) => (
             <li
               key={i}
@@ -130,12 +117,12 @@ const ComboBox = ({
       {showCustomInput && (
         <div style={styles.customInputContainer}>
           <input
-            ref={customInputRef}
-            type="text"
-            value={customValue}
-            onChange={handleCustomInputChange}
-            placeholder="Escriba el nombre..."
             style={styles.customInput}
+            type="text"
+            name={`${name}_custom`}  
+            value={customValue}
+            placeholder="Escriba aquí..."
+            onChange={handleCustomChange}
             autoComplete="off"
           />
         </div>

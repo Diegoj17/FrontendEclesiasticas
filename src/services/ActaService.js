@@ -26,6 +26,21 @@ class ActaService {
     }
   }
 
+  getBautizoById(id) {
+  return axios.get(`https://actaseclesiasticas.koyeb.app/api/bautizos/${id}`)
+    .then(res => res.data);
+}
+
+getConfirmacionById(id) {
+  return axios.get(`https://actaseclesiasticas.koyeb.app/api/confirmaciones/${id}`)
+    .then(res => res.data);
+}
+
+getMatrimonioById(id) {
+  return axios.get(`https://actaseclesiasticas.koyeb.app/api/matrimonios/${id}`)
+    .then(res => res.data);
+}
+
   /**
    * Busca actas por nombre
    * @param {string} nombre Nombre a buscar
@@ -423,6 +438,7 @@ class ActaService {
    * @param {Array} actas Lista de actas a transformar
    * @returns {Array} Lista de actas transformadas para la tabla
    */
+  /*
   transformActasForTable(actas) {
     if (!actas || !Array.isArray(actas)) {
       console.error("transformActasForTable: actas no es un array válido", actas)
@@ -522,6 +538,344 @@ class ActaService {
       return actaTransformada
     })
   }
+    */
+
+  /*
+  transformActasForTable(actas) {
+  if (!actas || !Array.isArray(actas)) {
+    console.error("transformActasForTable: actas no es un array válido", actas);
+    return [];
+  }
+
+  return actas.map((acta) => {
+    // Validar
+    if (!acta || typeof acta !== "object") {
+      console.error("transformActasForTable: acta no es un objeto válido", acta);
+      return {
+        id: "error",
+        primerNombre: "Error",
+        segundoNombre: "",
+        primerApellido: "",
+        segundoApellido: "",
+        ceremonia: "Error",
+      };
+    }
+
+    console.log("Procesando acta:", acta);
+
+    // Normalizar tipo de ceremonia
+    let ceremoniaNormalizada = acta.tipo || "";
+    const tipoLower = ceremoniaNormalizada.toLowerCase();
+    if (tipoLower === "BAUTIZO" || tipoLower === "Bautizo"|| tipoLower === "bautizo" 
+          || tipoLower === "BAUTISMO"|| tipoLower === "Bautismo" || tipoLower === "bautismo")
+          ceremoniaNormalizada = "Bautismo";
+    else if (tipoLower === "confirmacion" || tipoLower === "confirmación") ceremoniaNormalizada = "Confirmacion";
+    else if (tipoLower === "matrimonio") ceremoniaNormalizada = "Matrimonio";
+
+    // Mapeo base
+    const actaTransformada = {
+      id: acta.id || "",
+      primerNombre: acta.nombre1 || "",
+      segundoNombre: acta.nombre2 || "",
+      primerApellido: acta.apellido1 || "",
+      segundoApellido: acta.apellido2 || "",
+      libro: acta.libro || "",
+      folio: acta.folio || "",
+      acta: acta.numeroActa || "",
+      ceremonia: ceremoniaNormalizada,
+      fecha: acta.fecha || "",
+      notaMarginal: acta.notaMarginal || "",
+
+      // Datos de la ceremonia
+      nombresSacerdote: acta.nombresSacerdote || "",
+      nombresDoyFe: acta.nombresDoyFe || "",
+
+      // Campos para Bautismo
+      fechaNacimiento: acta.fechaNacimiento || "",
+      lugarNacimiento: acta.lugarNacimiento || "",
+      ciudadNacimiento: acta.ciudadNacimiento || "",
+      nombresPadre: acta.nombresPadre || "",
+      nombresMadre: acta.nombresMadre || "",
+      abueloPaterno: acta.abueloPaterno || "",
+      abuelaPaterna: acta.abuelaPaterna || "",
+      abueloMaterno: acta.abueloMaterno || "",
+      abuelaMaterna: acta.abuelaMaterna || "",
+      nombrepadrinos: acta.nombrepadrinos || "",
+      nombremadrinas: acta.nombremadrinas || "",
+
+      // Campos para Confirmación
+      monsenor: acta.nombresmonsr || "",
+      padrino: acta.nombrespadrino || "",
+      madrina: acta.nombresmadrina || "",
+
+      // Campos para Matrimonio
+      nombreCompletoEsposa: "",
+      fechaNacimientoEsposo: acta.novio_fechaNacimiento || "",
+      lugarNacimientoEsposo: acta.novio_lugarNacimiento || "",
+      padreEsposo: acta.novio_nombresPadre || "",
+      madreEsposo: acta.novio_nombresMadre || "",
+      fechaNacimientoEsposa: acta.novia_fechaNacimiento || "",
+      lugarNacimientoEsposa: acta.novia_lugarNacimiento || "",
+      padreEsposa: acta.novia_nombresPadre || "",
+      madreEsposa: acta.novia_nombresMadre || "",
+      testigo1: acta.testigo1 || "",
+      testigo2: acta.testigo2 || "",
+      testigo3: acta.testigo3 || "",
+      testigo4: acta.testigo4 || "",
+    };
+
+    // Construir nombre completo de la esposa si es Matrimonio
+    if (ceremoniaNormalizada === "Matrimonio") {
+      actaTransformada.nombreCompletoEsposa = [
+        acta.novia_nombre1,
+        acta.novia_nombre2,
+        acta.novia_apellido1,
+        acta.novia_apellido2,
+      ]
+        .filter(Boolean)
+        .join(" ");
+    }
+
+    return actaTransformada;
+  });
+}
+  */
+
+/*
+transformActasForTable(actas) {
+  if (!actas || !Array.isArray(actas)) {
+    console.error("transformActasForTable: actas no es un array válido", actas);
+    return [];
+  }
+
+  return actas.map((acta) => {
+    // Validar
+    if (!acta || typeof acta !== "object") {
+      console.error("transformActasForTable: acta no es un objeto válido", acta);
+      return {
+        id: "error",
+        primerNombre: "Error",
+        segundoNombre: "",
+        primerApellido: "",
+        segundoApellido: "",
+        ceremonia: "Error",
+      };
+    }
+
+    console.log("Procesando acta:", acta);
+
+    // Normalize the ceremony type
+    /*
+    let ceremoniaNormalizada = acta.tipo || "";
+    if (typeof ceremoniaNormalizada === "string") {
+      const tipoLower = ceremoniaNormalizada.toLowerCase();
+      if (tipoLower === "bautizo" || tipoLower === "bautismo") {
+        ceremoniaNormalizada = "Bautismo";
+      } else if (tipoLower === "confirmacion" || tipoLower === "confirmación") {
+        ceremoniaNormalizada = "Confirmacion";
+      } else if (tipoLower === "matrimonio") {
+        ceremoniaNormalizada = "Matrimonio";
+      }
+    }
+
+    let ceremoniaNormalizada = acta.tipo || ""
+
+    if (typeof ceremoniaNormalizada === "string") {
+        const tipoLower = ceremoniaNormalizada.toLowerCase()
+
+        if (tipoLower === "BAUTIZO" || tipoLower === "Bautizo"|| tipoLower === "bautizo" 
+          || tipoLower === "BAUTISMO"|| tipoLower === "Bautismo" || tipoLower === "bautismo") {
+          ceremoniaNormalizada = "Bautismo"
+        } else if (tipoLower === "CONFIRMACION" ||tipoLower === "Confirmacion" || tipoLower === "confirmacion" 
+          || tipoLower === "confirmación") {
+          ceremoniaNormalizada = "Confirmacion"
+        } else if (tipoLower === "matrimonio") {
+          ceremoniaNormalizada = "Matrimonio"
+        }
+      }
+
+    const transformed = {
+      id: acta.id,
+      tipo: ceremoniaNormalizada,
+      libro: acta.libro,
+      folio: acta.folio,
+      acta: acta.numeroActa,
+      fechaCeremonia: acta.fecha,
+      notaMarginal: acta.notaMarginal,
+      oficiante: acta.nombresSacerdote,
+      doyFe: acta.nombresDoyFe
+    };
+
+    // Agrupar campos según el tipo de acta
+    switch(ceremoniaNormalizada.toLowerCase()) {
+      case 'bautismo':
+        transformed.bautismo = {
+          primerNombre: acta.nombre1,
+          segundoNombre: acta.nombre2,
+          primerApellido: acta.apellido1,
+          segundoApellido: acta.apellido2,
+          fechaNacimiento: this.parseFecha(acta.fechaNacimiento),
+          lugarNacimiento: acta.lugarNacimiento,
+          nombrePadre: acta.nombresPadre,
+          nombreMadre: acta.nombresMadre,
+          abueloPaterno: acta.abueloPaterno,
+          abuelaPaterna: acta.abuelaPaterna,
+          abueloMaterno: acta.abueloMaterno,
+          abuelaMaterna: acta.abuelaMaterna,
+          padrino: acta.nombrepadrinos,
+          madrina: acta.nombremadrinas
+        };
+        break;
+
+      case 'confirmacion':
+        transformed.confirmacion = {
+          primerNombre: acta.nombre1,
+          segundoNombre: acta.nombre2,
+          primerApellido: acta.apellido1,
+          segundoApellido: acta.apellido2,
+          fechaNacimiento: this.parseFecha(acta.fechaNacimiento),
+          lugarNacimiento: acta.lugarNacimiento,
+          nombrePadre: acta.nombresPadre,
+          nombreMadre: acta.nombresMadre,
+          padrino: acta.nombrespadrino,
+          madrina: acta.nombresmadrina,
+          monseñor: acta.nombresmonsr
+        };
+        break;
+
+      case 'matrimonio':
+        transformed.matrimonio = {
+          novio: {
+            primerNombre: acta.novio_nombre1,
+            segundoNombre: acta.novio_nombre2,
+            primerApellido: acta.novio_apellido1,
+            segundoApellido: acta.novio_apellido2,
+            fechaNacimiento: this.parseFecha(acta.novio_fechaNacimiento),
+            lugarNacimiento: acta.novio_lugarNacimiento,
+            nombrePadre: acta.novio_nombresPadre,
+            nombreMadre: acta.novio_nombresMadre
+          },
+          novia: {
+            primerNombre: acta.novia_nombre1,
+            segundoNombre: acta.novia_nombre2,
+            primerApellido: acta.novia_apellido1,
+            segundoApellido: acta.novia_apellido2,
+            fechaNacimiento: this.parseFecha(acta.novia_fechaNacimiento),
+            lugarNacimiento: acta.novia_lugarNacimiento,
+            nombrePadre: acta.novia_nombresPadre,
+            nombreMadre: acta.novia_nombresMadre
+          },
+          testigo1: acta.testigo1,
+          testigo2: acta.testigo2,
+          testigo3: acta.testigo3,
+          testigo4: acta.testigo4
+        };
+        break;
+
+        default: // Añadir caso default
+        console.warn("Tipo de ceremonia no reconocido:", ceremoniaNormalizada);
+
+        break;
+    }
+
+    return transformed;
+  });
+}
+
+parseFecha(fechaStr) {
+  if (!fechaStr) return {};
+  const [dia, mes, año] = fechaStr.split('-');
+  return { dia, mes, año: año.length === 2 ? `20${año}` : año };
+}
+  */
+
+transformActasForTable(actas) {
+  if (!Array.isArray(actas)){
+    console.error("transformActasForTable: actas no es un array válido", actas) 
+    return [];
+  }
+
+  return actas.map((acta) => {
+
+    console.log("Procesando acta:", acta);
+    
+    const tipoRaw = (acta.tipo || "").toString().toLowerCase();
+    let ceremonia = "";
+    if (["bautizo","bautismo"].includes(tipoRaw)) ceremonia = "Bautismo";
+    else if (["confirmacion","confirmación"].includes(tipoRaw)) ceremonia = "Confirmacion";
+    else if (tipoRaw === "matrimonio") ceremonia = "Matrimonio";
+
+    // Base de campos comunes
+    const t = {
+      id: acta.id ?? "",
+      acta: acta.numeroActa ?? "",
+      libro: acta.libro ?? "",
+      folio: acta.folio ?? "",
+      ceremonia,
+      fecha: acta.fecha ?? "",
+      notaMarginal: acta.notaMarginal ?? "",
+      oficiante: acta.nombresSacerdote ?? "",
+      doyFe: acta.nombresDoyFe ?? "",
+
+      // Nombres de la persona central
+      primerNombre: acta.nombre1 ?? "",
+      segundoNombre: acta.nombre2 ?? "",
+      primerApellido: acta.apellido1 ?? acta.nombre3 ?? "",
+      segundoApellido: acta.apellido2 ?? acta.nombre4 ?? "",
+    };
+
+    // Campos de Bautismo
+    if (ceremonia === "Bautismo") {
+      Object.assign(t, {
+        fechaNacimiento: acta.fechaNacimiento ?? "",
+        lugarNacimiento: acta.lugarNacimiento ?? "",
+        nombresPadre: acta.nombresPadre ?? "",
+        nombresMadre: acta.nombresMadre ?? "",
+        abueloPaterno: acta.abueloPaterno ?? "",
+        abuelaPaterna: acta.abuelaPaterna ?? "",
+        abueloMaterno: acta.abueloMaterno ?? "",
+        abuelaMaterna: acta.abuelaMaterna ?? "",
+        nombrepadrinos: acta.nombrepadrinos ?? "",
+        nombremadrinas: acta.nombremadrinas ?? "",
+      });
+    }
+
+    // Campos de Confirmacion
+    if (ceremonia === "Confirmacion") {
+      Object.assign(t, {
+        fechaConfirmacion: acta.fechaConfirmacion ?? acta.fechaNacimiento ?? "",
+        monsenor: acta.nombresmonsr ?? "",
+        padrino: acta.nombrespadrino ?? "",
+        madrina: acta.nombresmadrina ?? "",
+      });
+    }
+
+    // Campos de Matrimonio
+    if (ceremonia === "Matrimonio") {
+      Object.assign(t, {
+        nombreCompletoEsposa: [
+          acta.novia_nombre1, acta.novia_nombre2,
+          acta.novia_nombre3, acta.novia_nombre4
+        ].filter(Boolean).join(" "),
+        fechaNacimientoEsposo: acta.novio_fechaNacimiento ?? "",
+        lugarNacimientoEsposo: acta.novio_lugarNacimiento ?? "",
+        padreEsposo: acta.novio_nombresPadre ?? "",
+        madreEsposo: acta.novio_nombresMadre ?? "",
+        fechaNacimientoEsposa: acta.novia_fechaNacimiento ?? "",
+        lugarNacimientoEsposa: acta.novia_lugarNacimiento ?? "",
+        padreEsposa: acta.novia_nombresPadre ?? "",
+        madreEsposa: acta.novia_nombresMadre ?? "",
+        testigo1: acta.testigo1 ?? "",
+        testigo2: acta.testigo2 ?? "",
+        testigo3: acta.testigo3 ?? "",
+        testigo4: acta.testigo4 ?? "",
+      });
+    }
+
+    return t;
+  });
+}
+
 }
 
 export default new ActaService()

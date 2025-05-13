@@ -835,7 +835,7 @@ const styles = {
     flexWrap: "wrap",
     fontSize: "1rem",
     fontWeight: "600",
-
+    cursor: "default",
     width: "100%",
     marginTop: "-0.5rem",
   },
@@ -844,6 +844,7 @@ const styles = {
     alignItems: "center",
     gap: "0rem",
     flexWrap: "wrap",
+    cursor: "pointer",
   },
   topButtonContainer: {
     display: "flex",
@@ -866,6 +867,9 @@ const styles = {
     width: "220px",
     fontWeight: "550",
     cursor: "pointer",
+    appearance: "none", // Elimina los estilos nativos
+    WebkitAppearance: "none", // Compatibilidad con Safari
+    MozAppearance: "none",
   },
   form: {
     backgroundColor: "#fff",
