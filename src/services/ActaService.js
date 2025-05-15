@@ -608,7 +608,7 @@ getMatrimonioById(id) {
     const formatearFecha = (fechaObj) => {
       if (!fechaObj || !fechaObj.dia || !fechaObj.mes || !fechaObj.año) return ""
       // Formato DD-MM-YY (los últimos dos dígitos del año)
-      const año = fechaObj.año.length === 4 ? fechaObj.año.substring(2) : fechaObj.año
+      const año = fechaObj.año
       return `${fechaObj.dia.padStart(2, "0")}-${fechaObj.mes.padStart(2, "0")}-${año}`
     }
 
