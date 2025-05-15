@@ -32,37 +32,92 @@ function VistaActas() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [selectedRow, setSelectedRow] = useState(null)
+  const [tipoSeleccionado, setTipoSeleccionado] = useState("Todos")
+  const [actasFiltradas, setActasFiltradas] = useState([])
+  const [actas, setActas] = useState([])
+  const [actaSeleccionada, setActaSeleccionada] = useState(null)
+  const [allRegistros, setAllRegistros] = useState([])
 
 
 useEffect(() => {
-    fetchActas()
-  }, [ceremoniaSeleccionada])
+    fetchAllActas()
+  }, [])
 
-  const fetchActas = async () => {
+  // Apply local filtering when tipoSeleccionado changes
+  useEffect(() => {
+    filterRegistrosByTipo()
+  }, [tipoSeleccionado, allRegistros])
+
+  // Fetch all records from the API
+  const fetchAllActas = async () => {
     setLoading(true)
     setError(null)
     try {
-      let actasRaw
+      const actasRaw = await ActaService.getAllActas()
+      console.log("Todas las actas obtenidas:", actasRaw)
 
-      if (ceremoniaSeleccionada === "Todos") {
-        actasRaw = await ActaService.getAllActas()
-      } else {
-        actasRaw = await ActaService.getActasByTipo(ceremoniaSeleccionada)
-      }
-
-      console.log("Actas obtenidas:", actasRaw)
       const actasFormateadas = ActaService.transformActasForTable(actasRaw)
-      console.log("Actas formateadas:", actasFormateadas)
+      console.log("Todas las actas formateadas:", actasFormateadas)
 
-      setRegistros(actasFormateadas)
+      setAllRegistros(actasFormateadas)
+      setRegistros(actasFormateadas) // Initially show all records
     } catch (err) {
-      console.error("Error al cargar actas:", err)
+      console.error("Error al cargar todas las actas:", err)
       setError("No se pudieron cargar las actas.")
     } finally {
       setLoading(false)
     }
   }
 
+  // Filter records locally based on selected ceremony type
+  const filterRegistrosByTipo = () => {
+    if (!allRegistros || allRegistros.length === 0) return
+
+    console.log("Filtrando por tipo:", tipoSeleccionado)
+    console.log("Total de registros antes de filtrar:", allRegistros.length)
+
+    if (tipoSeleccionado === "Todos") {
+      setRegistros(allRegistros)
+      return
+    }
+
+    const filtrados = allRegistros.filter((acta) => {
+      // Normalize ceremony type for comparison
+      const ceremonia = acta.ceremonia ? acta.ceremonia.toLowerCase() : ""
+      console.log(`Evaluando acta ID ${acta.id}, ceremonia: ${ceremonia}`)
+
+      // Handle different variations of ceremony types
+      if (tipoSeleccionado === "Bautismo") {
+        return ceremonia.includes("bautis") || ceremonia.includes("bautiz")
+      } else if (tipoSeleccionado === "Confirmacion") {
+        return ceremonia.includes("confirm")
+      } else if (tipoSeleccionado === "Matrimonio") {
+        return ceremonia.includes("matrim")
+      }
+
+      return false
+    })
+
+    console.log(`Registros filtrados por tipo ${tipoSeleccionado}:`, filtrados.length)
+    setRegistros(filtrados)
+
+    // Clear selection if no records match or if selected record is no longer in filtered list
+    if (filtrados.length === 0) {
+      setSelectedRow(false)
+    } else if (selectedRow && !filtrados.some((acta) => acta.id === selectedRow.id)) {
+      setSelectedRow(null)
+    }
+  }
+
+  const handleTipoChange = (e) => {
+    const nuevoTipo = e.target.value
+    console.log("Tipo seleccionado:", nuevoTipo)
+    setTipoSeleccionado(nuevoTipo)
+    setCeremoniaSeleccionada(nuevoTipo) // Keep both state variables in sync
+
+    // Close any expanded row when changing ceremony type
+    setSelectedRow(null)
+  }
   // Función para manejar la selección de una fila y mostrar detalles
   const handleRowSelect = (rowData) => {
     console.log("Fila seleccionada:", rowData)
@@ -102,10 +157,6 @@ useEffect(() => {
     navigate('/corregirActas')
   }
 
-  const handleCeremoniaChange = (e) => {
-    setCeremoniaSeleccionada(e.target.value)
-    console.log("Ceremonia seleccionada:", e.target.value)
-  }
   
   return (
 
@@ -144,8 +195,8 @@ useEffect(() => {
             </label>
             <select
               id="ceremonia"
-              value={ceremoniaSeleccionada}
-              onChange={handleCeremoniaChange}
+              value={tipoSeleccionado}
+              onChange={handleTipoChange}
               style={styles.select}
             >
               <option value="Todos">Todos</option>
@@ -166,9 +217,13 @@ useEffect(() => {
             ) : error ? (
               <div style={styles.errorContainer}>
                 <p>{error}</p>
-                <button onClick={fetchActas} style={styles.reloadButton}>
+                <button onClick={fetchAllActas} style={styles.reloadButton}>
                   Intentar de nuevo
                 </button>
+              </div>
+              ) : registros.length === 0 ? (
+              <div style={styles.emptyContainer}>
+                <p>No hay actas disponibles para el tipo seleccionado.</p>
               </div>
             ) : (
               <DataTableExpandle
@@ -178,7 +233,7 @@ useEffect(() => {
                 expandedRowTemplate={expandedRowTemplate}
                 selectedRow={selectedRow}
                 setSelectedRow={handleRowSelect}
-                responsiveLayout="scroll"
+                tipoSeleccionado={tipoSeleccionado}
               />
             )}
           </div>
@@ -296,6 +351,7 @@ const styles = {
     padding: '12px',
     borderRight: '1px solid #000',
     cursor: 'default',
+    textTransform: "capitalize",
   },
   loadingContainer: {
     position: 'absolute',
@@ -327,6 +383,19 @@ const styles = {
     border: "none",
     borderRadius: "0.25rem",
     cursor: "pointer",
+  },
+  emptyContainer: {
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "center",
+    alignItems: "center",
+    height: "200px",
+    width: "100%",
+    color: "#666",
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    transform: "translate(-50%, -50%)",
   },
 
 }

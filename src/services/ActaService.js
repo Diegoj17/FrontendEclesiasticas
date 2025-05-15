@@ -40,7 +40,8 @@ class ActaService {
 
       // Determinar el endpoint correcto según el tipo de acta
       let endpoint
-      if (tipoNormalizado === "bautismo" || tipoNormalizado === "bautizo" || tipoNormalizado === "BAUTIZO") {
+      if (tipoNormalizado === "Bautismo" || tipoNormalizado === "bautismo" ||
+          tipoNormalizado === "bautizo" || tipoNormalizado === "BAUTIZO" || tipoNormalizado === "Bautizo") {
         endpoint = `https://actaseclesiasticas.koyeb.app/api/bautizos`
         console.log("Obteniendo bautizos desde:", endpoint)
       } else if (tipoNormalizado === "confirmacion" || tipoNormalizado === "confirmación") {
@@ -74,6 +75,8 @@ class ActaService {
    * @param {Array} actas Lista de actas a transformar
    * @returns {Array} Lista de actas transformadas para la tabla
    */
+
+  
   transformActasForTable(actas) {
     if (!Array.isArray(actas)) {
       console.error("transformActasForTable: actas no es un array válido", actas)
@@ -89,7 +92,7 @@ class ActaService {
       // Verificar si el acta tiene un campo tipo explícito
       if (acta.tipo) {
         const tipoRaw = acta.tipo.toString().toLowerCase()
-        if (["bautizo", "bautismo"].includes(tipoRaw)) {
+        if (["bautizo", "bautismo", "BAUTIZO", "Bautizo"].includes(tipoRaw)) {
           ceremonia = "Bautismo"
         } else if (["confirmacion", "confirmación"].includes(tipoRaw)) {
           ceremonia = "Confirmacion"
@@ -127,7 +130,7 @@ class ActaService {
       }
 
       // Campos específicos según el tipo de ceremonia
-      if (ceremonia === "Bautismo") {
+      if (ceremonia === "Bautizo") {
         Object.assign(transformedActa, this.extractBautismoFields(acta))
       } else if (ceremonia === "Confirmacion") {
         Object.assign(transformedActa, this.extractConfirmacionFields(acta))
@@ -139,11 +142,7 @@ class ActaService {
     })
   }
 
-  /**
-   * Extrae los campos específicos de un bautismo
-   * @param {Object} acta Acta de bautismo
-   * @returns {Object} Campos específicos de bautismo
-   */
+
   extractBautismoFields(acta) {
     // Si los datos están anidados en un objeto bautizo o bautismo
     const bautismoData = acta.bautizo || acta.bautismo || acta
@@ -162,11 +161,7 @@ class ActaService {
     }
   }
 
-  /**
-   * Extrae los campos específicos de una confirmación
-   * @param {Object} acta Acta de confirmación
-   * @returns {Object} Campos específicos de confirmación
-   */
+ 
   extractConfirmacionFields(acta) {
     // Si los datos están anidados en un objeto confirmacion
     const confirmacionData = acta.confirmacion || acta
@@ -179,11 +174,7 @@ class ActaService {
     }
   }
 
-  /**
-   * Extrae los campos específicos de un matrimonio
-   * @param {Object} acta Acta de matrimonio
-   * @returns {Object} Campos específicos de matrimonio
-   */
+
   extractMatrimonioFields(acta) {
     // Si los datos están anidados en un objeto matrimonio
     const matrimonioData = acta.matrimonio || acta
@@ -216,8 +207,9 @@ class ActaService {
       testigo4: matrimonioData.testigo4 || "",
     }
   }
+  
 
-  /**
+   /**
    * Obtiene los detalles de un bautizo por ID
    * @param {string} id ID del bautizo
    * @returns {Promise} Promesa con los detalles del bautizo
@@ -235,17 +227,60 @@ class ActaService {
       })
 
       console.log("Bautizo response:", response.data)
-      return response.data
+
+      // Check if we have data and it's properly structured
+      if (response.data && (response.data.length > 0 || Object.keys(response.data).length > 0)) {
+        // If it's an array, take the first item
+        const data = Array.isArray(response.data) ? response.data[0] : response.data
+
+        // Process the data to ensure all expected properties are accessible
+        const processedData = {
+          ...data,
+          // Ensure these properties exist even if they're nested
+          abuelaMaterna: data.abuelaMaterna || (data[0] && data[0].abuelaMaterna),
+          abueloMaterno: data.abueloMaterno || (data[0] && data[0].abueloMaterno),
+          abuelaPaterna: data.abuelaPaterna || (data[0] && data[0].abuelaPaterna),
+          abueloPaterno: data.abueloPaterno || (data[0] && data[0].abueloPaterno),
+          // Add any other properties that might be nested
+        }
+
+        console.log("Processed bautizo data:", processedData)
+        return processedData
+      }
+
+      // If the response is empty or doesn't have the expected structure, try to fetch as a generic acta
+      console.log("Empty or invalid bautizo response, trying generic acta endpoint")
+      const genericResponse = await axios.get(`https://actaseclesiasticas.koyeb.app/api/actas/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      console.log("Generic acta response:", genericResponse.data)
+      return genericResponse.data
     } catch (error) {
       console.error(`Error al obtener bautizo con ID ${id}:`, error)
       if (error.response) {
         console.error("Response data:", error.response.data)
         console.error("Response status:", error.response.status)
       }
-      throw error
+
+      // If the specific endpoint fails, try the generic acta endpoint as fallback
+      try {
+        console.log("Trying fallback to generic acta endpoint")
+        const token = localStorage.getItem("token")
+        const fallbackResponse = await axios.get(`https://actaseclesiasticas.koyeb.app/api/actas/${id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        console.log("Fallback response:", fallbackResponse.data)
+        return fallbackResponse.data
+      } catch (fallbackError) {
+        console.error("Fallback also failed:", fallbackError)
+        throw error
+      }
     }
   }
-
   /**
    * Obtiene los detalles de una confirmación por ID
    * @param {string} id ID de la confirmación
@@ -567,6 +602,7 @@ getMatrimonioById(id) {
    * @param {string} numeroFormulario Número de formulario a asignar
    * @returns {Object} Acta formateada para el backend
    */
+  
   formatActaForBatch(acta, numeroFormulario) {
     // Formatear fecha de DD-MM-YY
     const formatearFecha = (fechaObj) => {
@@ -580,7 +616,7 @@ getMatrimonioById(id) {
     let formattedActa = {}
 
     // Determinar el tipo de acta y formatear según corresponda
-    if (acta.tipo.toLowerCase() === "bautismo") {
+    if (acta.tipo.toLowerCase() === "Bautismo") {
       formattedActa = {
         // Usar el número de formulario secuencial proporcionado
         numero_formulario: numeroFormulario,
@@ -620,7 +656,7 @@ getMatrimonioById(id) {
         formattedActa.nombrepadrinos = acta.bautismo.padrino || ""
         formattedActa.nombremadrinas = acta.bautismo.madrina || ""
       }
-    } else if (acta.tipo.toLowerCase() === "confirmación") {
+    } else if (acta.tipo.toLowerCase() === "Confirmacion") {
       formattedActa = {
         // Usar el número de formulario secuencial proporcionado
         numero_formulario: numeroFormulario,
@@ -1156,7 +1192,7 @@ transformActasForTable(actas) {
   });
 }
 
-*/
+
 
 transformActasForTable(actas) {
     if (!Array.isArray(actas)) {
@@ -1242,6 +1278,7 @@ transformActasForTable(actas) {
       return t
     })
   }
+    */
 
 }
 

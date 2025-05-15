@@ -19,13 +19,10 @@ function AñadirPartidas() {
   const navigate = useNavigate()
   const { user, logout } = useAuth()
   const [eventoSeleccionado, setEventoSeleccionado] = useState("")
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [menuAbierto, setMenuAbierto] = useState(false)
   const [errores, setErrores] = useState({})
-  const [sidebarAbierto, setSidebarAbierto] = useState(true)
   const [showChangeTypeModal, setShowChangeTypeModal] = useState(false);
   const [newEventType, setNewEventType] = useState("");
-
 
   const ciudadesColombia = [
     "Bogotá",
@@ -599,10 +596,6 @@ function AñadirPartidas() {
     navigate('/listaActas')
   }
 
-  const handleCorrect = () => {
-    navigate('/corregirActas')
-  }
-
   const handleBack = () => {
     navigate('/Principal')
   }
@@ -621,7 +614,6 @@ function AñadirPartidas() {
         onViewActas={handleViewActas}
         onSearch={handleSearch}
         onAdd={handleAdd}
-        onCorrect={handleCorrect}
         onBack={handleBack}
         
         />

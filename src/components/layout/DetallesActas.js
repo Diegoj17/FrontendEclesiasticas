@@ -25,6 +25,9 @@ const DetallesActas = ({ acta }) => {
 
         switch (tipoNormalizado) {
           case "bautismo":
+          case "Bautismo":
+          case "bautizo":
+          case "BAUTIZO":
             console.log("Fetching bautizo details with ID:", acta.id)
             data = await ActaService.getBautizoById(acta.id)
             break
@@ -427,6 +430,7 @@ const styles = {
     fontSize: "0.9rem",
     fontWeight: "450",
     textAlign: "right",
+    textTransform: "capitalize",
   },
   buttonIcon: {
     width: "16px",

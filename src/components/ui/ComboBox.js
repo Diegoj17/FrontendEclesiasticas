@@ -132,7 +132,6 @@ const ComboBox = ({
           onClick={() => setIsOpen((o) => !o)} 
           style={styles.toggleButton} 
           tabIndex={-1}>
-          disabled={loading}
           ▼
         </button>
       </div>

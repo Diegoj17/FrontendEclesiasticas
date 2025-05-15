@@ -1,4 +1,4 @@
-import React, { Component, useState } from 'react';
+import React, { Component, useState, useEffect } from 'react';
 import { DataTable } from 'primereact/datatable';
 import { Column } from "primereact/column"
 import 'primereact/resources/themes/saga-blue/theme.css';
@@ -12,8 +12,14 @@ const DataTableExpandle = ({
   selectedRow, 
   setSelectedRow,
   expandedRowTemplate,
+  tipoSeleccionado
   }) => {
   const [expandedRows, setExpandedRows] = useState({})
+
+  useEffect(() => {
+    // Resetear las filas expandidas cuando cambia el tipo de ceremonia
+    setExpandedRows({})
+  }, [tipoSeleccionado])
   
   const capitalize = s => s ? s.charAt(0).toUpperCase() + s.slice(1).toLowerCase() : '';
 

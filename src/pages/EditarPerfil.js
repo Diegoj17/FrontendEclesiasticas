@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from "react"
 import { useNavigate } from "react-router-dom"
 import { useAuth } from "../context/AuthContext"
-import { FaArrowLeft, FaUser, FaSave, FaExclamationCircle, FaCheck } from "react-icons/fa"
+import { FaArrowLeft, FaUser, FaSave, FaExclamationCircle, FaCheck, FaEye, FaEyeSlash } from "react-icons/fa"
+import { AiOutlineEye, AiOutlineEyeInvisible } from 'react-icons/ai';
 import logo from "../assets/logo.png"
 
 function EditProfile() {
@@ -30,10 +31,10 @@ function EditProfile() {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
-  const [isPasswordFocused, setIsPasswordFocused] = useState(false);
-  const [showPasswordRules, setShowPasswordRules] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showRules, setShowRules] = useState(false);
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const inputRef = useRef(null);
   const bubbleRef = useRef(null);
 
@@ -73,6 +74,12 @@ function EditProfile() {
   const handleSubmit = async (e) => {
     e.preventDefault()
     setLoading(true)
+
+    if (formData.password && formData.password !== confirmPassword) {
+    setErrors(prev => ({ ...prev, confirm: 'La nueva contraseña no coincide.' }));
+    setLoading(false);
+    return;
+  }
     setMessage({ text: "", type: "" })
 
     if (formData.password && !validatePassword(formData.password)) {
@@ -107,7 +114,7 @@ function EditProfile() {
         setModal({
           show:true,
           type: 'success',
-          message: 'Perfil actualizado exitosamente'
+          message: 'Perfil Actualizado Exitosamente'
         });
 
     } else {
@@ -258,17 +265,30 @@ function EditProfile() {
                   style={{
                     ...styles.input,
                   borderColor: errors.password && touched.password ? '#E83F25' : '#ddd',
-                  paddingRight: '35px'
+                  paddingRight: '2.5rem',
                   }}
                   required
                 />
+                {password.length > 0 && (
+                  <div
+                    style={styles.toggleIcon}
+                    onClick={() => setShowPassword(!showPassword)}
+
+                  >
+                  {showPassword
+                    ? <FaEye size={20} />
+                    : <FaEyeSlash size={20} />
+                  }
+                </div>
+                )}
                 {errors.password && touched.password && (
                   <FaExclamationCircle
                     style={styles.errorIcon}
                       color="#E83F25"
                   />
+                  
                 )}
-
+                
                 {showRules && (
                   <div ref={bubbleRef} style={styles.rulesBubble}>
                     <div style={styles.bubbleArrow}></div>
@@ -278,7 +298,7 @@ function EditProfile() {
                           <FaCheck
                             style={{
                               color: rule.valid ? '#00a400' : '#ffffff',
-                              fontSize: '15px',
+                              fontSize: '1rem',
                             }}
                           />
                           <span style={styles.ruleText}>{rule.text}</span>
@@ -286,6 +306,48 @@ function EditProfile() {
                       ))}
                     </div>
                   </div>
+                )}
+              </div>
+            </div>
+
+            <div style={styles.passwordContainer}>
+              <label htmlFor="confirmPassword" style={styles.label}>Repetir Contraseña Nueva</label>
+              <div style={styles.inputWrapper}>
+                <input
+                  ref={inputRef}
+                  name="confirmPassword"
+                  type={showConfirmPassword  ? "text" : "password"}
+                  value={confirmPassword}
+                  onChange={(e) => {
+                    setConfirmPassword(e.target.value);
+                  }}
+                  onBlur={() => handleBlur('password')}
+                  onFocus={() => setShowRules(true)}
+                  style={{
+                    ...styles.input,
+                  borderColor: errors.password && touched.password ? '#E83F25' : '#ddd',
+                  paddingRight: '2.5rem'
+                  }}
+                  required
+                />
+                {confirmPassword.length > 0 && (
+                  <div
+                    style={styles.toggleIcon}
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+
+                  >
+                  {showConfirmPassword
+                    ? <FaEye size={20} />
+                    : <FaEyeSlash size={20} />
+                  }
+                </div>
+                )}
+                {errors.password && touched.password && (
+                  <FaExclamationCircle
+                    style={styles.errorIcon}
+                      color="#E83F25"
+                  />
+                  
                 )}
               </div>
             </div>
@@ -676,6 +738,16 @@ const styles = {
     cursor: 'pointer',
     fontSize: '1rem',
   },
+  toggleIcon: {
+  position: 'absolute',
+  right: '2.2rem',
+  top: '50%',
+  transform: 'translateY(-50%)',
+  cursor: 'pointer',
+  fontSize: '1.5rem',
+  color: '#000000'       
+},
+
 }
 
 export default EditProfile

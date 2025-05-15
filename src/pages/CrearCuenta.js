@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import logo from "../assets/logo.png"
 import axios from 'axios';
-import { FaExclamationCircle, FaCheck, FaUser } from 'react-icons/fa';
+import { FaExclamationCircle, FaCheck, FaUser, FaEye, FaEyeSlash  } from 'react-icons/fa';
+import { AiOutlineEye, AiOutlineEyeInvisible } from 'react-icons/ai';
 
 function CrearCuenta() {
   const [name, setName] = useState('');
@@ -19,6 +20,9 @@ function CrearCuenta() {
   const [showRules, setShowRules] = useState(false);
   const inputRef = useRef(null);
   const bubbleRef = useRef(null);
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   
   const [passwordErrors, setPasswordErrors] = useState({
     length: false,
@@ -202,26 +206,40 @@ function CrearCuenta() {
                 )}
               </div>
             </div>
+
             <div style={styles.passwordContainer}>
               <label htmlFor="password" style={styles.label}>Contraseña</label>
               <div style={styles.inputWrapper}>
                 <input
                   ref={inputRef}
-                  type="password"
+                  name="password"
+                  type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => {
                     setPassword(e.target.value);
                     validatePassword(e.target.value);
+                    
                   }}
                   onBlur={() => handleBlur('password')}
                   onFocus={() => setShowRules(true)}
                   style={{
                     ...styles.input,
                     borderColor: errors.password && touched.password ? '#E83F25' : '#ddd',
-                    paddingRight: '35px',
+                    paddingRight: '2.5rem',
                   }}
                   required
                 />
+                {password.length > 0 && (
+                    <div
+                      style={styles.toggleIcon}
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      {showPassword
+                        ? <FaEye  size={20} />
+                        : <FaEyeSlash size={20} />
+                      }
+                    </div>
+                  )}
                 {errors.password && touched.password && (
                   <FaExclamationCircle style={styles.errorIcon} color="#E83F25" />
                 )}
@@ -244,6 +262,45 @@ function CrearCuenta() {
                   </div>
                 )}
               </div>
+            </div>
+            
+            <div style={styles.passwordContainer}>
+              <label htmlFor="password" style={styles.label}>Repetir Contraseña Nueva</label>
+              <div style={styles.inputWrapper}>
+                <input
+                  ref={inputRef}
+                  name="password"
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  value={confirmPassword}
+                  onChange={(e) => {
+                    setConfirmPassword(e.target.value);     
+                  }}
+                  onBlur={() => handleBlur('password')}
+                  onFocus={() => setShowRules(true)}
+                  style={{
+                    ...styles.input,
+                    borderColor: errors.password && touched.password ? '#E83F25' : '#ddd',
+                    paddingRight: '2.5rem',
+                  }}
+                  required
+                />
+                {confirmPassword.length > 0 && (
+                    <div
+                      style={styles.toggleIcon}
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    >
+                      {showConfirmPassword
+                        ? <FaEye  size={20} />
+                        : <FaEyeSlash size={20} />
+                      }
+                    </div>
+                  )}
+                {errors.password && touched.password && (
+                  <FaExclamationCircle 
+                    style={styles.errorIcon} 
+                    color="#E83F25" />
+                )}
+                </div>
             </div>
             <div style={styles.buttonContainer}>
               <button type="button" style={styles.cancelButton} onClick={handleCancel}>
@@ -612,6 +669,15 @@ const styles = {
       transform: 'rotate(360deg)',
     }
   },
+  toggleIcon: {
+  position: 'absolute',
+  right: '2.2rem',
+  top: '50%',
+  transform: 'translateY(-50%)',
+  cursor: 'pointer',
+  fontSize: '1.5rem',
+  color: '#000000'       // color neutro; cambia si quieres otro
+},
   
 };
 

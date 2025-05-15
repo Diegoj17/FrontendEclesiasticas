@@ -276,7 +276,7 @@ function ListaActas() {
                 ) : (
                   <FaFileUpload style={styles.buttonIcon} />
                 )}
-                <span>{isBatchProcessing ? "Guardando..." : `Guardar Actas (${selectedActas.length})`}</span>
+                <span>{isBatchProcessing ? "Guardando..." : `Confirmar Actas (${selectedActas.length})`}</span>
               </button>
             </div>
           </div>

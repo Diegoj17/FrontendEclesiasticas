@@ -70,7 +70,7 @@ function AppContent() {
       if (isAuthenticated) {
         // Redirigir a la última ruta guardada o a Principal
         const savedPath = localStorage.getItem("lastPath")
-        navigate(savedPath || "/Principal", { replace: true })
+        navigate("/Principal", { replace: true })
       }
     }, [navigate, isAuthenticated])
 
@@ -151,7 +151,7 @@ function AppContent() {
           path="*"
           element={
             isAuthenticated ? (
-              <Navigate to={sessionStorage.getItem("currentPath") || "/Principal"} replace />
+              <Navigate to={"/Principal"} replace />
             ) : (
               <Navigate to="/" replace />
             )
