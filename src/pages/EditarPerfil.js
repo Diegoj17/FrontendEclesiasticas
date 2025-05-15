@@ -33,6 +33,7 @@ function EditProfile() {
   const [modalMessage, setModalMessage] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showRules, setShowRules] = useState(false);
+  const [showPasswordRules, setShowPasswordRules] = useState(false); // Solo para el campo de contraseña
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const inputRef = useRef(null);
@@ -74,28 +75,40 @@ function EditProfile() {
   const handleSubmit = async (e) => {
     e.preventDefault()
     setLoading(true)
+    setErrors({}); // Limpiar errores previos
 
-    if (formData.password && formData.password !== confirmPassword) {
-    setErrors(prev => ({ ...prev, confirm: 'La nueva contraseña no coincide.' }));
+    // Validación de confirmación de contraseña
+  if (formData.password && formData.password !== confirmPassword) {
+    setErrors(prev => ({ 
+      ...prev, 
+      confirmPassword: 'Las contraseñas no coinciden' 
+    }));
     setLoading(false);
     return;
   }
-    setMessage({ text: "", type: "" })
 
-    if (formData.password && !validatePassword(formData.password)) {
-      return;
-    }
+  setMessage({ text: "", type: "" })
+
+  // Validación de reglas de contraseña (solo si hay password)
+  if (formData.password && !validatePassword(formData.password)) {
+    setLoading(false);
+    return;
+  }
 
     try {
-      console.log("Enviando datos para actualizar:", formData)
+    console.log("Enviando datos para actualizar:", {
+      nombre: formData.nombre,
+      apellido: formData.apellido,
+      email: formData.email,
+      ...(formData.password && { password: formData.password }) // Envía password solo si existe
+    });
 
-      // Llamar a la función updateUser del contexto
-      const success = await updateUser({
-        nombre: formData.nombre,
-        apellido: formData.apellido,
-        email: formData.email,
-        password: formData.password || undefined, // Solo enviar si tiene valor
-      })
+    const success = await updateUser({
+      nombre: formData.nombre,
+      apellido: formData.apellido,
+      email: formData.email,
+      ...(formData.password && { password: formData.password }) // Envía password solo si existe
+    });
 
       if (success) {
         // Actualizar localStorage
@@ -260,8 +273,11 @@ function EditProfile() {
                     validatePassword(e.target.value);
                     setFormData(prev => ({...prev, password: e.target.value}));
                   }}
-                  onBlur={() => handleBlur('password')}
-                  onFocus={() => setShowRules(true)}
+                  onBlur={() => {
+                      handleBlur('password');
+                      setShowPasswordRules(false);
+                  }}
+                  onFocus={() => setShowPasswordRules(true)}
                   style={{
                     ...styles.input,
                   borderColor: errors.password && touched.password ? '#E83F25' : '#ddd',
@@ -272,8 +288,8 @@ function EditProfile() {
                 {password.length > 0 && (
                   <div
                     style={styles.toggleIcon}
-                    onClick={() => setShowPassword(!showPassword)}
-
+                    onMouseDown={e => e.preventDefault()}
+                    onClick={() => setShowPassword(prev => !prev)}
                   >
                   {showPassword
                     ? <FaEye size={20} />
@@ -289,7 +305,7 @@ function EditProfile() {
                   
                 )}
                 
-                {showRules && (
+                {showPasswordRules  && (
                   <div ref={bubbleRef} style={styles.rulesBubble}>
                     <div style={styles.bubbleArrow}></div>
                     <div style={styles.rulesContainer}>
@@ -314,15 +330,14 @@ function EditProfile() {
               <label htmlFor="confirmPassword" style={styles.label}>Repetir Contraseña Nueva</label>
               <div style={styles.inputWrapper}>
                 <input
-                  ref={inputRef}
                   name="confirmPassword"
                   type={showConfirmPassword  ? "text" : "password"}
                   value={confirmPassword}
                   onChange={(e) => {
                     setConfirmPassword(e.target.value);
+                    validatePassword(e.target.value);
                   }}
                   onBlur={() => handleBlur('password')}
-                  onFocus={() => setShowRules(true)}
                   style={{
                     ...styles.input,
                   borderColor: errors.password && touched.password ? '#E83F25' : '#ddd',
@@ -341,6 +356,9 @@ function EditProfile() {
                     : <FaEyeSlash size={20} />
                   }
                 </div>
+                )}
+                {confirmPassword && password !== confirmPassword && (
+                  <span style={styles.errorText}>Las contraseñas no coinciden</span>
                 )}
                 {errors.password && touched.password && (
                   <FaExclamationCircle
@@ -634,6 +652,7 @@ const styles = {
   errorText: {
     color: '#e74c3c',
     fontSize: '0.8rem',
+    marginTop: '5px',
     display: 'block'
   },
 
@@ -648,35 +667,38 @@ const styles = {
     top: '0',
     marginLeft: '30px',
     width: '275px',
-    backgroundColor: '#FFCFB3',
+    backgroundColor: '#FF0000',
     borderRadius: '8px',
     boxShadow: '0 2px 14px rgba(0, 0, 0, 0.1)',
-    border: '1px solid #e4e6eb',
+    //border: '1px solid rgb(0, 0, 0)',
     zIndex: 1000
   },
   bubbleArrow: {
     position: 'absolute',
-    left: '-8px',
-    top: '16px',
-    width: '0',
-    height: '0',
-    borderTop: '8px solid transparent',
-    borderBottom: '8px solid transparent',
-    borderRight: '8px solid #FFCFB3',
+    left: '-1rem',
+    top: '0.8rem',
+    width: '1rem',
+    height: '1rem',
+    color: '#FF0000',
+    borderTop: '0.5rem solid transparent',
+    borderBottom: '0.5rem solid transparent',
+    borderRight: '1rem solid #FF0000',
     filter: 'drop-shadow(-2px 0 1px rgba(0, 0, 0, 0.05))'
   },
   rulesContainer: {
     padding: '20px'
+    
   },
   ruleItem: {
     display: 'flex',
     alignItems: 'center',
-    gap: '8px',
-    marginBottom: '8px'
+    gap: '0.4rem',
+    marginBottom: '0.5rem',
+    
   },
   ruleText: {
     fontSize: '14px',
-    color: '#000000'
+    color: '#ffffff'
   },
   ruleIcon: {
     fontSize: '16px',

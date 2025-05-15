@@ -105,7 +105,7 @@ export function AuthProvider({ children }) {
       console.log("Enviando datos al servidor:", updateData)
 
       // Realizar la solicitud HTTP
-      const response = await fetch("https://actaseclesiasticas.koyeb.app/api/auth/update-profile", {
+      const response = await fetch("https://actaseclesiasticas.koyeb.app/api/user/update-profile", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -1,4 +1,5 @@
-import { FaSignOutAlt, FaUserCircle, FaChevronUp, FaChevronDown, FaEdit } from "react-icons/fa"
+import { FaSignOutAlt, FaUserCircle, FaChevronUp, FaChevronDown, FaEdit, FaKey } from "react-icons/fa"
+
 import { useState, useRef, useCallback, useEffect } from "react"
 import { useAuth } from "../../context/AuthContext"
 import { useNavigate } from "react-router-dom"
@@ -8,12 +9,18 @@ function PrincipalHeader() {
   const navigate = useNavigate()
   const { user, logout } = useAuth()
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-const dropdownRef = useRef(null);
+  const dropdownRef = useRef(null);
 
   const handleEditProfile = () => {
     console.log("Navegando a editar perfil") // Agregamos un log para depuración
     setIsDropdownOpen(false) // Cerramos el dropdown
     navigate("/editarPerfil") // Navegamos a la ruta correcta
+  }
+
+  const handleChangePassword = () => {
+    console.log("Navegando a cambiar contraseña") // Agregamos un log para depuración
+    setIsDropdownOpen(false) // Cerramos el dropdown
+    navigate("/cambiarContrasena") // Navegamos a la ruta correcta
   }
 
   const toggleDropdown = useCallback((e) => {
@@ -45,7 +52,11 @@ const dropdownRef = useRef(null);
                     {/* Usamos un botón normal en lugar de un elemento de menú para mejor compatibilidad */}
                     <button onClick={handleEditProfile} style={styles.dropdownItem}>
                       <FaEdit style={styles.dropdownIcon} />
-                      <span style={styles.dropdownIconText}>Editar perfil</span>
+                      <span style={styles.dropdownIconText}>Editar Perfil</span>
+                    </button>
+                    <button onClick={handleChangePassword} style={styles.dropdownItem}>
+                      <FaKey style={styles.dropdownIcon} />
+                      <span style={styles.dropdownIconText}>Cambiar Contraseña</span>
                     </button>
                   </div>
                 )}

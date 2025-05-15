@@ -3,6 +3,7 @@ import axios from "axios"
 import { useNavigate } from "react-router-dom"
 import logo from "../assets/logo.png"
 import { useAuth } from "../context/AuthContext"
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 function Login() {
   const [email, setEmail] = useState("")
@@ -11,6 +12,7 @@ function Login() {
   const { isAuthenticated, login } = useAuth()
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
+  const [showPassword, setShowPassword] = useState(false);
 
   // Redirigir si ya está autenticado
   useEffect(() => {
@@ -88,13 +90,26 @@ function Login() {
               Contraseña
             </label>
             <input
-              type="password"
+              type={showPassword ? "text" : "password"}
               id="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               style={styles.input}
               required
             />
+            {password.length > 0 && (
+                <div
+                  style={styles.toggleIcon}
+                  onMouseDown={e => e.preventDefault()}
+                  onClick={() => setShowPassword(prev => !prev)}
+            
+                >
+                {showPassword
+                  ? <FaEyeSlash size={20} />
+                  : <FaEye size={20} />
+                }
+                </div>
+              )}
           </div>
 
           <button
@@ -289,7 +304,15 @@ const styles = {
     "50%": { backgroundPosition: "100% 50%" },
     "100%": { backgroundPosition: "0% 50%" },
   },
-  
+  toggleIcon: {
+  position: 'absolute',
+  right: '1rem',
+  top: '70%',
+  transform: 'translateY(-50%)',
+  cursor: 'pointer',
+  fontSize: '1.5rem',
+  color: '#000000'       
+},
 
 };
 
