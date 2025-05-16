@@ -93,7 +93,7 @@ const DetallesActas = ({ acta }) => {
               <h4 style={styles.sectionTitle}>Datos del Padre</h4>
               <div style={styles.detailsRow}>
                 <span style={styles.detailsLabel}>Padre:</span>
-                <span style={styles.detailsValue}>{datos.idBautizado.nombresPadre || "No disponible"}</span>
+                <span style={styles.detailsValue}>{datos.idBautizado.padre.nombre1 || "No disponible"}</span>
               </div>
               <div style={styles.detailsRow}>
                 <span style={styles.detailsLabel}>Abuelo Paterno:</span>
@@ -108,7 +108,7 @@ const DetallesActas = ({ acta }) => {
               <h4 style={styles.sectionTitle}>Datos de la Madre</h4>
               <div style={styles.detailsRow}>
                 <span style={styles.detailsLabel}>Madre:</span>
-                <span style={styles.detailsValue}>{datos.idBautizado.nombresMadre || "No disponible"}</span>
+                <span style={styles.detailsValue}>{datos.idBautizado.madre.nombre1 || "No disponible"}</span>
               </div>
               <div style={styles.detailsRow}>
                 <span style={styles.detailsLabel}>Abuelo Materno:</span>
