@@ -188,11 +188,11 @@ const DetallesActas = ({ acta }) => {
               <h4 style={styles.sectionTitle}>Datos de la Familia</h4>
               <div style={styles.detailsRow}>
                 <span style={styles.detailsLabel}>Padre:</span>
-                <span style={styles.detailsValue}>{datos.idConfirmante.nombresPadre || "No disponible"}</span>
+                <span style={styles.detailsValue}>{datos.idConfirmante.padre.nombre1 || "No disponible"}</span>
               </div>
               <div style={styles.detailsRow}>
                 <span style={styles.detailsLabel}>Madre:</span>
-                <span style={styles.detailsValue}>{datos.idConfirmante.nombresMadre || "No disponible"}</span>
+                <span style={styles.detailsValue}>{datos.idConfirmante.madre.nombre1 || "No disponible"}</span>
               </div>
               <div style={styles.detailsRow}>
                 <span style={styles.detailsLabel}>Padrino:</span>
