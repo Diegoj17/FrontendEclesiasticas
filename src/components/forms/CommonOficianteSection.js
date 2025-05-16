@@ -1,4 +1,4 @@
-import ComboBox from "../ui/ComboBoxSacerdote"
+import ComboBox from "../ui/ComboBoxSacerdotes"
 import SacerdoteService from "../../services/SacerdoteService"
 import { useState, useEffect } from "react"
 

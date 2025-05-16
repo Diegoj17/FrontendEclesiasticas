@@ -1,4 +1,4 @@
-import ComboBoxSacerdotes from "../ui/ComboBoxSacerdote"
+import ComboBoxSacerdotes from "../ui/ComboBoxSacerdotes"
 const ConfirmacionOficianteSection = ({ formData, handleChange }) => {
   // Función modificada para manejar la selección de sacerdotes
   const handleSacerdoteChange = (e) => {
