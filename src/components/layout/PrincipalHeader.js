@@ -20,7 +20,7 @@ function PrincipalHeader() {
   const handleChangePassword = () => {
     console.log("Navegando a cambiar contraseña") // Agregamos un log para depuración
     setIsDropdownOpen(false) // Cerramos el dropdown
-    navigate("/cambiarContrasena") // Navegamos a la ruta correcta
+    navigate("/cambiarContraseña") // Navegamos a la ruta correcta
   }
 
   const toggleDropdown = useCallback((e) => {

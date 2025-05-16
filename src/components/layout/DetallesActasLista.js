@@ -381,6 +381,7 @@ const styles = {
         fontSize: "0.9rem",
         fontWeight: "450",
         textAlign: "right",
+        textTransform: "capitalize",
       },
       buttonIcon: {
         width: "16px",

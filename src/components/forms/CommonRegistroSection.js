@@ -1,6 +1,13 @@
 import React from 'react'
 
 function CommonRegistroSection({ formData, handleChange }) {
+
+  // Generar opciones para días, meses y años
+  const dias = Array.from({ length: 31 }, (_, i) => i + 1);
+  const meses = Array.from({ length: 12 }, (_, i) => i + 1);
+  const añoActual = new Date().getFullYear();
+  const años = Array.from({ length: 500 }, (_, i) => añoActual - i);
+
   return (
     <div style={styles.section}>
       <h2 style={styles.sectionTitle}>Datos de Registro</h2>
@@ -18,44 +25,59 @@ function CommonRegistroSection({ formData, handleChange }) {
           <input type="text" name="acta" value={formData.acta} onChange={handleChange} style={styles.formRegistro} />
         </div>
       </div>
-      <div style={styles.ceremoniaContainer}>
-        <label style={styles.formLabelCeremonia}>Fecha de la Ceremonia</label>
-        <div style={styles.ceremoniaRow}>
-          <div style={styles.ceremoniaGroup}>
-            <label style={styles.ceremoniaLabel}>Día</label>
-            <input
-              type="text"
+
+      <div style={styles.formRow}>
+        {/* Fecha de Ceremonia */}
+        <div style={styles.formGroup}>
+          <label style={styles.formLabelCeremonia}>Fecha de la Ceremonia</label>
+          <div style={styles.dateContainer}>
+            <div style={styles.ceremoniaGroup}>
+            <select
               name="fechaCeremonia.dia"
               value={formData.fechaCeremonia.dia}
               onChange={handleChange}
               style={styles.ceremoniaInput}
-            />
-          </div>
-          <div style={styles.ceremoniaGroup}>
-            <label style={styles.ceremoniaLabel}>Mes</label>
-            <input
-              type="text"
+            >
+            <option value="">Día</option>
+              {dias.map((dia) => (
+                <option key={dia} value={dia}>{dia}</option>
+              ))}
+            </select>
+            </div>
+
+            <div style={styles.ceremoniaGroup}>
+            <select
               name="fechaCeremonia.mes"
               value={formData.fechaCeremonia.mes}
               onChange={handleChange}
               style={styles.ceremoniaInput}
-            />
-          </div>
-          <div style={styles.ceremoniaGroup}>
-            <label style={styles.ceremoniaLabel}>Año</label>
-            <input
-              type="text"
+            >
+              <option value="">Mes</option>
+              {meses.map((mes) => (
+                <option key={mes} value={mes}>{mes}</option>
+              ))}
+            </select>
+            </div>
+
+            <div style={styles.ceremoniaGroup}>
+            <select
               name="fechaCeremonia.año"
-              value={formData.fechaCeremonia.año}
+              value={formData.fechaCeremonia.año || ""}
               onChange={handleChange}
               style={styles.ceremoniaInput}
-            />
-          </div>
+            >
+              <option value="">Año</option>
+              {años.map((año) => (
+                <option key={año} value={año}>{año}</option>
+              ))}
+            </select>
+            </div>
         </div>
       </div>
     </div>
-  )
-}
+  </div>
+  );
+};
 
 const styles = {
   section: {
@@ -106,6 +128,14 @@ const styles = {
     fontSize: "1rem",
     textAlign: "center",
   },
+  dateContainer: {
+    display: "flex",
+    gap: "1rem",
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: "0.5rem",
+    width: "100%",
+  },
   ceremoniaContainer: {
     marginTop: "0.5rem",
     width: "100%",
@@ -144,7 +174,7 @@ const styles = {
   },
   ceremoniaInput: {
     width: "100%",
-    padding: "0.5rem",
+    padding: "0.5rem 1rem",
     border: "1px solid #ced4da",
     borderRadius: "0.5rem",
     fontSize: "1rem",

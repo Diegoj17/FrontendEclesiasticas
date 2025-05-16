@@ -89,20 +89,13 @@ function ListaActas() {
     }
 
     // Verificar si hay actas de matrimonio seleccionadas
-    const hayMatrimonios = selectedActas.some((acta) => acta.tipo.toLowerCase() === "matrimonio")
-
-    if (hayMatrimonios) {
+    
       setModalMessage(
-        "ADVERTENCIA: Las actas de matrimonio aún no están soportadas por el servidor. " +
-          "¿Desea continuar con el envío de las demás actas seleccionadas?",
-      )
-    } else {
-      setModalMessage(
-        `¿Está seguro que desea guardar las acta${
+        `¿Está seguro que desea guardar las actas seleccionadas${
           selectedActas.length > 1 ? "s" : ""
         } seleccionada${selectedActas.length > 1 ? "s" : ""}?`,
       )
-    }
+    
 
     setModalAction("enviar")
     setShowConfirmModal(true)
@@ -161,16 +154,6 @@ function ListaActas() {
 }, [])
   
 
-  const getNombreCompleto = (acta) => {
-    if (acta.tipo === "Bautismo") {
-      return `${acta.bautismo.primerNombre || ""} ${acta.bautismo.segundoNombre || ""} ${acta.bautismo.primerApellido || ""} ${acta.bautismo.segundoApellido || ""}`.trim()
-    } else if (acta.tipo === "Confirmación") {
-      return `${acta.confirmacion.primerNombre || ""} ${acta.confirmacion.segundoNombre || ""} ${acta.confirmacion.primerApellido || ""} ${acta.confirmacion.segundoApellido || ""}`.trim()
-    } else if (acta.tipo === "Matrimonio") {
-      return `${acta.matrimonio.novio.primerNombre || ""} ${acta.matrimonio.novio.primerApellido || ""} y ${acta.matrimonio.novia.primerNombre || ""} ${acta.matrimonio.novia.primerApellido || ""}`.trim()
-    }
-    return "Nombre no disponible"
-  }
 
   const getPrimerNombre = (acta) => {
     if (acta.tipo === "Bautismo") {
@@ -250,7 +233,7 @@ function ListaActas() {
                 }}
                 style={{
                   ...styles.actionButton,
-                  backgroundColor: "#FF000F",
+                  backgroundColor: "#FF0000",
                   color: "white",
                   opacity: selectedActas.length > 0 ? 1 : 0.5,
                   cursor: selectedActas.length > 0 ? "pointer" : "not-allowed",
@@ -392,7 +375,7 @@ function ListaActas() {
         <div style={styles.modalOverlay}>
           <div style={styles.modal}>
             <div style={styles.modalHeader}>
-              <h2 style={styles.modalTitle}>Confirmar Acción</h2>
+              <h2 style={styles.modalTitle}>Confirmar Actas</h2>
             </div>
             <div style={styles.modalBody}>
               <p>{modalMessage}</p>
@@ -421,7 +404,7 @@ function ListaActas() {
                 backgroundColor: resultModalSuccess ? "#4CAF50" : "#F44336",
               }}
             >
-              <h2 style={styles.modalTitle}>{resultModalSuccess ? "Operación Exitosa" : "Error"}</h2>
+              <h2 style={styles.modalTitle}>{resultModalSuccess ? "Operación Exitosa" : "¡Error!"}</h2>
             </div>
             <div style={styles.modalBody}>
               {!resultModalSuccess && (
@@ -692,8 +675,9 @@ const styles = {
   },
   modalTitle: {
     margin: 0,
-    fontSize: "1.2rem",
+    fontSize: "1.3rem",
     fontWeight: "600",
+    textAlign: "center",
   },
   modalBody: {
     padding: "1.5rem",
@@ -717,8 +701,8 @@ const styles = {
     transition: "background-color 0.2s",
   },
   cancelButton: {
-    backgroundColor: "#e0e0e0",
-    color: "#333",
+    backgroundColor: "#ff0000",
+    color: "#ffffff",
     border: "none",
     borderRadius: "0.25rem",
     padding: "0.5rem 1rem",

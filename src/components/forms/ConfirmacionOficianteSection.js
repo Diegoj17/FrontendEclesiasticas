@@ -1,113 +1,232 @@
-import ComboBox from "../ui/ComboboxSacerdote"
-import { useState, useEffect } from "react"
-import SacerdoteService from "../../services/SacerdoteService"
+import ComboBoxSacerdotes from "../ui/ComboBoxSacerdote"
+const ConfirmacionOficianteSection = ({ formData, handleChange }) => {
+  // Función modificada para manejar la selección de sacerdotes
+  const handleSacerdoteChange = (e) => {
+    const { name, value, sacerdoteData } = e.target
 
-function ConfirmacionOficianteSection({
-  formData,
-  handleChange,
-  sacerdotes = [],
-  monsenores = [],
-  testigos = [],
-  loading: externalLoading = false,
-  error: externalError = null,
-  agregarSacerdote = () => {},
-}) {
-  const [loading, setLoading] = useState(externalLoading)
-  const [error, setError] = useState(externalError)
-  const [sacerdotesList, setSacerdotesList] = useState([])
+    // SOLUCIÓN: Actualizar múltiples campos para asegurar consistencia
+    if (name === "oficiante") {
+      // Actualizar tanto el campo principal como el campo en confirmacion
+      handleChange({
+        target: {
+          name: "oficiante",
+          value: value,
+          isComboBox: true,
+        },
+      })
 
-  // Cargar sacerdotes al montar el componente
-  useEffect(() => {
-    const fetchSacerdotes = async () => {
-      // Si ya tenemos sacerdotes proporcionados, usarlos
-      if (sacerdotes.length > 0) {
-        setSacerdotesList(sacerdotes)
-        return
-      }
+      // También actualizar nombresSacerdote para el backend
+      handleChange({
+        target: {
+          name: "nombresSacerdote",
+          value: value,
+          isComboBox: true,
+        },
+      })
 
-      try {
-        setLoading(true)
-        setError(null)
-        const options = await SacerdoteService.getAllSacerdotes()
-        setSacerdotesList(options)
-      } catch (err) {
-        console.error("Error al cargar sacerdotes:", err)
-        setError("No se pudieron cargar los sacerdotes")
-      } finally {
-        setLoading(false)
+      // Actualizar el campo en confirmacion para mantener la UI consistente
+      handleChange({
+        target: {
+          name: "confirmacion.sacerdote",
+          value: value,
+          isComboBox: true,
+        },
+      })
+    }
+
+    // Guardar tanto el nombre visible como los datos completos del sacerdote
+    if (sacerdoteData) {
+      console.log("Datos del sacerdote seleccionado:", sacerdoteData)
+      // Guardar el ID del sacerdote si está disponible
+      if (sacerdoteData.id) {
+        handleChange({
+          target: {
+            name: "idSacerdote",
+            value: sacerdoteData.id,
+            isComboBox: true,
+          },
+        })
       }
     }
 
-    fetchSacerdotes()
-  }, [sacerdotes])
-
-  // Manejar el cambio en el ComboBox
-  const handleComboBoxChange = (e) => {
-    const { name, value } = e.target
-
-    // Llamar al manejador de cambios original
+    // Siempre actualizar el nombre visible
     handleChange(e)
+  }
 
-    // Si el valor no es "Otro" y no está en la lista, agregarlo
-    if (value !== "Otro" && value.trim() !== "") {
-      if (name === "confirmacion.sacerdote" && !sacerdotesList.includes(value)) {
-        agregarSacerdote(value, "sacerdote")
-      } else if (name === "confirmacion.monseñor" && !sacerdotesList.includes(value)) {
-        agregarSacerdote(value, "monsenor")
-      } else if (name === "confirmacion.doyFe" && !sacerdotesList.includes(value)) {
-        agregarSacerdote(value, "testigo")
+  const handleDoyFeChange = (e) => {
+    const { name, value, sacerdoteData } = e.target
+
+    // SOLUCIÓN: Actualizar múltiples campos para asegurar consistencia
+    if (name === "doyFe") {
+      // Actualizar tanto el campo principal como el campo en confirmacion
+      handleChange({
+        target: {
+          name: "doyFe",
+          value: value,
+          isComboBox: true,
+        },
+      })
+
+      // También actualizar nombresDoyFe para el backend
+      handleChange({
+        target: {
+          name: "nombresDoyFe",
+          value: value,
+          isComboBox: true,
+        },
+      })
+
+      // Actualizar el campo en confirmacion para mantener la UI consistente
+      handleChange({
+        target: {
+          name: "confirmacion.doyFe",
+          value: value,
+          isComboBox: true,
+        },
+      })
+    }
+
+    // Guardar tanto el nombre visible como los datos completos
+    if (sacerdoteData) {
+      console.log("Datos del Doy Fe seleccionado:", sacerdoteData)
+      // Guardar el ID si está disponible
+      if (sacerdoteData.id) {
+        handleChange({
+          target: {
+            name: "idDoyFe",
+            value: sacerdoteData.id,
+            isComboBox: true,
+          },
+        })
       }
     }
+
+    // Siempre actualizar el nombre visible
+    handleChange(e)
   }
+
+  const handleMonsenorChange = (e) => {
+    const { name, value, sacerdoteData } = e.target
+
+    // SOLUCIÓN: Actualizar múltiples campos para asegurar consistencia
+    if (name === "confirmacion.monseñor") {
+      // Actualizar el campo monseñor en confirmacion
+      handleChange({
+        target: {
+          name: "confirmacion.monseñor",
+          value: value,
+          isComboBox: true,
+        },
+      })
+
+      // También actualizar nombresmonsr para el backend
+      handleChange({
+        target: {
+          name: "nombresmonsr",
+          value: value,
+          isComboBox: true,
+        },
+      })
+    }
+
+    // Guardar tanto el nombre visible como los datos completos
+    if (sacerdoteData) {
+      console.log("Datos del Monseñor seleccionado:", sacerdoteData)
+      // Guardar el ID si está disponible
+      if (sacerdoteData.id) {
+        handleChange({
+          target: {
+            name: "idmonsr",
+            value: sacerdoteData.id,
+            isComboBox: true,
+          },
+        })
+      }
+    }
+
+    // Siempre actualizar el nombre visible
+    handleChange(e)
+  }
+
+  // Función para depurar el estado del formulario
+  const debugFormData = () => {
+    console.log("Estado actual del formData:", {
+      oficiante: formData.oficiante,
+      nombresSacerdote: formData.nombresSacerdote,
+      doyFe: formData.doyFe,
+      nombresDoyFe: formData.nombresDoyFe,
+      nombresmonsr: formData.nombresmonsr,
+      "confirmacion.monseñor": formData.confirmacion?.monseñor,
+      "confirmacion.sacerdote": formData.confirmacion?.sacerdote,
+      "confirmacion.doyFe": formData.confirmacion?.doyFe,
+    })
+  }
+
+  // Ejecutar depuración cuando se renderiza el componente
+  console.log("Renderizando ConfirmacionOficianteSection con formData:", formData)
+  debugFormData()
 
   return (
     <div style={styles.section}>
       <h2 style={styles.sectionTitle}>Datos del Encargado de Celebrar la Ceremonia</h2>
 
-      {loading ? (
-        <div style={styles.loadingContainer}>Cargando lista de sacerdotes...</div>
-      ) : error ? (
-        <div style={styles.errorContainer}>{error}</div>
-      ) : (
-        <>
-          <div style={styles.formRow}>
-            <div style={styles.formGroup}>
-              <ComboBox
-                label="Monseñor"
-                options={sacerdotesList}
-                value={formData.confirmacion?.monseñor || ""}
-                onChange={handleComboBoxChange}
-                placeholder="Seleccione o escriba el nombre"
-                name="confirmacion.monseñor"
-              />
-            </div>
-          </div>
-          <div style={styles.formRow}>
-            <div style={styles.formGroup}>
-              <ComboBox
-                label="Sacerdote"
-                options={sacerdotesList}
-                value={formData.confirmacion?.oficiante || ""}
-                onChange={handleComboBoxChange}
-                placeholder="Seleccione o escriba el nombre"
-                name="confirmacion.sacerdote"
-              />
-            </div>
-          </div>
-          <div style={styles.formRow}>
-            <div style={styles.formGroup}>
-              <ComboBox
-                label="Doy Fe"
-                options={sacerdotesList}
-                value={formData.confirmacion?.doyFe || ""}
-                onChange={handleComboBoxChange}
-                placeholder="Seleccione o escriba el nombre"
-                name="confirmacion.doyFe"
-              />
-            </div>
-          </div>
-        </>
-      )}
+      <div style={styles.formRow}>
+        <div style={styles.formGroup}>
+          <label htmlFor="confirmacion.monseñor" style={styles.label}>
+          Monseñor  
+          </label>
+          <ComboBoxSacerdotes
+            name="confirmacion.monseñor"
+            value={formData.confirmacion?.monseñor || formData.nombresmonsr || ""}
+            onChange={handleMonsenorChange}
+            placeholder="Seleccione un monseñor..."
+          />
+          {/* Campo oculto para asegurar que el nombre se guarde correctamente */}
+          <input
+            type="hidden"
+            name="nombresmonsr"
+            value={formData.confirmacion?.monseñor || formData.nombresmonsr || ""}
+          />
+        </div>
+      </div>
+
+      <div style={styles.formRow}>
+        <div style={styles.formGroup}>
+          <label htmlFor="oficiante" style={styles.label}>
+            Sacerdote
+          </label>
+          <ComboBoxSacerdotes
+            name="oficiante"
+            value={formData.oficiante || formData.nombresSacerdote || formData.confirmacion?.sacerdote || ""}
+            onChange={handleSacerdoteChange}
+            placeholder="Seleccione un sacerdote..."
+          />
+          {/* Campo oculto para asegurar que el nombre se guarde correctamente */}
+          <input
+            type="hidden"
+            name="nombresSacerdote"
+            value={formData.oficiante || formData.nombresSacerdote || formData.confirmacion?.sacerdote || ""}
+          />
+        </div>
+        <div style={styles.formGroup}>
+          <label htmlFor="doyFe" style={styles.label}>
+            Doy Fe
+          </label>
+          <ComboBoxSacerdotes
+            name="doyFe"
+            value={formData.doyFe || formData.nombresDoyFe || formData.confirmacion?.doyFe || ""}
+            onChange={handleDoyFeChange}
+            placeholder="Seleccione quien da fe..."
+          />
+          {/* Campo oculto para asegurar que el nombre se guarde correctamente */}
+          <input
+            type="hidden"
+            name="nombresDoyFe"
+            value={formData.doyFe || formData.nombresDoyFe || formData.confirmacion?.doyFe || ""}
+          />
+        </div>
+      </div>
+      
     </div>
   )
 }
@@ -131,12 +250,19 @@ const styles = {
     fontWeight: "700",
     color: "#385792",
   },
+  label: {
+    display: "block",
+    marginBottom: "0.5rem",
+    fontSize: "1rem",
+    fontWeight: "500",
+    color: "#000000",
+  },
   formRow: {
     display: "flex",
     flexWrap: "wrap",
     alignItems: "center",
     justifyContent: "space-between",
-    gap: "1rem",
+    gap: "0rem",
     marginBottom: "0.5rem",
     width: "100%",
   },

@@ -10,11 +10,11 @@ import CrearCuenta from "./pages/CrearCuenta"
 import RecuperarContraseña from "./pages/RecuperarContraseña"
 import Principal from "./pages/Principal"
 import EditarPerfil from "./pages/EditarPerfil"
+import CambiarContraseña from "./pages/CambiarContraseña"
 import AñadirActas from "./pages/AñadirActas"
 import BuscarActas from "./pages/BuscarActas"
 import VistaActas from "./pages/VistaActas"
 import ListaActas from "./pages/ListaActas"
-import CorregirActas from "./pages/CorregirActas"
 
 function App() {
   return (
@@ -36,7 +36,7 @@ function AppContent() {
 
   // Guardar la ruta actual en sessionStorage (más confiable para recargas)
   useEffect(() => {
-    const validPaths = ["/Principal", "/vistaActas", "/buscarActas", "/añadirActas", "/listaActas", "/editarPerfil"]
+    const validPaths = ["/Principal", "/vistaActas", "/buscarActas", "/añadirActas", "/listaActas", "/editarPerfil", "/cambiarContraseña"]
 
     if (validPaths.includes(location.pathname) && isAuthenticated) {
       sessionStorage.setItem("currentPath", location.pathname)
@@ -85,15 +85,32 @@ function AppContent() {
   return (
     <ScrollableContainer>
       <Routes>
-        <Route path="/" element={<LoginRedirect />} />
-        <Route path="/crearCuenta" element={<CrearCuenta />} />
-        <Route path="/recuperarContraseña" element={<RecuperarContraseña />} />
+        <Route 
+          path="/" 
+          element={<LoginRedirect />} 
+        />
+        <Route 
+          path="/crearCuenta" 
+          element={<CrearCuenta />} 
+        />
+        <Route 
+          path="/recuperarContraseña" 
+          element={<RecuperarContraseña />} 
+        />
 
         <Route
           path="/editarPerfil"
           element={
             <ProtectedRoute>
               <EditarPerfil />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/cambiarContraseña"
+          element={
+            <ProtectedRoute>
+              <CambiarContraseña />
             </ProtectedRoute>
           }
         />
@@ -137,14 +154,7 @@ function AppContent() {
             </ProtectedRoute>
           }
         />
-        <Route
-          path="/corregirActas"
-          element={
-            <ProtectedRoute>
-              <CorregirActas />
-            </ProtectedRoute>
-          }
-        />
+        
 
          {/* Ruta comodín que redirige a login o a la última ruta guardada */}
         <Route

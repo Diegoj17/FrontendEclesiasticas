@@ -2,6 +2,12 @@ import React from "react"
 import ComboBox from "../ui/ComboBox"
 
 function MatrimonioForm({ formData, handleChange, ciudadesColombia }) {
+
+  const dias = Array.from({ length: 31 }, (_, i) => i + 1);
+  const meses = Array.from({ length: 12 }, (_, i) => i + 1);
+  const añoActual = new Date().getFullYear();
+  const años = Array.from({ length: 500 }, (_, i) => añoActual - i);
+
   return (
     <>
       {/* Datos del novio */}
@@ -75,35 +81,47 @@ function MatrimonioForm({ formData, handleChange, ciudadesColombia }) {
           <div style={{ ...styles.fechaNacimientoContainer, flex: 1 }}>
             <label style={styles.formLabelNacimiento}>Fecha de Nacimiento</label>
             <div style={styles.fechaNacimientoRow}>
+
               <div style={styles.fechaNacimientoGroup}>
-                <label style={styles.fechaNacimientoLabel}>Dia</label>
-                <input
-                  type="text"
+                <select
                   name="matrimonio.novio.fechaNacimiento.dia"
                   value={formData.matrimonio.novio.fechaNacimiento.dia}
                   onChange={handleChange}
                   style={styles.fechaNacimientoInput}
-                />
+                >
+                <option value="">Día</option>
+                  {dias.map((dia) => (
+                    <option key={dia} value={dia}>{dia}</option>
+                  ))}
+                </select>
               </div>
+
               <div style={styles.fechaNacimientoGroup}>
-                <label style={styles.fechaNacimientoLabel}>Mes</label>
-                <input
-                  type="text"
+                <select
                   name="matrimonio.novio.fechaNacimiento.mes"
                   value={formData.matrimonio.novio.fechaNacimiento.mes}
                   onChange={handleChange}
                   style={styles.fechaNacimientoInput}
-                />
+                >
+                <option value="">Mes</option>
+                  {meses.map((mes) => (
+                    <option key={mes} value={mes}>{mes}</option>
+                  ))}
+                </select>
               </div>
+
               <div style={styles.fechaNacimientoGroup}>
-                <label style={styles.fechaNacimientoLabel}>Año</label>
-                <input
-                  type="text"
+                <select
                   name="matrimonio.novio.fechaNacimiento.año"
                   value={formData.matrimonio.novio.fechaNacimiento.año}
                   onChange={handleChange}
                   style={styles.fechaNacimientoInput}
-                />
+                >
+                <option value="">Año</option>
+                  {años.map((año) => (
+                    <option key={año} value={año}>{año}</option>
+                  ))}
+                </select>
               </div>
             </div>
           </div>
@@ -228,35 +246,47 @@ function MatrimonioForm({ formData, handleChange, ciudadesColombia }) {
           <div style={{ ...styles.fechaNacimientoContainer, flex: 1 }}>
             <label style={styles.formLabelNacimiento}>Fecha de Nacimiento</label>
             <div style={styles.fechaNacimientoRow}>
+
               <div style={styles.fechaNacimientoGroup}>
-                <label style={styles.fechaNacimientoLabel}>Dia</label>
-                <input
-                  type="text"
+                <select
                   name="matrimonio.novia.fechaNacimiento.dia"
                   value={formData.matrimonio.novia.fechaNacimiento.dia}
                   onChange={handleChange}
                   style={styles.fechaNacimientoInput}
-                />
+                >
+                <option value="">Día</option>
+                  {dias.map((dia) => (
+                    <option key={dia} value={dia}>{dia}</option>
+                  ))}
+                </select>
               </div>
+
               <div style={styles.fechaNacimientoGroup}>
-                <label style={styles.fechaNacimientoLabel}>Mes</label>
-                <input
-                  type="text"
+                <select
                   name="matrimonio.novia.fechaNacimiento.mes"
                   value={formData.matrimonio.novia.fechaNacimiento.mes}
                   onChange={handleChange}
                   style={styles.fechaNacimientoInput}
-                />
+                >
+                <option value="">Mes</option>
+                  {meses.map((mes) => (
+                    <option key={mes} value={mes}>{mes}</option>
+                  ))}
+                </select>
               </div>
+
               <div style={styles.fechaNacimientoGroup}>
-                <label style={styles.fechaNacimientoLabel}>Año</label>
-                <input
-                  type="text"
+                <select
                   name="matrimonio.novia.fechaNacimiento.año"
                   value={formData.matrimonio.novia.fechaNacimiento.año}
                   onChange={handleChange}
                   style={styles.fechaNacimientoInput}
-                />
+                >
+                <option value="">Año</option>
+                  {años.map((año) => (
+                    <option key={año} value={año}>{año}</option>
+                  ))}
+                </select>
               </div>
             </div>
           </div>

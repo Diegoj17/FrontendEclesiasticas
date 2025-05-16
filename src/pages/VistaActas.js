@@ -223,7 +223,7 @@ useEffect(() => {
               </div>
               ) : registros.length === 0 ? (
               <div style={styles.emptyContainer}>
-                <p>No hay actas disponibles para el tipo seleccionado.</p>
+                <p>No hay actas disponibles para el tipo de ceremonia seleccionado.</p>
               </div>
             ) : (
               <DataTableExpandle
@@ -391,7 +391,7 @@ const styles = {
     alignItems: "center",
     height: "200px",
     width: "100%",
-    color: "#666",
+    color: "#000000",
     position: "absolute",
     top: "50%",
     left: "50%",

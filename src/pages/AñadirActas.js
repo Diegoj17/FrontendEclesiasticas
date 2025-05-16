@@ -87,7 +87,7 @@ function AñadirPartidas() {
         padrino: currentData.bautismo.padrino,
         madrina: currentData.bautismo.madrina,
         // Campos específicos de confirmación
-        fechaBautismo: { dia: "", mes: "", año: "" }, // Se deja para llenar manualmente
+        //fechaBautismo: { dia: "", mes: "", año: "" }, // Se deja para llenar manualmente
         lugarBautismo: currentData.bautismo.lugarNacimiento, // Se sugiere el mismo lugar
         monseñor: "",
         sacerdote: "",
@@ -168,7 +168,7 @@ function AñadirPartidas() {
           padrino: currentData.bautismo.padrino,
           madrina: currentData.bautismo.madrina,
           // Campos específicos de confirmación se inicializan vacíos
-          fechaBautismo: { dia: "", mes: "", año: "" },
+          //fechaBautismo: { dia: "", mes: "", año: "" },
           lugarBautismo: "",
           monseñor: "",
           sacerdote: "",
@@ -670,20 +670,6 @@ function AñadirPartidas() {
                 <FaListAlt style={styles.buttonIcon} />
                 <span style={styles.buttonText}>Revisar Lista</span>
               </button>
-
-              <button
-                  type="submit"
-                  style={{
-                    ...styles.sidebarButton,
-                    opacity: eventoSeleccionado && !isSubmitting ? 1 : 0.5,
-                    cursor: eventoSeleccionado && !isSubmitting ? "pointer" : "not-allowed",
-                  }}
-                  disabled={!eventoSeleccionado || isSubmitting}
-                  onClick={handleSubmit}
-                >
-                  <FaFileMedical style={styles.buttonIcon} />
-                  <span style={styles.buttonText}>{isSubmitting ? "Guardando..." : "Guardar"}</span>
-                </button>
             </div>
           </div>
 
@@ -720,6 +706,24 @@ function AñadirPartidas() {
                   </div>
                 </div>
               </div>
+
+              {/* Botón de Guardar movido aquí */}
+              <div style={styles.saveButtonContainer}>
+                <button
+                  type="submit"
+                  style={{
+                    ...styles.sidebarButton,
+                    opacity: eventoSeleccionado && !isSubmitting ? 1 : 0.5,
+                    cursor: eventoSeleccionado && !isSubmitting ? "pointer" : "not-allowed",
+                  }}
+                  disabled={!eventoSeleccionado || isSubmitting}
+                  onClick={handleSubmit}
+                >
+                <FaFileMedical style={styles.buttonIcon} />
+                <span style={styles.buttonText}>{isSubmitting ? "Guardando..." : "Guardar Acta"}</span>
+                </button>
+              </div>
+
             </form>
           ) : (
             <div style={styles.noSelectionMessage}>
@@ -841,7 +845,7 @@ const styles = {
   topButtonContainer: {
     display: "flex",
     alignItems: "center",
-    gap: "0.5rem",
+    padding: "0rem 1rem",
     flexWrap: "wrap",
   },
   label: {
@@ -932,7 +936,7 @@ const styles = {
     alignItems: "center",
     justifyContent: "center",
     gap: "0.5rem",
-    padding: "0.75rem",
+    padding: "0rem 0.75rem",
     border: "none",
     borderRadius: "0.5rem",
     backgroundColor: "#FCCE74",
@@ -945,6 +949,14 @@ const styles = {
     position: "relative",
     minHeight: "40px",
     opacity: 1,
+  },
+  saveButtonContainer: {
+  display: "flex",
+  justifyContent: "flex-end",
+  alignItems: "center",
+  marginTop: "1rem",
+  padding: "0 0rem",
+  whiteSpace: "nowrap",
   },
   buttonIcon: {
     width: "16px",

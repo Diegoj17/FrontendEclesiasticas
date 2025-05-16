@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom"
 import { useAuth } from "../../context/AuthContext"
 import logo from "../../assets/logo.png" 
 
-import { FaSignOutAlt, FaUserCircle, FaChevronDown, FaChevronUp, FaEdit } from "react-icons/fa"
+import { FaSignOutAlt, FaUserCircle, FaChevronDown, FaChevronUp, FaEdit, FaKey } from "react-icons/fa"
 
 function Header({ title }) {
   const navigate = useNavigate()
@@ -20,6 +20,12 @@ function Header({ title }) {
   const handleEditProfile = () => {
     setIsDropdownOpen(false)
     navigate("/editarPerfil")
+  }
+
+  const handleChangePassword = () => {
+    console.log("Navegando a cambiar contraseña") 
+    setIsDropdownOpen(false) 
+    navigate("/cambiarContraseña") 
   }
 
   return (
@@ -49,6 +55,10 @@ function Header({ title }) {
             <button style={styles.dropdownItem} onClick={handleEditProfile}>
               <FaEdit style={styles.dropdownIcon} />
               <span style={styles.dropdownIconText}>Editar perfil</span>
+            </button>
+            <button onClick={handleChangePassword} style={styles.dropdownItem}>
+              <FaKey style={styles.dropdownIcon} />
+              <span style={styles.dropdownIconText}>Cambiar Contraseña</span>
             </button>
           </div>
         )}

@@ -1,9 +1,7 @@
-"use client"
-
 import { useState, useRef, useEffect } from "react"
 import axios from "axios"
 
-const ComboBoxSacerdotes = ({
+const ComboBoxSacerdote = ({
   label,
   value = "", // valor "oficial" (o "Otro")
   onChange, // para el valor "oficial"
@@ -19,6 +17,7 @@ const ComboBoxSacerdotes = ({
   const [options, setOptions] = useState([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
+  const [sacerdotesData, setSacerdotesData] = useState([])
 
   // Cargar la lista de sacerdotes cuando se monta el componente
   useEffect(() => {
@@ -38,26 +37,59 @@ const ComboBoxSacerdotes = ({
           },
         })
 
-        // Transformar los datos de sacerdotes a un array de strings para el ComboBox
-        // Asumiendo que cada sacerdote tiene un campo 'nombre' o similar
-        const sacerdotesOptions = response.data.map(
-          (sacerdote) => sacerdote.nombre || `${sacerdote.nombres || ""} ${sacerdote.apellidos || ""}`.trim(),
-        )
+        console.log("Respuesta de sacerdotes:", response.data)
+
+        // Verificar la estructura de los datos
+        if (!Array.isArray(response.data)) {
+          console.error("La respuesta no es un array:", response.data)
+          setOptions(["Otro"])
+          setLoading(false)
+          return
+        }
+
+        // Guardar los datos completos para referencia
+        setSacerdotesData(response.data)
+
+        // Transformar los datos para mostrar en el dropdown
+        const sacerdotesOptions = response.data.map((sacerdote) => {
+          // Si es un objeto con id y nombre
+          if (sacerdote && typeof sacerdote === "object") {
+            // Usar el nombre si existe, o crear una etiqueta con el ID
+            if (sacerdote.nombre && sacerdote.nombre.trim() !== "") {
+              return sacerdote.nombre
+            } else {
+              return `Sacerdote ID: ${sacerdote.id || "desconocido"}`
+            }
+          }
+          // Si es un string, usarlo directamente
+          else if (typeof sacerdote === "string") {
+            return sacerdote
+          }
+
+          // Si no podemos determinar un nombre, usar una representación del objeto
+          return JSON.stringify(sacerdote)
+        })
+
+        // Filtrar valores vacíos o duplicados
+        const uniqueOptions = [...new Set(sacerdotesOptions.filter((name) => name && name.trim() !== ""))]
 
         // Añadir la opción "Otro" al final
-        sacerdotesOptions.push("Otro")
+        uniqueOptions.push("Otro")
 
-        setOptions(sacerdotesOptions)
+        setOptions(uniqueOptions)
         setLoading(false)
       } catch (err) {
         console.error("Error al cargar sacerdotes:", err)
         setError("No se pudieron cargar los sacerdotes")
         setLoading(false)
+        // Asegurar que al menos exista la opción "Otro"
+        setOptions(["Otro"])
       }
     }
 
     fetchSacerdotes()
   }, [])
+
 
   // Cerrar dropdown clic fuera
   useEffect(() => {
@@ -78,7 +110,9 @@ const ComboBoxSacerdotes = ({
     }
   }, [value, options])
 
-  const filtered = options.filter((opt) => opt.toLowerCase().includes(inputValue.toLowerCase()))
+  const filtered = options
+    .filter((opt) => opt && typeof opt === "string" && opt.trim() !== "")
+    .filter((opt) => opt.toLowerCase().includes(inputValue.toLowerCase()))
 
   const handleInputChange = (e) => {
     const v = e.target.value
@@ -141,17 +175,19 @@ const ComboBoxSacerdotes = ({
 
       {isOpen && filtered.length > 0 && (
         <ul style={styles.dropdown}>
-          {filtered.map((opt, i) => (
-            <li
-              key={i}
-              onMouseDown={() => handleOptionSelect(opt)}
-              style={styles.option}
-              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#f5f5f5")}
-              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#fff")}
-            >
-              {opt}
-            </li>
-          ))}
+          {filtered.map((opt, i) =>
+            opt && opt.trim() !== "" ? (
+              <li
+                key={i}
+                onMouseDown={() => handleOptionSelect(opt)}
+                style={styles.option}
+                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#f5f5f5")}
+                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#fff")}
+              >
+                {opt}
+              </li>
+            ) : null,
+          )}
         </ul>
       )}
 
@@ -251,4 +287,4 @@ const styles = {
   },
 }
 
-export default ComboBoxSacerdotes
+export default ComboBoxSacerdote

@@ -1,4 +1,4 @@
-import ComboBox from "../ui/ComboboxSacerdote"
+import ComboBox from "../ui/ComboBoxSacerdote"
 import SacerdoteService from "../../services/SacerdoteService"
 import { useState, useEffect } from "react"
 
@@ -61,12 +61,7 @@ function CommonOficianteSection({
     <div style={styles.section}>
       <h2 style={styles.sectionTitle}>Datos del Encargado de Celebrar la Ceremonia</h2>
 
-      {loading ? (
-        <div style={styles.loadingContainer}>Cargando lista de sacerdotes...</div>
-      ) : error ? (
-        <div style={styles.errorContainer}>{error}</div>
-      ) : (
-        <>
+      
           <div style={styles.formRow}>
             <div style={styles.formGroup}>
               <ComboBox
@@ -91,8 +86,6 @@ function CommonOficianteSection({
               />
             </div>
           </div>
-        </>
-      )}
     </div>
   )
 }

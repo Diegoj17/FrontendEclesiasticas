@@ -1,6 +1,12 @@
 import ComboBox from "../ui/ComboBox"
 
 function BautismoForm({ formData, handleChange, ciudadesColombia }) {
+
+  const dias = Array.from({ length: 31 }, (_, i) => i + 1);
+  const meses = Array.from({ length: 12 }, (_, i) => i + 1);
+  const añoActual = new Date().getFullYear();
+  const años = Array.from({ length: 500 }, (_, i) => añoActual - i);
+
   return (
     <>
       {/* Datos del bautizado */}
@@ -54,34 +60,45 @@ function BautismoForm({ formData, handleChange, ciudadesColombia }) {
             <label style={styles.formLabelNacimiento}>Fecha de Nacimiento</label>
             <div style={styles.fechaNacimientoRow}>
               <div style={styles.fechaNacimientoGroup}>
-                <label style={styles.fechaNacimientoLabel}>Dia</label>
-                <input
-                  type="text"
+                <select
+                  
                   name="bautismo.fechaNacimiento.dia"
                   value={formData.bautismo.fechaNacimiento.dia}
                   onChange={handleChange}
                   style={styles.fechaNacimientoInput}
-                />
+                >
+                <option value="">Día</option>
+                {dias.map((dia) => (
+                  <option key={dia} value={dia}>{dia}</option>
+                ))}
+                </select>
               </div>
               <div style={styles.fechaNacimientoGroup}>
-                <label style={styles.fechaNacimientoLabel}>Mes</label>
-                <input
-                  type="text"
+                <select
+                  
                   name="bautismo.fechaNacimiento.mes"
                   value={formData.bautismo.fechaNacimiento.mes}
                   onChange={handleChange}
                   style={styles.fechaNacimientoInput}
-                />
+                >
+              <option value="">Mes</option>
+              {meses.map((mes) => (
+                <option key={mes} value={mes}>{mes}</option>
+              ))}
+            </select>
               </div>
               <div style={styles.fechaNacimientoGroup}>
-                <label style={styles.fechaNacimientoLabel}>Año</label>
-                <input
-                  type="text"
+                <select
                   name="bautismo.fechaNacimiento.año"
                   value={formData.bautismo.fechaNacimiento.año}
                   onChange={handleChange}
                   style={styles.fechaNacimientoInput}
-                />
+                >
+              <option value="">Año</option>
+              {años.map((año) => (
+                <option key={año} value={año}>{año}</option>
+              ))}
+            </select>
               </div>
             </div>
           </div>

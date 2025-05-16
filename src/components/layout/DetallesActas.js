@@ -82,11 +82,11 @@ const DetallesActas = ({ acta }) => {
               <h4 style={styles.sectionTitle}>Datos del Bautizado</h4>
               <div style={styles.detailsRow}>
                 <span style={styles.detailsLabel}>Fecha de nacimiento:</span>
-                <span style={styles.detailsValue}>{datos.fechaNacimiento || "No disponible"}</span>
+                <span style={styles.detailsValue}>{datos.idBautizado.fechaNacimiento || "No disponible"}</span>
               </div>
               <div style={styles.detailsRow}>
                 <span style={styles.detailsLabel}>Lugar de nacimiento:</span>
-                <span style={styles.detailsValue}>{datos.lugarNacimiento || "No disponible"}</span>
+                <span style={styles.detailsValue}>{datos.idBautizado.lugarNacimiento || "No disponible"}</span>
               </div>
             </div>
             <div style={styles.detailsSection}>
@@ -123,11 +123,11 @@ const DetallesActas = ({ acta }) => {
               <h4 style={styles.sectionTitle}>Padrinos y Madrinas</h4>
               <div style={styles.detailsRow}>
                 <span style={styles.detailsLabel}>Padrinos:</span>
-                <span style={styles.detailsValue}>{datos.nombrepadrinos || "No disponible"}</span>
+                <span style={styles.detailsValue}>{datos.nombrespadrino || "No disponible"}</span>
               </div>
               <div style={styles.detailsRow}>
                 <span style={styles.detailsLabel}>Madrinas:</span>
-                <span style={styles.detailsValue}>{datos.nombremadrinas || "No disponible"}</span>
+                <span style={styles.detailsValue}>{datos.nombresmadrina || "No disponible"}</span>
               </div>
             </div>
             <div style={styles.detailsSection}>
@@ -237,8 +237,8 @@ const DetallesActas = ({ acta }) => {
 
       case "Matrimonio":
         // Intentar acceder a los datos anidados de manera segura
-        const novio = datos.matrimonio?.novio || {}
-        const novia = datos.matrimonio?.novia || {}
+        const novio = datos.personaA || {}
+        const novia = datos.personaB || {}
 
         return (
           <div style={styles.detailsGrid}>
@@ -248,30 +248,31 @@ const DetallesActas = ({ acta }) => {
                 <span style={styles.detailsLabel}>Nombre completo:</span>
                 <span style={styles.detailsValue}>
                   {`${capitalize(acta.primerNombre || "")} ${capitalize(acta.segundoNombre || "")} ${capitalize(acta.primerApellido || "")} ${capitalize(acta.segundoApellido || "")}`}
+                  {datos.personaB.nombre1 || "No disponible"} {datos.personaB.nombre2 || "No disponible"} {datos.personaB.apellido1 || "No disponible"} {datos.personaB.apellido2 || "No disponible"}
                 </span>
               </div>
               <div style={styles.detailsRow}>
                 <span style={styles.detailsLabel}>Fecha de nacimiento:</span>
                 <span style={styles.detailsValue}>
-                  {datos.novio_fechaNacimiento || novio.fechaNacimiento || "No disponible"}
+                  {datos.personaB.fechaNacimiento || "No disponible"}
                 </span>
               </div>
               <div style={styles.detailsRow}>
                 <span style={styles.detailsLabel}>Lugar de nacimiento:</span>
                 <span style={styles.detailsValue}>
-                  {datos.novio_lugarNacimiento || novio.lugarNacimiento || "No disponible"}
+                  {datos.personaB.lugarNacimiento || novio.lugarNacimiento || "No disponible"}
                 </span>
               </div>
               <div style={styles.detailsRow}>
                 <span style={styles.detailsLabel}>Padre:</span>
                 <span style={styles.detailsValue}>
-                  {datos.novio_nombresPadre || novio.nombrePadre || "No disponible"}
+                  {datos.personaB.padre.nombre1 || "No disponible"} 
                 </span>
               </div>
               <div style={styles.detailsRow}>
                 <span style={styles.detailsLabel}>Madre:</span>
                 <span style={styles.detailsValue}>
-                  {datos.novio_nombresMadre || novio.nombreMadre || "No disponible"}
+                  {datos.personaB.madre.nombre1 || "No disponible"} 
                 </span>
               </div>
             </div>
@@ -285,21 +286,19 @@ const DetallesActas = ({ acta }) => {
                     ${capitalize(datos.novia_nombre2 || novia.segundoNombre || "")} 
                     ${capitalize(datos.novia_apellido1 || novia.primerApellido || "")} 
                     ${capitalize(datos.novia_apellido2 || novia.segundoApellido || "")}`}
+                    {datos.personaA.nombre1 || "No disponible"} {datos.personaA.nombre2 || "No disponible"} {datos.personaA.apellido1 || "No disponible"} {datos.personaA.apellido2 || "No disponible"}
                 </span>
               </div>
               <div style={styles.detailsRow}>
                 <span style={styles.detailsLabel}>Fecha nacimiento:</span>
                 <span style={styles.detailsValue}>
-                  {datos.novia_fechaNacimiento ||
-                    datos.fechaNacimientoEsposa ||
-                    novia.fechaNacimiento ||
-                    "No disponible"}
+                  {datos.personaA.fechaNacimiento || "No disponible"}
                 </span>
               </div>
               <div style={styles.detailsRow}>
                 <span style={styles.detailsLabel}>Lugar nacimiento:</span>
                 <span style={styles.detailsValue}>
-                  {datos.novia_lugarNacimiento ||
+                  {datos.personaA.lugarNacimiento ||
                     datos.lugarNacimientoEsposa ||
                     novia.lugarNacimiento ||
                     "No disponible"}
@@ -308,13 +307,13 @@ const DetallesActas = ({ acta }) => {
               <div style={styles.detailsRow}>
                 <span style={styles.detailsLabel}>Padre:</span>
                 <span style={styles.detailsValue}>
-                  {datos.novia_nombresPadre || datos.padreEsposa || novia.nombrePadre || "No disponible"}
+                  {datos.personaA.padre.nombre1 || "No disponible"} 
                 </span>
               </div>
               <div style={styles.detailsRow}>
                 <span style={styles.detailsLabel}>Madre:</span>
                 <span style={styles.detailsValue}>
-                  {datos.novia_nombresMadre || datos.madreEsposa || novia.nombreMadre || "No disponible"}
+                  {datos.personaA.madre.nombre1 || "No disponible"}
                 </span>
               </div>
             </div>
@@ -340,22 +339,22 @@ const DetallesActas = ({ acta }) => {
             <div style={styles.detailsSection}>
               <h4 style={styles.sectionTitle}>Datos de la Ceremonia</h4>
               <div style={styles.detailsRow}>
-                <span style={styles.detailsLabel}>Oficiante:</span>
-                <span style={styles.detailsValue}>{datos.oficiante || datos.nombresSacerdote || "No disponible"}</span>
+                <span style={styles.detailsLabel}>Sacerdote:</span>
+                <span style={styles.detailsValue}>{datos.idSacerdote.nombre || "No disponible"}</span>
               </div>
               <div style={styles.detailsRow}>
                 <span style={styles.detailsLabel}>Doy Fe:</span>
-                <span style={styles.detailsValue}>{datos.doyFe || datos.nombresDoyFe || "No disponible"}</span>
+                <span style={styles.detailsValue}>{datos.idDoyfe.nombre  || "No disponible"}</span>
               </div>
               <div style={styles.detailsRow}>
                 <span style={styles.detailsLabel}>Fecha ceremonia:</span>
-                <span style={styles.detailsValue}>{datos.fecha || "No disponible"}</span>
+                <span style={styles.detailsValue}>{datos.idActa.fecha || "No disponible"}</span>
               </div>
             </div>
             <div style={styles.detailsSection}>
               <h4 style={styles.sectionTitle}>Nota Marginal</h4>
               <div style={styles.detailsRow}>
-                <span style={styles.detailsValue}>{datos.notaMarginal || "No disponible"}</span>
+                <span style={styles.detailsValue}>{datos.idActa.notas || "No disponible"}</span>
               </div>
             </div>
           </div>

@@ -43,7 +43,7 @@ function EditProfile() {
       show: false,
       type: 'success', // 'success' o 'error'
       message: ''
-    });
+  });
   
 
   const [message, setMessage] = useState({ text: "", type: "" });
@@ -143,9 +143,6 @@ function EditProfile() {
 }
 };
 
-  const handleCancel = () => {
-    navigate("/principal");
-  };
 
   const validatePassword = (pass) => {
 
@@ -185,14 +182,21 @@ function EditProfile() {
   ];
 
   const closeSuccessModal = () => {
-    setModal(prev => ({...prev, show: false}));
-    navigate("/principal");
+  const savedPath = sessionStorage.getItem("currentPath") || "/Principal";
+  setModal(prev => ({...prev, show: false}));
+  navigate(savedPath);
 };
 
   const closeErrorModal = () => {
-    setShowErrorModal(false);
-    navigate("/principal");
+    const savedPath = sessionStorage.getItem("currentPath") || "/Principal";
+    setModal(prev => ({...prev, show: false}));
+    navigate(savedPath);
   };
+
+  const handleCancel = () => {
+  const savedPath = sessionStorage.getItem("currentPath") || "/Principal";
+  navigate(savedPath);
+};
 
   return (
     <div style={styles.container}>
@@ -202,8 +206,8 @@ function EditProfile() {
         </div>
         <div style={styles.card}>
           <div style={styles.header}>
-            <button onClick={() => navigate("/principal")} style={styles.backButton}>
-              <FaArrowLeft />
+            <button onClick={handleCancel} style={styles.backButton}>
+              <FaArrowLeft style={styles.atras}/>
             </button>
             <h1 style={styles.title}>Editar Perfil</h1>
             <div style={styles.spacer}></div>
@@ -213,7 +217,7 @@ function EditProfile() {
 
           <div style={styles.avatarContainer}>
             <div style={styles.avatar}>
-              <FaUser size={40} color="#385792" />
+              <FaUser style={styles.avatarIcon} />
             </div>
           </div>
 
@@ -260,116 +264,7 @@ function EditProfile() {
               />
             </div>
 
-            <div style={styles.passwordContainer}>
-              <label htmlFor="password" style={styles.label}>Contraseña</label>
-              <div style={styles.inputWrapper}>
-                <input
-                  ref={inputRef}
-                  name="password"
-                  type={showPassword ? "text" : "password"}
-                  value={password}
-                  onChange={(e) => {
-                    setPassword(e.target.value);
-                    validatePassword(e.target.value);
-                    setFormData(prev => ({...prev, password: e.target.value}));
-                  }}
-                  onBlur={() => {
-                      handleBlur('password');
-                      setShowPasswordRules(false);
-                  }}
-                  onFocus={() => setShowPasswordRules(true)}
-                  style={{
-                    ...styles.input,
-                  borderColor: errors.password && touched.password ? '#E83F25' : '#ddd',
-                  paddingRight: '2.5rem',
-                  }}
-                  required
-                />
-                {password.length > 0 && (
-                  <div
-                    style={styles.toggleIcon}
-                    onMouseDown={e => e.preventDefault()}
-                    onClick={() => setShowPassword(prev => !prev)}
-                  >
-                  {showPassword
-                    ? <FaEye size={20} />
-                    : <FaEyeSlash size={20} />
-                  }
-                </div>
-                )}
-                {errors.password && touched.password && (
-                  <FaExclamationCircle
-                    style={styles.errorIcon}
-                      color="#E83F25"
-                  />
-                  
-                )}
-                
-                {showPasswordRules  && (
-                  <div ref={bubbleRef} style={styles.rulesBubble}>
-                    <div style={styles.bubbleArrow}></div>
-                    <div style={styles.rulesContainer}>
-                      {rules.map((rule) => (
-                        <div key={rule.id} style={styles.ruleItem}>
-                          <FaCheck
-                            style={{
-                              color: rule.valid ? '#00a400' : '#ffffff',
-                              fontSize: '1rem',
-                            }}
-                          />
-                          <span style={styles.ruleText}>{rule.text}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div style={styles.passwordContainer}>
-              <label htmlFor="confirmPassword" style={styles.label}>Repetir Contraseña Nueva</label>
-              <div style={styles.inputWrapper}>
-                <input
-                  name="confirmPassword"
-                  type={showConfirmPassword  ? "text" : "password"}
-                  value={confirmPassword}
-                  onChange={(e) => {
-                    setConfirmPassword(e.target.value);
-                    validatePassword(e.target.value);
-                  }}
-                  onBlur={() => handleBlur('password')}
-                  style={{
-                    ...styles.input,
-                  borderColor: errors.password && touched.password ? '#E83F25' : '#ddd',
-                  paddingRight: '2.5rem'
-                  }}
-                  required
-                />
-                {confirmPassword.length > 0 && (
-                  <div
-                    style={styles.toggleIcon}
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-
-                  >
-                  {showConfirmPassword
-                    ? <FaEye size={20} />
-                    : <FaEyeSlash size={20} />
-                  }
-                </div>
-                )}
-                {confirmPassword && password !== confirmPassword && (
-                  <span style={styles.errorText}>Las contraseñas no coinciden</span>
-                )}
-                {errors.password && touched.password && (
-                  <FaExclamationCircle
-                    style={styles.errorIcon}
-                      color="#E83F25"
-                  />
-                  
-                )}
-              </div>
-            </div>
-
+            
             <div style={styles.buttonContainer}>
               <button type="button" onClick={handleCancel} style={styles.cancelButton}>
                 Cancelar
@@ -478,13 +373,13 @@ const styles = {
   logoContainer: {
     marginBottom: '0rem',
     alignItems: 'center',
-    marginTop: '-8rem',
     display: 'flex',
     justifyContent: 'center',
     cursor: 'default',
+    marginTop: '-15rem',
   },
   logo: {
-    width: '200px',
+    width: '12.5rem',
     height: 'auto',
     objectFit: 'contain',
     transition: 'all 0.3s ease',
@@ -502,11 +397,11 @@ const styles = {
   },
   card: {
     backgroundColor: "white",
+    padding: '25px 30px',
     borderRadius: "0.7rem",
     boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
     width: "100%",
-    maxWidth: "500px",
-    padding: "30px",
+    maxWidth: "400px",
     boxSizing: "border-box",
   },
   header: {
@@ -524,26 +419,33 @@ const styles = {
   title: {
     fontSize: "1.8rem",
     fontWeight: "bold",
-    margin: "0 auto",
     textAlign: "center",
-    flex: 1,
+    margin: "0 0  0 4.5rem",
+    color: "#385792",
+    //marginTop: '-2.3rem',
   },
   spacer: {
     width: "24px",
   },
   subtitle: {
     textAlign: "center",
-    color: "#666",
-    marginBottom: "20px",
+    color: "#000000",
+    marginBottom: "0.5rem",
   },
   avatarContainer: {
     display: "flex",
     justifyContent: "center",
-    marginBottom: "20px",
+    marginBottom: "0.5rem",
+  },
+  avatarIcon: {
+    color: "#385792",
+    alignItems: "center",
+    width: "2rem",
+    height: "2rem",
   },
   avatar: {
-    width: "80px",
-    height: "80px",
+    width: "4rem",
+    height: "4rem",
     borderRadius: "50%",
     backgroundColor: "#f0f0f0",
     display: "flex",
@@ -599,8 +501,8 @@ const styles = {
   cancelButton: {
     flex: "1",
     padding: "1rem 1rem",
-    backgroundColor: "#FCCE74",
-    color: "#000000",
+    backgroundColor: "#FF0000",
+    color: "#FFFFFF",
     border: "none",
     borderRadius: "5px",
     cursor: "pointer",
@@ -609,8 +511,8 @@ const styles = {
   },
   saveButton: {
     padding: "1rem 1rem",
-    backgroundColor: "#FCCE74",
-    color: "black",
+    backgroundColor: "#4E9F3D",
+    color: "white",
     border: "none",
     borderRadius: '5px',
     cursor: "pointer",
@@ -622,7 +524,15 @@ const styles = {
   buttonIcon: {
     marginRight: "8px",
   },
-
+  atras:{
+    display: 'flex',
+    alignItems: 'center',
+    gap: '5rem',
+    margin: '0 0  0 -1rem',
+    fontSize: '1.5rem',
+    cursor: 'pointer',
+    color: '#385792',
+  },
   passwordRequirements: {
     margin: '10px 0',
     padding: '15px',
