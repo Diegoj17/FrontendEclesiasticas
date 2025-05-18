@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import ActaService from "../../services/ActaService" // Ajusta la ruta según sea necesario
+import { useRouter } from "next/router"
 
 // Función para capitalizar la primera letra
 const capitalize = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1).toLowerCase() : "")
@@ -11,27 +12,39 @@ const DetallesActas = ({ acta }) => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
+  const [acta, setActa] = useState(null)
+  const router = useRouter()
+  const { id } = router.query
+
   useEffect(() => {
     const fetchDetalle = async () => {
-      if (!acta) return
+      if (!id) return
 
-      setLoading(true)
       try {
-        console.log("Fetching details for acta:", acta)
-        let data
+        const actaId = Number.parseInt(id, 10)
+        if (isNaN(actaId)) {
+          console.error("ID de acta no válido")
+          return
+        }
 
+        const acta = await ActaService.getActaById(actaId)
+        if (!acta) {
+          console.error("Acta no encontrada")
+          return
+        }
+
+        let data
         // Normalizar el tipo de ceremonia para asegurar consistencia
-        const tipoNormalizado = acta.ceremonia ? acta.ceremonia.toLowerCase() : ""
+        const tipoNormalizado = acta.ceremonia ? acta.ceremonia.toLowerCase().trim() : ""
 
         switch (tipoNormalizado) {
           case "bautismo":
-          case "Bautismo":
           case "bautizo":
-          case "BAUTIZO":
             console.log("Fetching bautizo details with ID:", acta.id)
             data = await ActaService.getBautizoById(acta.id)
             break
           case "confirmacion":
+          case "confirmación":
             console.log("Fetching confirmacion details with ID:", acta.id)
             data = await ActaService.getConfirmacionById(acta.id)
             break
@@ -40,21 +53,30 @@ const DetallesActas = ({ acta }) => {
             data = await ActaService.getMatrimonioById(acta.id)
             break
           default:
-            throw new Error(`Tipo de ceremonia no válido: ${tipoNormalizado}`)
+            console.error(`Tipo de ceremonia no reconocido: "${tipoNormalizado}"`)
+            // Intentar determinar el tipo basado en otros datos disponibles
+            if (acta.nombreConyuge) {
+              console.log("Detectado como matrimonio por la presencia de cónyuge")
+              data = await ActaService.getMatrimonioById(acta.id)
+            } else if (acta.padrinos) {
+              console.log("Detectado como bautizo por la presencia de padrinos")
+              data = await ActaService.getBautizoById(acta.id)
+            } else if (acta.celebrante) {
+              console.log("Detectado como confirmación por la presencia de celebrante")
+              data = await ActaService.getConfirmacionById(acta.id)
+            } else {
+              throw new Error(`Tipo de ceremonia no válido: ${tipoNormalizado}`)
+            }
         }
 
-        console.log("Received data:", data)
-        setDetalle(data)
-      } catch (err) {
-        console.error("Error fetching details:", err)
-        setError(err.message || "Error al cargar los detalles")
-      } finally {
-        setLoading(false)
+        setActa(data)
+      } catch (error) {
+        console.error("Error fetching acta details:", error)
       }
     }
 
     fetchDetalle()
-  }, [acta])
+  }, [id])
 
   if (!acta) return <div>No se ha seleccionado un acta</div>
   if (loading) return <div>Cargando...</div>
