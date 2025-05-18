@@ -528,7 +528,7 @@ return (
                   <input
                     type="text"
                     value={searchTerm}
-                    onChange={handleAdvancedSearchChange}
+                    onChange={handleSearchChange}
                     style={styles.searchInput}
                     placeholder="Buscar por nombres o apellidos..."
                     autoComplete="off"
