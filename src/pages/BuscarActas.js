@@ -78,13 +78,7 @@ function BuscarPartidas() {
     const timeoutId = setTimeout(async () => {
       try {
         // Usar el servicio para buscar actas por nombre
-        const resultados = await ActaService.searchByFullName({
-  nombre1: advancedSearch.primerNombre,
-  nombre2: advancedSearch.segundoNombre,
-  apellido1: advancedSearch.primerApellido,
-  apellido2: advancedSearch.segundoApellido
-})
-        
+        const resultados = await ActaService.searchByName(searchTerm)
 
         // Transformar los resultados al formato esperado por la tabla
         const actasFormateadas = ActaService.transformActasForTable(resultados)
@@ -102,6 +96,7 @@ function BuscarPartidas() {
     return () => clearTimeout(timeoutId)
   }, [searchTerm, showAdvancedSearch])
   
+
 
 
   // Manejar búsqueda avanzada
