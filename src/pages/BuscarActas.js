@@ -97,67 +97,69 @@ function BuscarPartidas() {
   }, [searchTerm, showAdvancedSearch])
   
   // Función para transformar los resultados de búsqueda
-  const transformarResultadosBusqueda = (resultados) => {
-  const actasFormateadas = [];
+  
+const transformarResultadosBusqueda = (resultados) => {
+    const actasFormateadas = []
 
-  resultados.forEach(acta => {
-    const baseFields = {
-      id: acta.id,
-      libro: acta.libro || "",
-      folio: acta.folio || "",
-      acta: acta.numeroActa || "",
-      ceremonia: acta.tipo || "",
-      fecha: acta.fechaCeremonia || ""
-    };
-
-    // Campos comunes para todos los tipos
-    const commonPersonFields = {
-      primerNombre: acta.nombre1 || "",
-      segundoNombre: acta.nombre2 || "",
-      primerApellido: acta.apellido1 || "",
-      segundoApellido: acta.apellido2 || ""
-    };
-
-    // Manejar diferentes tipos de actas
-    switch(acta.tipo?.toLowerCase()) {
-      case 'matrimonio':
+    // Agregar matrimonios
+    if (resultados.matrimonios && resultados.matrimonios.length > 0) {
+      resultados.matrimonios.forEach((matrimonio) => {
         actasFormateadas.push({
-          ...baseFields,
-          ...commonPersonFields,
+          id: matrimonio.id,
           tipo: "Matrimonio",
-          nombreConyuge: acta.nombreCompletoEsposa || ""
-        });
-        break;
-        
-      case 'bautizo':
-        actasFormateadas.push({
-          ...baseFields,
-          ...commonPersonFields,
-          tipo: "Bautismo",
-          padrinos: [acta.nombrepadrinos, acta.nombremadrinas].filter(Boolean)
-        });
-        break;
-        
-      case 'confirmacion':
-        actasFormateadas.push({
-          ...baseFields,
-          ...commonPersonFields,
-          tipo: "Confirmación",
-          celebrante: acta.nombresmonsr || ""
-        });
-        break;
-        
-      default:
-        actasFormateadas.push({
-          ...baseFields,
-          ...commonPersonFields,
-          tipo: "General"
-        });
+          primerNombre: matrimonio.personaA?.nombre1?.split(" ")[0] || "",
+          segundoNombre: matrimonio.personaA?.nombre2?.split(" ")[1] || "",
+          primerApellido: matrimonio.personaA?.apellido1?.split(" ")[2] || "",
+          segundoApellido: matrimonio.personaA?.apellido2?.split(" ")[3] || "",
+          libro: matrimonio.acta?.libro || "",
+          folio: matrimonio.acta?.folio || "",
+          acta: matrimonio.acta?.numeroActa || "",
+          ceremonia: "Matrimonio",
+          // Otros campos específicos de matrimonio
+        })
+      })
     }
-  });
 
-  return actasFormateadas;
-}
+    // Agregar bautizos
+    if (resultados.bautizos && resultados.bautizos.length > 0) {
+      resultados.bautizos.forEach((bautizo) => {
+        actasFormateadas.push({
+          id: bautizo.id,
+          tipo: "Bautismo",
+          primerNombre: bautizo.idBautizado?.nombre1?.split(" ")[0] || "",
+          segundoNombre: bautizo.idBautizado?.nombre2?.split(" ")[1] || "",
+          primerApellido: bautizo.idBautizado?.apellido1?.split(" ")[2] || "",
+          segundoApellido: bautizo.idBautizado?.apellido2?.split(" ")[3] || "",
+          libro: bautizo.acta?.libro || "",
+          folio: bautizo.acta?.folio || "",
+          acta: bautizo.acta?.numeroActa || "",
+          ceremonia: "Bautismo",
+          // Otros campos específicos de bautizo
+        })
+      })
+    }
+
+    // Agregar confirmaciones
+    if (resultados.confirmaciones && resultados.confirmaciones.length > 0) {
+      resultados.confirmaciones.forEach((confirmacion) => {
+        actasFormateadas.push({
+          id: confirmacion.id,
+          tipo: "Confirmación",
+          primerNombre: confirmacion.confirmante?.nombre1?.split(" ")[0] || "",
+          segundoNombre: confirmacion.confirmante?.nombre2?.split(" ")[1] || "",
+          primerApellido: confirmacion.confirmante?.apellido1?.split(" ")[2] || "",
+          segundoApellido: confirmacion.confirmante?.apellido2?.split(" ")[3] || "",
+          libro: confirmacion.acta?.libro || "",
+          folio: confirmacion.acta?.folio || "",
+          acta: confirmacion.acta?.numeroActa || "",
+          ceremonia: "Confirmación",
+          // Otros campos específicos de confirmación
+        })
+      })
+    }
+
+    return actasFormateadas
+  }
 
   // Manejar búsqueda avanzada
   const handleAdvancedSearch = async () => {
