@@ -24,7 +24,7 @@ useEffect(() => {
         let data
 
         // Normalizar el tipo de ceremonia para asegurar consistencia
-        const tipoNormalizado = acta.tipo ? acta.tipo.toLowerCase() : ""
+        const tipoNormalizado = acta.ceremonia ? acta.ceremonia.toLowerCase() : ""
 
         switch (tipoNormalizado) {
           case "bautismo":
