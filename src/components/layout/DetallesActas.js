@@ -11,8 +11,7 @@ const DetallesActas = ({ acta }) => {
   const [detalle, setDetalle] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
-
-  const [acta, setActa] = useState(null)
+  
   const router = useRouter()
   const { id } = router.query
 
