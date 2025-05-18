@@ -6,9 +6,8 @@ import ActaService from "../../services/ActaService" // Ajusta la ruta según se
 // Función para capitalizar la primera letra
 const capitalize = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1).toLowerCase() : "")
 
-const DetallesActas = () => {
+const DetallesActas = ({acta}) => {
   
-  const [acta, setActa] = useState(null)
   const [detalle, setDetalle] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
