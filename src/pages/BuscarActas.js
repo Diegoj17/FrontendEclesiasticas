@@ -98,67 +98,66 @@ function BuscarPartidas() {
   
   // Función para transformar los resultados de búsqueda
   const transformarResultadosBusqueda = (resultados) => {
-    const actasFormateadas = []
+  const actasFormateadas = [];
 
-    // Agregar matrimonios
-    if (resultados.matrimonios && resultados.matrimonios.length > 0) {
-      resultados.matrimonios.forEach((matrimonio) => {
+  resultados.forEach(acta => {
+    const baseFields = {
+      id: acta.id,
+      libro: acta.libro || "",
+      folio: acta.folio || "",
+      acta: acta.numeroActa || "",
+      ceremonia: acta.tipo || "",
+      fecha: acta.fechaCeremonia || ""
+    };
+
+    // Campos comunes para todos los tipos
+    const commonPersonFields = {
+      primerNombre: acta.nombre1 || "",
+      segundoNombre: acta.nombre2 || "",
+      primerApellido: acta.apellido1 || "",
+      segundoApellido: acta.apellido2 || ""
+    };
+
+    // Manejar diferentes tipos de actas
+    switch(acta.tipo?.toLowerCase()) {
+      case 'matrimonio':
         actasFormateadas.push({
-          id: matrimonio.id,
+          ...baseFields,
+          ...commonPersonFields,
           tipo: "Matrimonio",
-          primerNombre: matrimonio.personaA?.nombre?.split(" ")[0] || "",
-          segundoNombre: matrimonio.personaA?.nombre?.split(" ")[1] || "",
-          primerApellido: matrimonio.personaA?.nombre?.split(" ")[2] || "",
-          segundoApellido: matrimonio.personaA?.nombre?.split(" ")[3] || "",
-          libro: matrimonio.acta?.libro || "",
-          folio: matrimonio.acta?.folio || "",
-          acta: matrimonio.acta?.numeroActa || "",
-          ceremonia: "Matrimonio",
-          // Otros campos específicos de matrimonio
-        })
-      })
-    }
-
-    // Agregar bautizos
-    if (resultados.bautizos && resultados.bautizos.length > 0) {
-      resultados.bautizos.forEach((bautizo) => {
+          nombreConyuge: acta.nombreCompletoEsposa || ""
+        });
+        break;
+        
+      case 'bautizo':
         actasFormateadas.push({
-          id: bautizo.id,
+          ...baseFields,
+          ...commonPersonFields,
           tipo: "Bautismo",
-          primerNombre: bautizo.idBautizado?.nombre?.split(" ")[0] || "",
-          segundoNombre: bautizo.idBautizado?.nombre?.split(" ")[1] || "",
-          primerApellido: bautizo.idBautizado?.nombre?.split(" ")[2] || "",
-          segundoApellido: bautizo.idBautizado?.nombre?.split(" ")[3] || "",
-          libro: bautizo.acta?.libro || "",
-          folio: bautizo.acta?.folio || "",
-          acta: bautizo.acta?.numeroActa || "",
-          ceremonia: "Bautismo",
-          // Otros campos específicos de bautizo
-        })
-      })
-    }
-
-    // Agregar confirmaciones
-    if (resultados.confirmaciones && resultados.confirmaciones.length > 0) {
-      resultados.confirmaciones.forEach((confirmacion) => {
+          padrinos: [acta.nombrepadrinos, acta.nombremadrinas].filter(Boolean)
+        });
+        break;
+        
+      case 'confirmacion':
         actasFormateadas.push({
-          id: confirmacion.id,
+          ...baseFields,
+          ...commonPersonFields,
           tipo: "Confirmación",
-          primerNombre: confirmacion.confirmante?.nombre?.split(" ")[0] || "",
-          segundoNombre: confirmacion.confirmante?.nombre?.split(" ")[1] || "",
-          primerApellido: confirmacion.confirmante?.nombre?.split(" ")[2] || "",
-          segundoApellido: confirmacion.confirmante?.nombre?.split(" ")[3] || "",
-          libro: confirmacion.acta?.libro || "",
-          folio: confirmacion.acta?.folio || "",
-          acta: confirmacion.acta?.numeroActa || "",
-          ceremonia: "Confirmación",
-          // Otros campos específicos de confirmación
-        })
-      })
+          celebrante: acta.nombresmonsr || ""
+        });
+        break;
+        
+      default:
+        actasFormateadas.push({
+          ...baseFields,
+          ...commonPersonFields,
+          tipo: "General"
+        });
     }
+  });
 
-    return actasFormateadas
-  }
+  return actasFormateadas;
+}
 
   // Manejar búsqueda avanzada
   const handleAdvancedSearch = async () => {
@@ -177,7 +176,13 @@ function BuscarPartidas() {
 
     try {
       // Filtrar parámetros vacíos
-      const params = {}
+      const params = {
+        nombre1: advancedSearch.primerNombre || "",
+        nombre2: advancedSearch.segundoNombre || "",
+        apellido1: advancedSearch.primerApellido || "",
+        apellido2: advancedSearch.segundoApellido || ""
+      };
+      
       if (advancedSearch.primerNombre) params.primerNombre = advancedSearch.primerNombre
       if (advancedSearch.segundoNombre) params.segundoNombre = advancedSearch.segundoNombre
       if (advancedSearch.primerApellido) params.primerApellido = advancedSearch.primerApellido
