@@ -369,20 +369,23 @@ class ActaService {
    * @returns {Promise} Promesa con los resultados de la búsqueda
    */
   async searchByFullName(params) {
-    try {
-      const token = localStorage.getItem("token")
-      const response = await axios.get(`https://actaseclesiasticas.koyeb.app/api/actas/busquedaavanzada`, {
-        params,
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      return response.data
-    } catch (error) {
-      console.error("Error al buscar actas por nombre completo:", error)
-      throw error
-    }
+  try {
+    const token = localStorage.getItem("token");
+    const response = await axios.get(`${API_URL}/actas/busquedaavanzada`, {
+      params: {
+        nombre1: params.primerNombre,
+        nombre2: params.segundoNombre,
+        apellido1: params.primerApellido,
+        apellido2: params.segundoApellido
+      },
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error en búsqueda avanzada:", error);
+    throw error;
   }
+}
 
   
   /**
