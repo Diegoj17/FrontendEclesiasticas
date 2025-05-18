@@ -191,7 +191,7 @@ const transformarResultadosBusqueda = (resultados) => {
       if (advancedSearch.segundoApellido) params.segundoApellido = advancedSearch.segundoApellido
 
       const resultados = await ActaService.searchByFullName(params)
-      const actasFormateadas = transformarResultadosBusqueda(resultados)
+      const actasFormateadas = ActaService.transformActasForTable(resultados)
 
       setRegistrosFiltrados(actasFormateadas)
       setRegistros(actasFormateadas)
@@ -528,7 +528,7 @@ return (
                   <input
                     type="text"
                     value={searchTerm}
-                    onChange={handleSearchChange}
+                    onChange={handleAdvancedSearchChange}
                     style={styles.searchInput}
                     placeholder="Buscar por nombres o apellidos..."
                     autoComplete="off"
