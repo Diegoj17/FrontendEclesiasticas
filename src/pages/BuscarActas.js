@@ -138,7 +138,7 @@ const transformarResultadosBusqueda = (resultados) => {
           ...baseFields,
           ...commonPersonFields,
           tipo: "Bautismo",
-          ceremonia: "bautizo" || "BAUTIZO",
+          ceremonia: "BAUTIZO",
           padrinos: [acta.nombrepadrinos, acta.nombremadrinas].filter(Boolean)
         });
         break;
