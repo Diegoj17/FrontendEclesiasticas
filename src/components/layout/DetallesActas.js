@@ -7,7 +7,9 @@ import { useRouter } from "next/router"
 // Función para capitalizar la primera letra
 const capitalize = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1).toLowerCase() : "")
 
-const DetallesActas = ({ acta }) => {
+const DetallesActas = () => {
+  
+  const [acta, setActa] = useState(null)
   const [detalle, setDetalle] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -77,7 +79,7 @@ const DetallesActas = ({ acta }) => {
     fetchDetalle()
   }, [id])
 
-  
+
   if (!acta) return <div>No se ha seleccionado un acta</div>
   if (loading) return <div>Cargando...</div>
   if (error) return <div>Error: {error}</div>
