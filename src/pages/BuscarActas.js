@@ -126,15 +126,19 @@ const transformarResultadosBusqueda = (resultados) => {
           ...baseFields,
           ...commonPersonFields,
           tipo: "Matrimonio",
+          ceremonia: "matrimonio",
           nombreConyuge: acta.nombreCompletoEsposa || ""
         });
         break;
         
       case 'bautizo':
+      case "bautismo":
+      case "BAUTIZO":
         actasFormateadas.push({
           ...baseFields,
           ...commonPersonFields,
           tipo: "Bautismo",
+          ceremonia: "bautizo" || "BAUTIZO",
           padrinos: [acta.nombrepadrinos, acta.nombremadrinas].filter(Boolean)
         });
         break;
@@ -144,6 +148,7 @@ const transformarResultadosBusqueda = (resultados) => {
           ...baseFields,
           ...commonPersonFields,
           tipo: "Confirmación",
+          ceremonia: "confirmacion"
           celebrante: acta.nombresmonsr || ""
         });
         break;
