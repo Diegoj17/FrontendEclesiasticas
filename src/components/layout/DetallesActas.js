@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react"
 import ActaService from "../../services/ActaService" // Ajusta la ruta según sea necesario
-import { useRouter } from "next/router"
 
 // Función para capitalizar la primera letra
 const capitalize = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1).toLowerCase() : "")
@@ -14,8 +13,6 @@ const DetallesActas = () => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   
-  const router = useRouter()
-  const { id } = router.query
 
 useEffect(() => {
     const fetchDetalle = async () => {
