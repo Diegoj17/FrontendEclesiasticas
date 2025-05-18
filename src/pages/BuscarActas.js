@@ -81,7 +81,7 @@ function BuscarPartidas() {
         const resultados = await ActaService.searchByName(searchTerm)
 
         // Transformar los resultados al formato esperado por la tabla
-        const actasFormateadas = transformarResultadosBusqueda(resultados)
+        const actasFormateadas = ActaService.transformActasForTable(resultados)
 
         setRegistrosFiltrados(actasFormateadas)
         setRegistros(actasFormateadas)
