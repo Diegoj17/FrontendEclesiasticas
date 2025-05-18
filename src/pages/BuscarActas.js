@@ -253,6 +253,14 @@ const transformarResultadosBusqueda = (resultados) => {
     }
   };
 
+  const expandedRowTemplate = (rowData) => {
+      return (
+        <div style={styles.expandedRowContainer}>
+          <DetallesActas acta={rowData} />
+        </div>
+      )
+    }
+
 
 
   const generarPDFCorto = () => {
@@ -599,7 +607,7 @@ return (
                         registrosFiltrados={registros}
                         filters={filters}
                         onFilter={(e) => setFilters(e.filters)}
-                        expandedRowTemplate={(rowData) => <DetallesActas acta={rowData} />}
+                        expandedRowTemplate={expandedRowTemplate}
                         selectedRow={selectedRow}
                         setSelectedRow={setSelectedRow}
                       /> 
