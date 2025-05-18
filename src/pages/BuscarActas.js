@@ -78,7 +78,13 @@ function BuscarPartidas() {
     const timeoutId = setTimeout(async () => {
       try {
         // Usar el servicio para buscar actas por nombre
-        const resultados = await ActaService.searchByFullName(searchTerm)
+        const resultados = await ActaService.searchByFullName({
+  nombre1: advancedSearch.primerNombre,
+  nombre2: advancedSearch.segundoNombre,
+  apellido1: advancedSearch.primerApellido,
+  apellido2: advancedSearch.segundoApellido
+})
+        
 
         // Transformar los resultados al formato esperado por la tabla
         const actasFormateadas = ActaService.transformActasForTable(resultados)
@@ -96,70 +102,7 @@ function BuscarPartidas() {
     return () => clearTimeout(timeoutId)
   }, [searchTerm, showAdvancedSearch])
   
-  // Función para transformar los resultados de búsqueda
-  
-const transformarResultadosBusqueda = (resultados) => {
-  const actasFormateadas = [];
 
-  resultados.forEach(acta => {
-    const baseFields = {
-      id: acta.id,
-      libro: acta.libro || "",
-      folio: acta.folio || "",
-      acta: acta.numeroActa || "",
-      ceremonia: acta.tipo || "",
-      fecha: acta.fechaCeremonia || ""
-    };
-
-    // Campos comunes para todos los tipos
-    const commonPersonFields = {
-      primerNombre: acta.nombre1 || "",
-      segundoNombre: acta.nombre2 || "",
-      primerApellido: acta.apellido1 || "",
-      segundoApellido: acta.apellido2 || ""
-    };
-
-    // Manejar diferentes tipos de actas
-    switch (acta.tipo?.toLowerCase()) {
-  case "matrimonio":
-    actasFormateadas.push({
-      ...baseFields,
-      ...commonPersonFields,
-      tipo: "matrimonio",
-      nombreConyuge: acta.nombreCompletoEsposa || "",
-    });
-    break;
-
-  case "bautizo":
-  case "bautismo":
-    actasFormateadas.push({
-      ...baseFields,
-      ...commonPersonFields,
-      tipo: "bautismo",
-      padrinos: [acta.nombrepadrinos, acta.nombremadrinas].filter(Boolean),
-    });
-    break;
-
-  case "confirmacion":
-    actasFormateadas.push({
-      ...baseFields,
-      ...commonPersonFields,
-      tipo: "confirmacion",
-      celebrante: acta.nombresmonsr || "",
-    });
-    break;
-
-  default:
-    actasFormateadas.push({
-      ...baseFields,
-      ...commonPersonFields,
-      tipo: "desconocido",
-    });
-}
-  });
-
-  return actasFormateadas;
-}
 
   // Manejar búsqueda avanzada
   const handleAdvancedSearch = async () => {
