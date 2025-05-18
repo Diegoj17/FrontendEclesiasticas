@@ -78,7 +78,7 @@ function BuscarPartidas() {
     const timeoutId = setTimeout(async () => {
       try {
         // Usar el servicio para buscar actas por nombre
-        const resultados = await ActaService.searchByName(searchTerm)
+        const resultados = await ActaService.searchByFullName(searchTerm)
 
         // Transformar los resultados al formato esperado por la tabla
         const actasFormateadas = ActaService.transformActasForTable(resultados)
