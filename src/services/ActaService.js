@@ -371,7 +371,7 @@ class ActaService {
   async searchByFullName(params) {
   try {
     const token = localStorage.getItem("token");
-    const response = await axios.get(`${API_URL}/actas/busquedaavanzada`, {
+    const response = await axios.get(`https://actaseclesiasticas.koyeb.app/api/actas/busquedaavanzada`, {
       params: {
         nombre1: params.primerNombre,
         nombre2: params.segundoNombre,
