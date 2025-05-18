@@ -120,46 +120,42 @@ const transformarResultadosBusqueda = (resultados) => {
     };
 
     // Manejar diferentes tipos de actas
-    switch(acta.tipo?.toLowerCase()) {
-      case 'matrimonio':
-        actasFormateadas.push({
-          ...baseFields,
-          ...commonPersonFields,
-          tipo: "Matrimonio",
-          ceremonia: "matrimonio",
-          nombreConyuge: acta.nombreCompletoEsposa || ""
-        });
-        break;
-        
-      case 'bautizo':
-      case "bautismo":
-      case "BAUTIZO":
-        actasFormateadas.push({
-          ...baseFields,
-          ...commonPersonFields,
-          tipo: "Bautismo",
-          ceremonia: "BAUTIZO",
-          padrinos: [acta.nombrepadrinos, acta.nombremadrinas].filter(Boolean)
-        });
-        break;
-        
-      case 'confirmacion':
-        actasFormateadas.push({
-          ...baseFields,
-          ...commonPersonFields,
-          tipo: "Confirmación",
-          ceremonia: "confirmacion"
-          celebrante: acta.nombresmonsr || ""
-        });
-        break;
-        
-      default:
-        actasFormateadas.push({
-          ...baseFields,
-          ...commonPersonFields,
-          tipo: "General"
-        });
-    }
+    switch (acta.tipo?.toLowerCase()) {
+  case "matrimonio":
+    actasFormateadas.push({
+      ...baseFields,
+      ...commonPersonFields,
+      tipo: "matrimonio",
+      nombreConyuge: acta.nombreCompletoEsposa || "",
+    });
+    break;
+
+  case "bautizo":
+  case "bautismo":
+    actasFormateadas.push({
+      ...baseFields,
+      ...commonPersonFields,
+      tipo: "bautismo",
+      padrinos: [acta.nombrepadrinos, acta.nombremadrinas].filter(Boolean),
+    });
+    break;
+
+  case "confirmacion":
+    actasFormateadas.push({
+      ...baseFields,
+      ...commonPersonFields,
+      tipo: "confirmacion",
+      celebrante: acta.nombresmonsr || "",
+    });
+    break;
+
+  default:
+    actasFormateadas.push({
+      ...baseFields,
+      ...commonPersonFields,
+      tipo: "desconocido",
+    });
+}
   });
 
   return actasFormateadas;
@@ -603,7 +599,7 @@ return (
                         registrosFiltrados={registros}
                         filters={filters}
                         onFilter={(e) => setFilters(e.filters)}
-                        expandedRowTemplate={(rowData) => <DetallesActas {...rowData} />}
+                        expandedRowTemplate={(rowData) => <DetallesActas acta={rowData} />}
                         selectedRow={selectedRow}
                         setSelectedRow={setSelectedRow}
                       /> 
