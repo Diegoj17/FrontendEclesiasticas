@@ -77,6 +77,7 @@ const DetallesActas = ({ acta }) => {
     fetchDetalle()
   }, [id])
 
+  
   if (!acta) return <div>No se ha seleccionado un acta</div>
   if (loading) return <div>Cargando...</div>
   if (error) return <div>Error: {error}</div>
