@@ -1,7 +1,7 @@
 "use client"
 import { useState, useEffect } from "react"
 import { useNavigate, useParams } from "react-router-dom"
-import Header from "../components/Header"
+import Header from "../components/layout/Header"
 import BautismoForm from "../components/forms/BautismoForm"
 import ConfirmacionForm from "../components/forms/ConfirmacionForm"
 import MatrimonioForm from "../components/forms/MatrimonioForm"
