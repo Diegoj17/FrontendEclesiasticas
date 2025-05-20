@@ -188,6 +188,10 @@ const styles = {
       whiteSpace: "nowrap",
       cursor: "default",
       borderRadius: "0.5rem",
+      '& .p-highlight': {
+      backgroundColor: '#f0f0f0 !important',
+      transition: 'background-color 0.2s'
+    }
     },
     columnaTabla: {
       backgroundColor: '#FCCE74',

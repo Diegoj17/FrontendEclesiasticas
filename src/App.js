@@ -15,6 +15,7 @@ import AñadirActas from "./pages/AñadirActas"
 import BuscarActas from "./pages/BuscarActas"
 import VistaActas from "./pages/VistaActas"
 import ListaActas from "./pages/ListaActas"
+import EditarActas from "./pages/EditarActas"
 
 function App() {
   return (
@@ -36,7 +37,9 @@ function AppContent() {
 
   // Guardar la ruta actual en sessionStorage (más confiable para recargas)
   useEffect(() => {
-    const validPaths = ["/Principal", "/vistaActas", "/buscarActas", "/añadirActas", "/listaActas", "/editarPerfil", "/cambiarContraseña"]
+    const validPaths = [
+      "/Principal", "/vistaActas", "/buscarActas", "/añadirActas", 
+      "/listaActas", "/editarPerfil", "/cambiarContraseña", "/editarActas"]
 
     if (validPaths.includes(location.pathname) && isAuthenticated) {
       sessionStorage.setItem("currentPath", location.pathname)
@@ -151,6 +154,14 @@ function AppContent() {
           element={
             <ProtectedRoute>
               <ListaActas />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/editarActas"
+          element={
+            <ProtectedRoute>
+              <EditarActas />
             </ProtectedRoute>
           }
         />

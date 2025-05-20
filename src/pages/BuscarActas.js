@@ -123,12 +123,20 @@ function BuscarPartidas() {
     setSearchTerm(e.target.value)
   }
 
+  /*
   const handleEditActa = () => {
     if (selectedActas.length === 1) {
       const actaAEditar = selectedActas[0];
       navigate('/añadirActas', { state: { acta: actaAEditar } });
     }
   };
+  */
+
+  const handleEditActa = () => {
+  if (selectedRow) {
+    navigate(`/editarActas/${selectedRow.id}/${selectedRow.ceremonia.toLowerCase()}`);
+  }
+};
 
   const expandedRowTemplate = (rowData) => {
       return (
@@ -139,12 +147,9 @@ function BuscarPartidas() {
   }
 
   const handleRowSelect = (rowData) => {
-    console.log("Fila seleccionada:", rowData)
-    setSelectedRow(rowData)
-
-    // Imprimir todos los campos del acta para depuración
-    console.log("Acta seleccionada (todos los campos):", rowData)
-  }
+  setSelectedRow(rowData);
+  setSelectedActas([rowData]); // Actualizar selectedActas también si es necesario
+  };
 
 
 
@@ -432,7 +437,7 @@ return (
               <div style={styles.printControls}>
                 <button
                   onClick={handleEditActa}
-                  disabled={selectedActas.length !== 1}
+                  disabled={!selectedRow}
                   type="button"
                   style={{
                     ...styles.printButton,
