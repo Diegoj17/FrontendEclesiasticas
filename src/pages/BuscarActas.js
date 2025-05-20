@@ -6,7 +6,6 @@ import Sidebar from "../components/layout/Sidebar"
 import ActaService from "../services/ActaService"
 import { FilterMatchMode, FilterOperator } from "primereact/api"
 import DataTableExpandle from "../components/layout/DataTableExpandle"
-import ExpandedRowTemplate from "../components/layout/ExpandedRowTemplate"
 import DetallesActas from "../components/layout/DetallesActas"
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
@@ -26,13 +25,6 @@ function BuscarPartidas() {
   const [error, setError] = useState(null)
   const [showAdvancedSearch, setShowAdvancedSearch] = useState(false)
   
-  // Estado para búsqueda avanzada
-  const [advancedSearch, setAdvancedSearch] = useState({
-    primerNombre: "",
-    segundoNombre: "",
-    primerApellido: "",
-    segundoApellido: "",
-  })
 
 
   // Configuración de filtros para PrimeReact DataTable
@@ -100,64 +92,11 @@ function BuscarPartidas() {
 
 
   // Manejar búsqueda avanzada
-  const handleAdvancedSearch = async () => {
-    if (
-      !advancedSearch.primerNombre &&
-      !advancedSearch.segundoNombre &&
-      !advancedSearch.primerApellido &&
-      !advancedSearch.segundoApellido
-    ) {
-      setError("Debe proporcionar al menos un criterio de búsqueda")
-      return
-    }
+  
 
-    setIsLoading(true)
-    setError(null)
+  
 
-    try {
-      // Filtrar parámetros vacíos
-      const params = {
-        nombre1: advancedSearch.primerNombre || "",
-        nombre2: advancedSearch.segundoNombre || "",
-        apellido1: advancedSearch.primerApellido || "",
-        apellido2: advancedSearch.segundoApellido || ""
-      };
-      
-      if (advancedSearch.primerNombre) params.primerNombre = advancedSearch.primerNombre
-      if (advancedSearch.segundoNombre) params.segundoNombre = advancedSearch.segundoNombre
-      if (advancedSearch.primerApellido) params.primerApellido = advancedSearch.primerApellido
-      if (advancedSearch.segundoApellido) params.segundoApellido = advancedSearch.segundoApellido
-
-      const resultados = await ActaService.searchByFullName(params)
-      const actasFormateadas = ActaService.transformActasForTable(resultados)
-
-      setRegistrosFiltrados(actasFormateadas)
-      setRegistros(actasFormateadas)
-    } catch (error) {
-      console.error("Error en búsqueda avanzada:", error)
-      setError("Error al realizar la búsqueda avanzada. Por favor, intente de nuevo.")
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  const handleAdvancedSearchChange = (e) => {
-    const { name, value } = e.target
-    setAdvancedSearch((prev) => ({
-      ...prev,
-      [name]: value,
-    }))
-  }
-
-  const clearAdvancedSearch = () => {
-    setAdvancedSearch({
-      primerNombre: "",
-      segundoNombre: "",
-      primerApellido: "",
-      segundoApellido: "",
-    })
-    setRegistrosFiltrados([])
-  }
+  
 
   const handleBack = () => {
     navigate('/Principal')
@@ -197,7 +136,15 @@ function BuscarPartidas() {
           <DetallesActas acta={rowData} />
         </div>
       )
-    }
+  }
+
+  const handleRowSelect = (rowData) => {
+    console.log("Fila seleccionada:", rowData)
+    setSelectedRow(rowData)
+
+    // Imprimir todos los campos del acta para depuración
+    console.log("Acta seleccionada (todos los campos):", rowData)
+  }
 
 
 
@@ -547,7 +494,7 @@ return (
                         onFilter={(e) => setFilters(e.filters)}
                         expandedRowTemplate={expandedRowTemplate}
                         selectedRow={selectedRow}
-                        setSelectedRow={setSelectedRow}
+                        setSelectedRow={handleRowSelect}
                       /> 
                     </div>
                   )}
