@@ -11,6 +11,22 @@ function PrincipalHeader() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
 
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsDropdownOpen(false)
+      }
+    }
+
+    if (isDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside)
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [isDropdownOpen])
+
   const handleEditProfile = () => {
     console.log("Navegando a editar perfil") // Agregamos un log para depuración
     setIsDropdownOpen(false) // Cerramos el dropdown
@@ -26,7 +42,10 @@ function PrincipalHeader() {
   const toggleDropdown = useCallback((e) => {
       e?.stopPropagation();
       setIsDropdownOpen(prev => !prev);
-    }, []);
+    }, 
+  []);
+  
+  
   return (
     <header style={styles.header}>
       <div style={styles.logoContainer}>

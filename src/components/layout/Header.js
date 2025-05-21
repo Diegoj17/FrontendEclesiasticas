@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useRef, useEffect, useCallback } from "react"
 import { useNavigate } from "react-router-dom"
 import { useAuth } from "../../context/AuthContext"
 import logo from "../../assets/logo.png" 
@@ -9,8 +9,28 @@ function Header({ title }) {
   const navigate = useNavigate()
   const { user, logout } = useAuth()
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+  const dropdownRef = useRef(null)
 
-  const toggleDropdown = () => setIsDropdownOpen(!isDropdownOpen)
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    if (isDropdownOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isDropdownOpen]);
+
+  const toggleDropdown = (e) => {
+    e?.stopPropagation();
+    setIsDropdownOpen(!isDropdownOpen);
+  };
 
   const handleLogout = () => {
     logout()
@@ -29,18 +49,25 @@ function Header({ title }) {
   }
 
   return (
+    
     <header style={styles.header}>
+
       <div style={styles.logoContainer}>
       <img src={logo || "/placeholder.svg"} alt="Logo" style={styles.logo} />
       </div>
+
       <div style={styles.titleContainer}>
       <h1 style={styles.headerTitle}>{title}</h1>
       </div>
+
       <button onClick={handleLogout} style={styles.logoutButton}>
         <FaSignOutAlt style={styles.iconLogout} />
         <span style={styles.iconLogoutText}> Cerrar Sesión</span>
       </button>
-      <div style={styles.userContainer} onClick={toggleDropdown}>
+      <div style={styles.userContainer}
+      ref={dropdownRef}
+      onClick={toggleDropdown}> 
+
         <div style={styles.userInfo}>
           <FaUserCircle size={24} style={styles.userIcon} />
           <div style={styles.userText}>

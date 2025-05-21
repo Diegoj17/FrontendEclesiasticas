@@ -72,8 +72,8 @@ function BuscarPartidas() {
         // Usar el servicio para buscar actas por nombre
         const resultados = await ActaService.searchByName(searchTerm)
 
-        // Transformar los resultados al formato esperado por la tabla
-        const actasFormateadas = ActaService.transformActasForTable(resultados)
+        const actasUnicas = [...new Map(resultados.map(item => [item.id, item])).values()];
+        const actasFormateadas = ActaService.transformActasForTable(actasUnicas);
 
         setRegistrosFiltrados(actasFormateadas)
         setRegistros(actasFormateadas)
@@ -132,9 +132,11 @@ function BuscarPartidas() {
   };
   */
 
-  const handleEditActa = () => {
+  // Modificar la función handleEditActa
+const handleEditActa = () => {
   if (selectedRow) {
-    navigate(`/editarActas/${selectedRow.id}/${selectedRow.ceremonia.toLowerCase()}`);
+    console.log("Navegando a:", `/editar-acta/${selectedRow.id}/${selectedRow.ceremonia.toLowerCase()}`);
+    navigate(`/editar-acta/${selectedRow.id}/${selectedRow.ceremonia.toLowerCase()}`);
   }
 };
 
@@ -538,6 +540,19 @@ const styles = {
   buttonText: {
     fontSize: "1rem",
     flex: 1,
+  },
+  buttonIcon: {
+    width: "16px",
+    height: "16px",
+    fill: "black",
+    marginRight: "0.3rem"
+  },
+  searchSection: {
+    display: "flex",
+    alignItems: "center",
+    marginBottom: "1rem",
+    gap: "1rem",
+    marginTop: "1rem",
   },
   mainContent: {
     display: "flex",

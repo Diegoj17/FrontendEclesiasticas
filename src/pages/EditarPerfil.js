@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from "react"
 import { useNavigate } from "react-router-dom"
 import { useAuth } from "../context/AuthContext"
 import { FaArrowLeft, FaUser, FaSave, FaExclamationCircle, FaCheck, FaEye, FaEyeSlash } from "react-icons/fa"
-import { AiOutlineEye, AiOutlineEyeInvisible } from 'react-icons/ai';
 import logo from "../assets/logo.png"
 
 function EditProfile() {
@@ -194,9 +193,8 @@ function EditProfile() {
   };
 
   const handleCancel = () => {
-  const savedPath = sessionStorage.getItem("currentPath") || "/Principal";
-  navigate(savedPath);
-};
+    navigate(-1); 
+  };
 
   return (
     <div style={styles.container}>
@@ -466,7 +464,7 @@ const styles = {
   label: {
     fontSize: "1rem",
     display: "block",
-    marginBottom: "5px",
+    marginBottom: "0.5rem",
     fontWeight: "600",
   },
   input: {
@@ -476,10 +474,11 @@ const styles = {
     display: "flex",
     height: "40px",
     width: "100%",
-    padding: '0.75rem',
+    marginBottom: "-1rem",
+    padding: '0.75rem 1rem',
     fontSize: "1rem",
     border: "1px solid #ddd",
-    borderRadius: "4px",
+    borderRadius: "0.25rem",
     boxSizing: "border-box",
     outline: 'none',
     '&:focus': {
@@ -496,7 +495,8 @@ const styles = {
   buttonContainer: {
     display: "flex",
     justifyContent: "space-between",
-    gap: "10px",
+    marginTop: "1rem",
+    gap: "0.5rem",
   },
   cancelButton: {
     flex: "1",

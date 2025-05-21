@@ -105,8 +105,8 @@ function Login() {
             
                 >
                 {showPassword
-                  ? <FaEyeSlash size={20} />
-                  : <FaEye size={20} />
+                  ? <FaEye size={20} />
+                  : <FaEyeSlash size={20} />
                 }
                 </div>
               )}
@@ -148,12 +148,18 @@ function Login() {
             }
         `}</style>
         </form>
-        <p style={styles.createAccountLink} onClick={handleCreateAccount}>
-          Crear Cuenta
-        </p>
+
         <p style={styles.forgotPassword} onClick={handleForgotPassword}>
           ¿Olvidaste tu contraseña?
         </p>
+
+        <div style={styles.buttonContainer}>
+        <button
+        type="submit" 
+        onClick={handleCreateAccount} style={styles.createAccount} title="Crear cuenta nueva">
+          <span style={styles.buttonText}>Crear cuenta nueva</span>
+      </button>
+      </div>
       </div>
     </div>
   )
@@ -197,7 +203,7 @@ const styles = {
     backgroundColor: '#ffffff',
     padding: '3rem',
     marginLeft: '-80px',
-    borderRadius: '1.5rem',
+    borderRadius: '0.8rem',
     boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
     width: '50%',
     maxWidth: '400px',
@@ -207,12 +213,12 @@ const styles = {
     display: "flex",
     flexDirection: "column",
     justifyContent: "center",
-    
-    
+     
   },
   title: {
     fontSize: '2.5rem',
-    marginBottom: '4rem',
+    marginBottom: '2rem',
+    marginTop: '-1rem',
     fontWeight: "700",
     position: "relative",
     textAlign: "center",
@@ -248,7 +254,7 @@ const styles = {
   button: {
     padding: "0.75rem",
     fontSize: "25px",
-    backgroundColor: "#FCCE74",
+    backgroundColor: "#F9E400",
     color: "black",
     border: "none",
     cursor: "pointer",
@@ -258,15 +264,34 @@ const styles = {
     transition: "background-color 0.2s ease",
     transform: "none !important",
   },
-  forgotPassword: {
-    marginTop: '1rem',
-    fontSize: '0.875rem',
-    textAlign: 'center',
-    color: '#007BFF',
-    cursor: 'pointer',
-    textDecoration: 'underline',
+  buttonContainer: {
+    display: 'flex',
+    justifyContent: 'center',
+
   },
-  createAccountLink: {
+  createAccount: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: "1rem 1rem",
+    fontSize: "1rem",
+    backgroundColor: "#06D001",
+    color: "white",
+    border: "none",
+    cursor: "pointer",
+    borderRadius: "0.5rem",
+    marginTop: "1.5rem",
+    position: "relative",
+    transition: "background-color 0.2s ease",
+    transform: "none !important",
+  },
+  icon: {
+    width: "1rem",
+    height: "1rem",
+    fill: "white",
+    marginRight: "0.3rem"
+  },
+  forgotPassword: {
     marginTop: '1rem',
     fontSize: '0.875rem',
     textAlign: 'center',

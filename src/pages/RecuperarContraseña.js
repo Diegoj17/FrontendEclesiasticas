@@ -288,8 +288,8 @@ const styles = {
   cancelButton: {
     padding: '0.75rem',
     fontSize: '1rem',
-    backgroundColor: '#FCCE74',
-    color: 'black',
+    backgroundColor: '#FF0000',
+    color: 'white',
     border: 'none',
     borderRadius: '5px',
     cursor: 'pointer',
@@ -300,8 +300,8 @@ const styles = {
   submitButton: {
     padding: '1rem 1rem',
     fontSize: '1rem',
-    backgroundColor: '#FCCE74',
-    color: 'black',
+    backgroundColor: '#06D001',
+    color: 'white',
     border: 'none',
     borderRadius: '5px',
     cursor: 'pointer',

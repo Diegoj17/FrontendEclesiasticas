@@ -141,7 +141,7 @@ function CambiarContraseña() {
             <div style={styles.spacer}></div>
           </div>
 
-          <div style={styles.subtitle}>Actualiza tu Contraseña de Acceso</div>
+          <div style={styles.subtitle}>Actualiza tu contraseña de acceso</div>
 
           <div style={styles.avatarContainer}>
             <div style={styles.avatar}>

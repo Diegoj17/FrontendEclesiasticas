@@ -158,7 +158,7 @@ function AppContent() {
           }
         />
         <Route
-          path="/editarActas"
+          path="/editar-acta/:id/:tipo"
           element={
             <ProtectedRoute>
               <EditarActas />
