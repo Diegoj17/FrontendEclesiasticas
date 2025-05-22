@@ -271,7 +271,7 @@ const styles = {
     position: "relative",
     transition: "background-color 0.2s ease",
     transform: "none !important",
-    backgroundImage: "radial-gradient(#F9E400, #FFC107)"
+    backgroundImage: "radial-gradient(#F6C90E, #F6C90E)"
   },
   buttonContainer: {
     display: 'flex',
