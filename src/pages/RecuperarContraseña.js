@@ -351,6 +351,11 @@ const styles = {
     marginBottom: '1.5rem',
     color: '#555',
   },
+  errorText: {
+    color: 'red',
+    fontSize: '0.7rem',
+    marginTop: '0.5rem',
+  },
   modalButton: {
     backgroundColor: '#2ecc71',
     color: 'white',
