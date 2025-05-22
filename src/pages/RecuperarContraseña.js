@@ -300,7 +300,7 @@ const styles = {
   submitButton: {
     padding: '1rem 1rem',
     fontSize: '1rem',
-    backgroundColor: '#06D001',
+    backgroundColor: '#27548A',
     color: 'white',
     border: 'none',
     borderRadius: '5px',
