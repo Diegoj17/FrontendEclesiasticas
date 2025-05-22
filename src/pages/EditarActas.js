@@ -9,7 +9,7 @@ import BautismoForm from "../components/forms/BautismoForm";
 import ConfirmacionForm from "../components/forms/ConfirmacionForm";
 import MatrimonioForm from "../components/forms/MatrimonioForm";
 import ActaService from "../services/ActaService";
-import { FaArrowLeft, FaSave } from "react-icons/fa";
+import { FaArrowLeft, FaSave, FaCheck, FaExclamationTriangle } from "react-icons/fa";
 
 const initialFormData = {
   libro: "",
@@ -35,6 +35,9 @@ function EditarActa() {
   const [ciudadesColombia, setCiudadesColombia] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [formData, setFormData] = useState(initialFormData);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showErrorModal, setShowErrorModal] = useState(false);
+  const [modalMessage, setModalMessage] = useState("");
 
   const handleChange = (e) => {
     const { name, value, isComboBox } = e.target;
@@ -188,13 +191,24 @@ function EditarActa() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
+    setIsSubmitting(true);
+    
     try {
-      await ActaService.updateActa(tipo, id, formData);
-      navigate(-1);
+      await ActaService.createActasBatch(tipo, id, formData);
+      setModalMessage("Los cambios se han guardado correctamente.");
+      setShowSuccessModal(true);
+      
+      // Redirigir después de 2 segundos
+      setTimeout(() => {
+        navigate(-1); // O a la ruta que prefieras
+      }, 2000);
+      
     } catch (err) {
-      console.error(err);
-      setLoading(false);
+      console.error("Error al guardar acta:", err);
+      setModalMessage(err.response?.data?.message || "Error al guardar los cambios");
+      setShowErrorModal(true);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -207,9 +221,8 @@ function EditarActa() {
   return (
     <div style={styles.container}>
       <Header title={`Edición de Acta de ${tipo.charAt(0).toUpperCase() + tipo.slice(1)}`} />
-
     
-        <div style={styles.actionsBar}>
+      <div style={styles.actionsBar}>
       <button onClick={handleBack} style={styles.backButton} title="Atrás">
           <FaArrowLeft style={styles.iconBack} />
           <span style={styles.buttonText}>Atrás</span>
@@ -254,6 +267,54 @@ function EditarActa() {
         </button>
         </div>
       </form>
+
+      {showSuccessModal && (
+        <div style={styles.modalOverlay}>
+          <div style={styles.modal}>
+            <div style={{...styles.modalHeader, backgroundColor: "#4CAF50"}}>
+              <h2 style={styles.modalTitle}>¡Éxito!</h2>
+            </div>
+            <div style={styles.modalBody}>
+              <FaCheck style={{color: "#4CAF50", fontSize: "2rem", marginBottom: "1rem"}} />
+              <p>{modalMessage}</p>
+            </div>
+            <div style={styles.modalFooter}>
+              <button 
+                onClick={() => {
+                  setShowSuccessModal(false);
+                  navigate(-1);
+                }} 
+                style={styles.confirmButton}
+              >
+                Aceptar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de error */}
+      {showErrorModal && (
+        <div style={styles.modalOverlay}>
+          <div style={styles.modal}>
+            <div style={{...styles.modalHeader, backgroundColor: "#F44336"}}>
+              <h2 style={styles.modalTitle}>¡Error!</h2>
+            </div>
+            <div style={styles.modalBody}>
+              <FaExclamationTriangle style={{color: "#F44336", fontSize: "2rem", marginBottom: "1rem"}} />
+              <p>{modalMessage}</p>
+            </div>
+            <div style={styles.modalFooter}>
+              <button 
+                onClick={() => setShowErrorModal(false)} 
+                style={{...styles.confirmButton, backgroundColor: "#F44336"}}
+              >
+                Aceptar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
     
     
@@ -312,10 +373,10 @@ const styles = {
     padding: "0.75rem 1rem",
     border: "none",
     borderRadius: "0.5rem",
-    backgroundColor: "#FCCE74",
+    backgroundColor: "#385792",
     cursor: "pointer",
     textAlign: "left",
-    color: "black",
+    color: "white",
     transition: "background-color 0.2s",
     whiteSpace: "nowrap",
     overflow: "hidden",
@@ -369,6 +430,7 @@ const styles = {
     marginBottom: "0.5rem",
     fontWeight: "700",
     color: "#385792",
+    marginTop: "-0rem",
   },
   formRow: {
     display: "flex",
@@ -400,6 +462,57 @@ const styles = {
     resize: "vertical",
     whiteSpace: "pre-wrap",
     verticalAlign: "top",
+  },
+  modalOverlay: {
+    position: "fixed",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 1000,
+  },
+  modal: {
+    backgroundColor: "white",
+    borderRadius: "0.5rem",
+    width: "400px",
+    maxWidth: "90%",
+    boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+    overflow: "hidden",
+  },
+  modalHeader: {
+    padding: "1rem",
+    borderBottom: "1px solid #e0e0e0",
+  },
+  modalTitle: {
+    margin: 0,
+    fontSize: "1.3rem",
+    fontWeight: "600",
+    textAlign: "center",
+    color: "white",
+  },
+  modalBody: {
+    padding: "1.5rem",
+    textAlign: "center",
+  },
+  modalFooter: {
+    padding: "1rem",
+    borderTop: "1px solid #e0e0e0",
+    display: "flex",
+    justifyContent: "center",
+  },
+  confirmButton: {
+    backgroundColor: "#4CAF50",
+    color: "white",
+    border: "none",
+    borderRadius: "0.25rem",
+    padding: "0.5rem 1rem",
+    cursor: "pointer",
+    fontWeight: "600",
+    minWidth: "100px",
   },
 };
 

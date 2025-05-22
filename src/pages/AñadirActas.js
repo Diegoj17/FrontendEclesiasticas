@@ -710,7 +710,7 @@ function AñadirPartidas() {
                 <button
                   type="submit"
                   style={{
-                    ...styles.sidebarButton,
+                    ...styles.saveButton,
                     opacity: eventoSeleccionado && !isSubmitting ? 1 : 0.5,
                     cursor: eventoSeleccionado && !isSubmitting ? "pointer" : "not-allowed",
                   }}
@@ -897,6 +897,7 @@ const styles = {
     marginBottom: "0.5rem",
     fontWeight: "700",
     color: "#385792",
+    marginTop: "-0rem",
   },
   formRow: {
     display: "flex",
@@ -948,13 +949,32 @@ const styles = {
     minHeight: "40px",
     opacity: 1,
   },
+  saveButton: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: "0.5rem",
+    padding: "0rem 0.75rem",
+    border: "none",
+    borderRadius: "0.5rem",
+    backgroundColor: "#385792",
+    cursor: "pointer",
+    textAlign: "left",
+    color: "white",
+    transition: "background-color 0.2s",
+    whiteSpace: "nowrap",
+    overflow: "hidden",
+    position: "relative",
+    minHeight: "40px",
+    opacity: 1,
+  },
   saveButtonContainer: {
-  display: "flex",
-  justifyContent: "flex-end",
-  alignItems: "center",
-  marginTop: "1rem",
-  padding: "0 0rem",
-  whiteSpace: "nowrap",
+    display: "flex",
+    justifyContent: "flex-end",
+    alignItems: "center",
+    marginTop: "1rem",
+    padding: "0 0rem",
+    whiteSpace: "nowrap",
   },
   buttonIcon: {
     width: "16px",

@@ -247,7 +247,7 @@ function ListaActas() {
                 onClick={handleEnviarActas}
                 style={{
                   ...styles.actionButton,
-                  backgroundColor: "#77B254",
+                  backgroundColor: "#27548A",
                   color: "white",
                   opacity: selectedActas.length > 0 ? 1 : 0.5,
                   cursor: selectedActas.length > 0 ? "pointer" : "not-allowed",
@@ -691,7 +691,7 @@ const styles = {
     gap: "0.5rem",
   },
   confirmButton: {
-    backgroundColor: "#385792",
+    backgroundColor: "#27548A",
     color: "white",
     border: "none",
     borderRadius: "0.25rem",

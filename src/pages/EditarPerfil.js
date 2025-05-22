@@ -15,7 +15,6 @@ function EditProfile() {
     nombre: "",
     apellido: "",
     email: "",
-    password: "",
   });
 
   const [errors, setErrors] = useState({});
@@ -32,9 +31,6 @@ function EditProfile() {
   const [modalMessage, setModalMessage] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showRules, setShowRules] = useState(false);
-  const [showPasswordRules, setShowPasswordRules] = useState(false); // Solo para el campo de contraseña
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const inputRef = useRef(null);
   const bubbleRef = useRef(null);
 
@@ -54,7 +50,6 @@ function EditProfile() {
         nombre: user.nombre || "",
         apellido: user.apellido || "",
         email: user.email || "",
-        password: "",
       });
     }
   }, [user]);
@@ -76,37 +71,19 @@ function EditProfile() {
     setLoading(true)
     setErrors({}); // Limpiar errores previos
 
-    // Validación de confirmación de contraseña
-  if (formData.password && formData.password !== confirmPassword) {
-    setErrors(prev => ({ 
-      ...prev, 
-      confirmPassword: 'Las contraseñas no coinciden' 
-    }));
-    setLoading(false);
-    return;
-  }
-
-  setMessage({ text: "", type: "" })
-
-  // Validación de reglas de contraseña (solo si hay password)
-  if (formData.password && !validatePassword(formData.password)) {
-    setLoading(false);
-    return;
-  }
+    setMessage({ text: "", type: "" })
 
     try {
     console.log("Enviando datos para actualizar:", {
       nombre: formData.nombre,
       apellido: formData.apellido,
       email: formData.email,
-      ...(formData.password && { password: formData.password }) // Envía password solo si existe
     });
 
     const success = await updateUser({
       nombre: formData.nombre,
       apellido: formData.apellido,
-      email: formData.email,
-      ...(formData.password && { password: formData.password }) // Envía password solo si existe
+      email: formData.email,  
     });
 
       if (success) {
@@ -358,6 +335,8 @@ const styles = {
     padding: '20px 0 0 0',
     margin: '0 auto',
     cursor: 'default',
+    flexWrap: "wrap",
+    overflow: "auto",
   },
   formContainer: {
     display: 'flex',
@@ -375,6 +354,7 @@ const styles = {
     justifyContent: 'center',
     cursor: 'default',
     marginTop: '-15rem',
+    flexWrap: "wrap",
   },
   logo: {
     width: '12.5rem',
@@ -387,6 +367,7 @@ const styles = {
     display: 'flex',
     gap: '0rem',
     marginBottom: '0rem',
+    flexWrap: "wrap",
     '@media (max-width: 768px)': {
       flexDirection: 'column',
       gap: '0',
@@ -401,6 +382,7 @@ const styles = {
     width: "100%",
     maxWidth: "400px",
     boxSizing: "border-box",
+    flexWrap: "wrap",
   },
   header: {
     display: "flex",
@@ -501,7 +483,7 @@ const styles = {
   cancelButton: {
     flex: "1",
     padding: "1rem 1rem",
-    backgroundColor: "#FF0000",
+    backgroundColor: "#CD1818",
     color: "#FFFFFF",
     border: "none",
     borderRadius: "5px",
@@ -511,7 +493,7 @@ const styles = {
   },
   saveButton: {
     padding: "1rem 1rem",
-    backgroundColor: "#4E9F3D",
+    backgroundColor: "#27548A",
     color: "white",
     border: "none",
     borderRadius: '5px',

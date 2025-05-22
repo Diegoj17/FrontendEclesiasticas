@@ -149,9 +149,15 @@ const handleEditActa = () => {
   }
 
   const handleRowSelect = (rowData) => {
+  console.log("Fila seleccionada:", rowData);
   setSelectedRow(rowData);
-  setSelectedActas([rowData]); // Actualizar selectedActas también si es necesario
+  
+  // Si necesitas transformar los datos como en VistaActas
+  const actaFormateada = ActaService.transformActasForTable(rowData);
+  setSelectedRow(actaFormateada);
   };
+
+  
 
 
 
@@ -501,7 +507,7 @@ return (
                         onFilter={(e) => setFilters(e.filters)}
                         expandedRowTemplate={expandedRowTemplate}
                         selectedRow={selectedRow}
-                        setSelectedRow={handleRowSelect}
+                        setSelectedRow={setSelectedRow}
                       /> 
                     </div>
                   )}

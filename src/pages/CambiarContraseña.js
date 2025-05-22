@@ -6,16 +6,13 @@ import logo from "../assets/logo.png";
 
 function CambiarContraseña() {
   const navigate = useNavigate();
-  const { updatePassword } = useAuth();
+  const { updatedUser } = useAuth();
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
-  const [newPassword, setNewPassword] = useState('');
-  const [currentPassword, setCurrentPassword] = useState('');
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [touched, setTouched] = useState({});
   const [showPassword, setShowPassword] = useState({
     current: false,
@@ -87,7 +84,7 @@ function CambiarContraseña() {
     }
 
     try {
-      await updatePassword({
+      await updatedUser({
         currentPassword: formData.currentPassword,
         newPassword: formData.newPassword
       });
@@ -529,7 +526,7 @@ const styles = {
   cancelButton: {
     flex: "1",
     padding: "1rem 1rem",
-    backgroundColor: "#FF0000",
+    backgroundColor: "#CD1818",
     color: "#FFFFFF",
     border: "none",
     borderRadius: "5px",
@@ -539,7 +536,7 @@ const styles = {
   },
   saveButton: {
     padding: "1rem 1rem",
-    backgroundColor: "#4E9F3D",
+    backgroundColor: "#27548A",
     color: "white",
     border: "none",
     borderRadius: '5px',
@@ -612,7 +609,7 @@ const styles = {
     top: '0',
     marginLeft: '30px',
     width: '275px',
-    backgroundColor: '#FF0000',
+    backgroundColor: '#CD1818',
     borderRadius: '8px',
     boxShadow: '0 2px 14px rgba(0, 0, 0, 0.1)',
     //border: '1px solid rgb(0, 0, 0)',
@@ -624,10 +621,10 @@ const styles = {
     top: '0.8rem',
     width: '1rem',
     height: '1rem',
-    color: '#FF0000',
+    color: '#CD1818',
     borderTop: '0.5rem solid transparent',
     borderBottom: '0.5rem solid transparent',
-    borderRight: '1rem solid #FF0000',
+    borderRight: '1rem solid #CD1818',
     filter: 'drop-shadow(-2px 0 1px rgba(0, 0, 0, 0.05))'
   },
   rulesContainer: {

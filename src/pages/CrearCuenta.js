@@ -8,6 +8,7 @@ import { AiOutlineEye, AiOutlineEyeInvisible } from 'react-icons/ai';
 function CrearCuenta() {
   const [name, setName] = useState('');
   const [lastname, setLastname] = useState('');
+  const [parroquia, setParroquia] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -151,12 +152,12 @@ function CrearCuenta() {
           <p style={styles.description}>Ingresa los datos para crear la cuenta.</p>
           <div style={styles.avatarContainer}>
             <div style={styles.avatar}>
-              <FaUser size={40} color="#385792" />
+              <FaUser style={styles.avatarIcon} />
             </div>
           </div>
           <form onSubmit={handleSubmit} style={styles.form}>
             <div style={styles.rowContainer}>
-              <div style={{ ...styles.formGroup, flex: 1, marginRight: '15px' }}>
+              <div style={{...styles.formGroup, flex: 1, marginRight: '10px'}}>
                 <label htmlFor="name" style={styles.label}>Nombre</label>
                 <input
                   type="text"
@@ -167,7 +168,7 @@ function CrearCuenta() {
                   required
                 />
               </div>
-              <div style={{ ...styles.formGroup, flex: 1, marginRight: '15px' }}>
+              <div style={{...styles.formGroup, flex: 1}}>
                 <label htmlFor="email" style={styles.label}>Apellido</label>
                 <input
                   type="text"
@@ -206,6 +207,18 @@ function CrearCuenta() {
                 )}
               </div>
             </div>
+
+            <div style={styles.formGroup}>
+              <label htmlFor="parroquia" style={styles.label}>Parroquia</label>
+                <input
+                  type="text"
+                  id="parroquia"
+                  value={parroquia}
+                  onChange={(e) => setParroquia(e.target.value)}
+                  style={styles.input}
+                  required
+                />
+              </div>
 
             <div style={styles.passwordContainer}>
               <label htmlFor="password" style={styles.label}>Contraseña</label>
@@ -425,6 +438,8 @@ const styles = {
     marginBottom: '0.5rem',
     margin: '0 0 8px 0',
     textAlign: 'center',
+    color: '#385792',
+    marginTop: '-0.9rem',
   },
   description: {
     fontSize: '1rem',
@@ -437,17 +452,24 @@ const styles = {
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: "20px",
+    marginBottom: "0.5rem",
+  },
+  avatarIcon: {
+    color: "#385792",
+    alignItems: "center",
+    width: "2rem",
+    height: "2rem",
   },
   avatar: {
-    width: "80px",
-    height: "80px",
+    width: "4rem",
+    height: "4rem",
     borderRadius: "50%",
     backgroundColor: "#f0f0f0",
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
     border: "2px solid #385792",
+    marginTop: "-0.5rem",
   },
   form: {
     display: 'flex',
@@ -493,9 +515,9 @@ const styles = {
     flex: 1,
     padding: '1rem 1rem',
     fontSize: '1rem',
-    backgroundColor: '#FF0000',
-    color: 'white',
-    border: 'none',
+    backgroundColor: '#DDDDDD',
+    color: 'black',
+    border: '1px solid #27548A',
     borderRadius: '5px',
     cursor: 'pointer',
     fontWeight: "550",
@@ -507,7 +529,7 @@ const styles = {
     flex: 1,
     padding: '1rem 1rem',
     fontSize: '1rem',
-    backgroundColor: '#06D001',
+    backgroundColor: '#27548A',
     color: 'white',
     border: 'none',
     borderRadius: '5px',

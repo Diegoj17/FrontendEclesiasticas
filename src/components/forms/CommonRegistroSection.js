@@ -94,9 +94,10 @@ const styles = {
   sectionTitle: {
     fontSize: "1.1rem",
     padding: "0rem",
-    marginBottom: "0.5rem",
+    marginBottom: "1.4rem",
     fontWeight: "700",
     color: "#385792",
+    marginTop: "-0rem",
   },
   registroRow: {
     display: "flex",

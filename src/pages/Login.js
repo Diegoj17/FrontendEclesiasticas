@@ -63,7 +63,9 @@ function Login() {
   return (
 
     <div style={styles.container}>
-      {/* Logo en la parte izquierda */}
+      {/* Contenedor principal flexible */}
+      <div style={styles.contentWrapper}>
+        {/* Logo */}
       <div style={styles.logoContainer}>
         <img src={logo || "/placeholder.svg"} alt="Logo" style={styles.logo} />
       </div>
@@ -162,6 +164,7 @@ function Login() {
       </div>
       </div>
     </div>
+  </div>
   )
 }
 
@@ -179,6 +182,16 @@ const styles = {
     width: "100%",
     cursor: 'default',
   },
+  contentWrapper: {
+    display: "flex",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: "6rem",
+    maxWidth: "1200px",
+    width: "100%",
+    flexWrap: "wrap", // Permite que los elementos se apilen en pantallas pequeñas
+  },
   logoContainer: {
     marginRight: '5px',
     marginLeft: '-50px',
@@ -189,22 +202,18 @@ const styles = {
     width: "50%",
   },
   logo: {
-    display: "flex",
     width: "100%",
-    height: 'auto',
-    maxWidth: '800px ',
+    height: "auto",
+    maxWidth: "100%",
     objectFit: "contain",
-    maxHeight: "80vh",
-    marginRight: '150px',
-    alignItems: "center",
-    justifyContent: "center",
+    marginRight: "6rem",
   },
   loginContainer: {
     backgroundColor: '#ffffff',
     padding: '3rem',
     marginLeft: '-80px',
     borderRadius: '0.8rem',
-    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
+    //boxShadow: '0 8px 8px ',
     width: '50%',
     maxWidth: '400px',
     minWidth: '500px',
@@ -213,10 +222,9 @@ const styles = {
     display: "flex",
     flexDirection: "column",
     justifyContent: "center",
-     
   },
   title: {
-    fontSize: '2.5rem',
+    fontSize: 'clamp(1.8rem, 3vw, 2.5rem)',
     marginBottom: '2rem',
     marginTop: '-1rem',
     fontWeight: "700",
@@ -254,7 +262,7 @@ const styles = {
   button: {
     padding: "0.75rem",
     fontSize: "25px",
-    backgroundColor: "#F9E400",
+   // backgroundColor: "#F9E400",
     color: "black",
     border: "none",
     cursor: "pointer",
@@ -263,6 +271,7 @@ const styles = {
     position: "relative",
     transition: "background-color 0.2s ease",
     transform: "none !important",
+    backgroundImage: "radial-gradient(#F9E400, #FFC107)"
   },
   buttonContainer: {
     display: 'flex',
@@ -275,7 +284,7 @@ const styles = {
     justifyContent: "center",
     padding: "1rem 1rem",
     fontSize: "1rem",
-    backgroundColor: "#06D001",
+    backgroundColor: "#27548A",
     color: "white",
     border: "none",
     cursor: "pointer",
@@ -295,7 +304,7 @@ const styles = {
     marginTop: '1rem',
     fontSize: '0.875rem',
     textAlign: 'center',
-    color: '#007BFF',
+    color: '#27548A',
     cursor: 'pointer',
     textDecoration: 'underline',
   },
