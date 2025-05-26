@@ -205,7 +205,7 @@ const handleEditActa = () => {
       }
     };
 
-    const response = await axios.post(
+  const response = await axios.get(
       "https://actaseclesiasticas.koyeb.app/api/actas/pdf",
       requestBody,
       {
