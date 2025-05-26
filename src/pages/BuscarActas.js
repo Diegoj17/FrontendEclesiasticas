@@ -70,7 +70,7 @@ function BuscarPartidas() {
     const timeoutId = setTimeout(async () => {
       try {
         // Usar el servicio para buscar actas por nombre
-        const resultados = await ActaService.searchByName(searchTerm)
+        const resultados = await ActaService.searchByFullName(searchTerm)
 
         const actasUnicas = [...new Map(resultados.map(item => [item.id, item])).values()];
         const actasFormateadas = ActaService.transformActasForTable(actasUnicas);
