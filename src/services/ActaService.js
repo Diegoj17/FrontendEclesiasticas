@@ -373,10 +373,10 @@ class ActaService {
     const token = localStorage.getItem("token");
     const response = await axios.get(`https://actaseclesiasticas.koyeb.app/api/actas/buscaravanzado`, {
       params: {
-        nombre1: params.primerNombre,
-        nombre2: params.segundoNombre,
-        apellido1: params.primerApellido,
-        apellido2: params.segundoApellido
+        nombre1: params.nombre1 || "",
+        nombre2: params.nombre2 || "",
+        apellido1: params.apellido1 || "",
+        apellido2: params.apellido2 || ""
       },
       headers: { Authorization: `Bearer ${token}` }
     });

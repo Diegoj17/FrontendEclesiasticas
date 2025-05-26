@@ -48,6 +48,14 @@ function BuscarPartidas() {
     },
   })
 
+  // Estado para los parámetros de búsqueda avanzada
+  const [advancedSearchParams, setAdvancedSearchParams] = useState({
+    primerNombre: "",
+    segundoNombre: "",
+    primerApellido: "",
+    segundoApellido: ""
+  });
+
   // Datos filtrados para la tabla
   const [registrosFiltrados, setRegistrosFiltrados] = useState([])
 
@@ -59,35 +67,47 @@ function BuscarPartidas() {
   
   // Búsqueda en tiempo real con el término simple
   useEffect(() => {
-    if (searchTerm.trim() === "" || showAdvancedSearch) {
-      setRegistrosFiltrados([])
-      setIsLoading(false)
-      return
-    }
+  if ((searchTerm.trim() === "" && !showAdvancedSearch) || 
+      (showAdvancedSearch && !advancedSearchParams.nombre1 && !advancedSearchParams.apellido1)) {
+    setRegistrosFiltrados([]);
+    setIsLoading(false);
+    return;
+  }
 
-    setIsLoading(true)
+  setIsLoading(true);
 
-    const timeoutId = setTimeout(async () => {
-      try {
-        // Usar el servicio para buscar actas por nombre
-        const resultados = await ActaService.searchByFullName(searchTerm)
-
-        const actasUnicas = [...new Map(resultados.map(item => [item.id, item])).values()];
-        const actasFormateadas = ActaService.transformActasForTable(actasUnicas);
-
-        setRegistrosFiltrados(actasFormateadas)
-        setRegistros(actasFormateadas)
-        setIsLoading(false)
-      } catch (error) {
-        console.error("Error al buscar actas:", error)
-        setError("Error al buscar actas. Por favor, intente de nuevo.")
-        setIsLoading(false)
+  const timeoutId = setTimeout(async () => {
+    try {
+      let resultados;
+      
+      if (showAdvancedSearch) {
+        // Búsqueda avanzada
+        resultados = await ActaService.searchByFullName({
+          nombre1: advancedSearchParams.primerNombre,
+          nombre2: advancedSearchParams.segundoNombre,
+          apellido1: advancedSearchParams.primerApellido,
+          apellido2: advancedSearchParams.segundoApellido
+        });
+      } else {
+        // Búsqueda simple
+        resultados = await ActaService.searchByName(searchTerm);
       }
-    }, 300)
 
-    return () => clearTimeout(timeoutId)
-  }, [searchTerm, showAdvancedSearch])
-  
+      const actasUnicas = [...new Map(resultados.map(item => [item.id, item])).values()];
+      const actasFormateadas = ActaService.transformActasForTable(actasUnicas);
+
+      setRegistrosFiltrados(actasFormateadas);
+      setRegistros(actasFormateadas);
+      setIsLoading(false);
+    } catch (error) {
+      console.error("Error al buscar actas:", error);
+      setError("Error al buscar actas. Por favor, intente de nuevo.");
+      setIsLoading(false);
+    }
+  }, 300);
+
+  return () => clearTimeout(timeoutId);
+}, [searchTerm, showAdvancedSearch, advancedSearchParams]);
 
 
 
