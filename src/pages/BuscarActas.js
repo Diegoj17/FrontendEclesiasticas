@@ -7,9 +7,8 @@ import ActaService from "../services/ActaService"
 import { FilterMatchMode, FilterOperator } from "primereact/api"
 import DataTableExpandle from "../components/layout/DataTableExpandle"
 import DetallesActas from "../components/layout/DetallesActas"
-import jsPDF from "jspdf";
-import autoTable from "jspdf-autotable";
 import { FaPrint, FaSearch, FaTimes, FaEdit } from "react-icons/fa"
+import axios from "axios"
 
 function BuscarPartidas() {
   const navigate = useNavigate()
@@ -177,235 +176,67 @@ const handleEditActa = () => {
   setSelectedRow(actaFormateada);
   };
 
-  
+  const handlePrintLargo = async () => {
+  if (!selectedRow) return;
 
+  try {
+    const token = localStorage.getItem("token");
+    if (!token) throw new Error("No hay token de autenticación");
 
+    // Mapear datos al formato requerido por el backend
+    const requestBody = {
+      tipoPdf: selectedRow.ceremonia.toLowerCase(),
+      tipoDocumento: "largo",
+      parametros: {
+        libro: selectedRow.libro || "",
+        folio: selectedRow.folio || "",
+        acta: selectedRow.acta || "",
+        num_dias: "15", // Ejemplo - ajustar según necesidad
+        mes_anio: new Date().toLocaleDateString('es-ES', { month: 'long', year: 'numeric' }).toUpperCase(),
+        monsenior: selectedRow.monsenor || selectedRow.oficiante || "",
+        nombre_bautizado: `${selectedRow.primerNombre} ${selectedRow.segundoNombre} ${selectedRow.primerApellido} ${selectedRow.segundoApellido}`,
+        nombre_padre: selectedRow.nombresPadre || "",
+        nombre_madre: selectedRow.nombresMadre || "",
+        nombre_padrinos: selectedRow.nombrepadrinos || selectedRow.padrino || "N/A",
+        nombre_doyfe: selectedRow.doyFe || "",
+        nota_marginal: selectedRow.notaMarginal || "Ninguna",
+        fecha_nacimiento: selectedRow.fechaNacimiento || "",
+        fecha_actual: new Date().toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })
+      }
+    };
 
-  const generarPDFCorto = () => {
-    if (!selectedRow) return;
-    const r = registros.find(r => r.id === selectedRow.id);
-    if (!r) return;
-  
-    const doc = new jsPDF({ unit: "pt", format: "a4", orientation: "portrait" });
-    // Header
-    doc.setFontSize(18);
-    doc.setTextColor("#385792");
-    doc.text("CERTIFICADO DE BAUTISMO", 210, 40, { align: "center" });
-    doc.setFontSize(12);
-    doc.setTextColor(0);
-    doc.text(`Parroquia San Luis Gonzaga — Diócesis de ${r.diocesis}`, 210, 60, { align: "center" });
-  
-    // Tabla breve
-    autoTable(doc, {
-      startY: 90,
-      theme: "grid",
-      head: [["Campo", "Valor"]],
-      body: [
-        ["Nombre completo", `${r.primerNombre} ${r.segundoNombre} ${r.primerApellido} ${r.segundoApellido}`],
-        ["Fecha de bautizo", r.fecha],
-        ["Libro/Acta/Folio", `${r.libro} / ${r.acta} / ${r.folio}`],
-        ["Padrinos", r.padrinos?.join(", ") || "N/A"],
-        ["Celebrante", r.oficiante || r.sacerdote],
-      ],
-      headStyles: { fillColor: "#385792", textColor: "#fff" },
-      styles: { fontSize: 11 },
-      columnStyles: { 0: { cellWidth: 120 }, 1: { cellWidth: 350 } },
-    });
-  
-    // Pie y descarga
-    const fechaEmision = new Date().toLocaleDateString();
-    doc.setFontSize(10);
-    doc.text(`Emitido: ${fechaEmision}`, 40, doc.lastAutoTable.finalY + 30);
-    doc.save(`certificado_bautismo_${r.primerNombre}.pdf`);
+    const response = await axios.post(
+      "https://actaseclesiasticas.koyeb.app/api/actas/pdf",
+      requestBody,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        responseType: 'blob'
+      }
+    );
+
+    // Crear y descargar el PDF
+    const pdfBlob = new Blob([response.data], { type: 'application/pdf' });
+    const pdfUrl = URL.createObjectURL(pdfBlob);
+    
+    const link = document.createElement('a');
+    link.href = pdfUrl;
+    link.download = `acta_${selectedRow.ceremonia}_${selectedRow.acta}.pdf`;
+    link.click();
+    
+    URL.revokeObjectURL(pdfUrl);
+
+  } catch (error) {
+    console.error("Error al generar PDF:", error);
+    alert(`Error al generar el PDF: ${error.message}`);
+  }
   };
   
 
-  const generarFormatoCorto = () => {
-    if (!selectedRow) return
-
-    const selectedRecord = registros.find((r) => r.id === selectedRow.id)
-    if (!selectedRecord) return
-
-    const printWindow = window.open("", "_blank")
-    printWindow.document.write(`
-      <html>
-        <head>
-          <title>Certificado Bautismal - ${selectedRecord.primerNombre}</title>
-          <style>
-            @page { margin: 2cm; size: A4 portrait; }
-            body {
-              font-family: 'Arial', sans-serif;
-              line-height: 1.6;
-              color: #2c3e50;
-            }
-            .encabezado {
-              border-bottom: 3px solid #385792;
-              padding-bottom: 15px;
-              margin-bottom: 25px;
-            }
-            .titulo-principal {
-              color: #385792;
-              font-size: 24pt;
-              text-align: center;
-              margin: 20px 0;
-            }
-            .tabla-datos {
-              width: 100%;
-              border-collapse: collapse;
-              margin: 25px 0;
-            }
-            .tabla-datos td {
-              padding: 12px;
-              border: 1px solid #ddd;
-            }
-            .tabla-datos td:first-child {
-              font-weight: bold;
-              width: 30%;
-              background-color: #f8f9fa;
-            }
-            .sello-parroquia {
-              float: right;
-              width: 150px;
-              margin: 20px;
-            }
-            @media print {
-              .no-print { display: none; }
-              button { display: none; }
-            }
-          </style>
-        </head>
-        <body>
-          <img src="/sello-oficial.png" alt="Sello Parroquial" class="sello-parroquia">
-          
-          <div class="encabezado">
-            <h1 class="titulo-principal">CERTIFICADO DE BAUTISMO</h1>
-            <p style="text-align: center;">Parroquia San Luis Gonzaga</p>
-            <p style="text-align: center;">Diócesis de ${selectedRecord.diocesis || "N/A"}</p>
-          </div>
   
-          <table class="tabla-datos">
-            <tr>
-              <td>Nombre completo:</td>
-              <td>${selectedRecord.primerNombre} ${selectedRecord.segundoNombre} ${selectedRecord.primerApellido} ${selectedRecord.segundoApellido}</td>
-            </tr>
-            <tr>
-              <td>Fecha de bautizo:</td>
-              <td>${selectedRecord.fecha}</td>
-            </tr>
-            <tr>
-              <td>Libro/Acta/Folio:</td>
-              <td>${selectedRecord.libro} - ${selectedRecord.folio} - ${selectedRecord.acta}</td>
-            </tr>
-            <tr>
-              <td>Padrinos:</td>
-              <td>${selectedRecord.padrinos ? selectedRecord.padrinos.join(", ") : "N/A"}</td>
-            </tr>
-            <tr>
-              <td>Celebrante:</td>
-              <td>${selectedRecord.oficiante || selectedRecord.sacerdote}</td>
-            </tr>
-          </table>
   
-          <div style="margin-top: 50px;">
-            <p>Fecha de emisión: ${new Date().toLocaleDateString()}</p>
-            <div style="text-align: center; margin-top: 40px;">
-              <p>__________________________</p>
-              <p>P. ${selectedRecord.párroco || "N/A"}</p>
-              <p>Párroco</p>
-            </div>
-          </div>
-  
-          <script>
-            window.onload = function() {
-              window.print();
-              setTimeout(() => window.close(), 1000);
-            }
-          </script>
-        </body>
-      </html>
-    `)
-    printWindow.document.close()
-    printWindow.print()
-  }
-
-  const handlePrintLargo = () => {
-    if (!selectedRow) return
-
-    const selectedRecord = registros.find((r) => r.id === selectedRow.id)
-    if (!selectedRecord) return
-
-    const formatos = {
-      largo: Object.keys(selectedRecord).filter(
-        (key) => typeof selectedRecord[key] !== "object" && key !== "id" && key !== "padrinos",
-      ),
-    }
-
-    const camposImpresion = formatos.largo
-
-    const printWindow = window.open("", "_blank")
-    printWindow.document.write(`
-      <html>
-        <head>
-          <title>Partida de ${selectedRecord.primerNombre}</title>
-          <style>
-            body { font-family: Arial, sans-serif; padding: 20px; }
-            .header { 
-              border-bottom: 2px solid #000; 
-              margin-bottom: 20px;
-              padding-bottom: 10px;
-            }
-            table { border-collapse: collapse; width: 100%; }
-            td, th { border: 1px solid #ddd; padding: 8px; }
-            th { background-color: #f2f2f2; }
-            .formato-largo td { padding: 12px; font-size: 14px; }
-          </style>
-        </head>
-        <body>
-          <div class="header">
-            <h2>Certificado Completo</h2>
-            <p>Emitido: ${new Date().toLocaleDateString()}</p>
-          </div>
-  
-          <table class="formato-largo">
-            <tbody>
-              ${camposImpresion
-                .map(
-                  (key) => `
-                <tr>
-                  <th>${
-                    key
-                      .replace(/([A-Z])/g, " $1")
-                      .charAt(0)
-                      .toUpperCase() + key.replace(/([A-Z])/g, " $1").slice(1)
-                  }</th>
-                  <td>${selectedRecord[key] || "N/A"}</td>
-                </tr>
-              `,
-                )
-                .join("")}
-              ${
-                selectedRecord.padrinos
-                  ? `
-                <tr>
-                  <th>Padrinos</th>
-                  <td>${selectedRecord.padrinos.join(", ")}</td>
-                </tr>
-              `
-                  : ""
-              }
-            </tbody>
-          </table>
-          
-          <div style="margin-top: 30px; text-align: right;">
-            <p>_________________________</p>
-            <p>Firma autorizada</p>
-          </div>
-        </body>
-      </html>
-    `)
-    printWindow.document.close()
-    printWindow.print()
-  }
 
 
 return (
@@ -479,7 +310,7 @@ return (
                 </button>
                 <button
                   type="button"
-                  onClick={generarFormatoCorto}
+                  onClick={handlePrintLargo}
                   style={{
                     ...styles.printButton,
                     opacity: selectedRow ? 1 : 0.5,
