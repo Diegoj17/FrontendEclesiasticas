@@ -112,22 +112,22 @@ const styles = {
   logoContainer: {
     display: "flex",
     alignItems: "center",
-    gap: "1rem"
+    gap: "1rem",
+    marginRight: "auto",
+    padding: "0.5rem 0",
+    cursor: "pointer",
   },
   logo: {
     height: "3.8rem",
     width: "auto",
     objectFit: "contain",
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: "20rem",
   },
   titleContainer: {
     flex: 1,
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    textAlign: "center"
+    margin: "0 2rem",
   },
   headerTitle: {
     margin: 0,

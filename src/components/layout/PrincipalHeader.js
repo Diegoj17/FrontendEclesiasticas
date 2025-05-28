@@ -125,7 +125,7 @@ const styles = {
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    margin: "0 1rem",
+    margin: "0 2rem",
   },
   title: {
     fontSize: "clamp(1.2rem, 4vw, 1.8rem)",
