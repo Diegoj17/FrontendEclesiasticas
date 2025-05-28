@@ -48,16 +48,18 @@ function PrincipalHeader() {
   
   return (
     <header style={styles.header}>
-      <div style={styles.logoContainer}>
+      <div style={styles.logoContainer}
         onClick={() => navigate("/Principal")}
         role="button"
         tabIndex={0}
-        
+        >
       <img src={logo || "/placeholder.svg"} alt="Logo" style={styles.logo} />
       </div>
+
       <div style={styles.titleContainer}>
         <h1 style={styles.title}>Parroquia San Luis Gonzaga</h1>
       </div>
+
         <div ref={dropdownRef} style={styles.userContainer} onClick={toggleDropdown}>
       
       <div style={styles.userSection}>
