@@ -49,6 +49,10 @@ function PrincipalHeader() {
   return (
     <header style={styles.header}>
       <div style={styles.logoContainer}>
+        onClick={() => navigate("/Principal")}
+        role="button"
+        tabIndex={0}
+        
       <img src={logo || "/placeholder.svg"} alt="Logo" style={styles.logo} />
       </div>
       <div style={styles.titleContainer}>
@@ -103,7 +107,8 @@ const styles = {
   logoContainer: {
     display: "flex",
     alignItems: "center",
-    gap: "1rem"
+    gap: "1rem",
+    cursor: "pointer",
   },
   logo: {
     height: "3.8rem",

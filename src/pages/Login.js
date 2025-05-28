@@ -1,9 +1,11 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import axios from "axios"
 import { useNavigate } from "react-router-dom"
 import logo from "../assets/logo.png"
 import { useAuth } from "../context/AuthContext"
-import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { FaEye, FaEyeSlash, FaRegEnvelope } from "react-icons/fa";
+import { LuLock } from "react-icons/lu";
+import { CgEnter } from "react-icons/cg";
 
 function Login() {
   const [email, setEmail] = useState("")
@@ -13,6 +15,9 @@ function Login() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
   const [showPassword, setShowPassword] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
+
+  const inputRef = useRef(null)
 
   // Redirigir si ya está autenticado
   useEffect(() => {
@@ -51,6 +56,16 @@ function Login() {
     }
   };
 
+  const togglePasswordVisibility = () => {
+    // Guarda la posición actual del cursor
+    const { selectionStart, selectionEnd } = inputRef.current
+    setShowPassword(prev => !prev)
+    // Restaura la posición después del render
+    setTimeout(() => {
+      inputRef.current.setSelectionRange(selectionStart, selectionEnd)
+    }, 0)
+  }
+
   const handleForgotPassword = () => {
     navigate("/recuperarContraseña") // Redirige a la interfaz de recuperación de contraseña
   }
@@ -78,32 +93,40 @@ function Login() {
             <label htmlFor="email" style={styles.label}>
               Correo Electrónico
             </label>
+            <div style={styles.inputContainer}>
+            <FaRegEnvelope  style={styles.inputIcon} />
             <input
               type="email"
               id="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               style={styles.input}
+              placeholder="Ingresa tu correo electrónico"
               required
             />
+          </div>
           </div>
           <div style={styles.formGroup}>
             <label htmlFor="password" style={styles.label}>
               Contraseña
             </label>
+            <div style={styles.inputContainer}>
+            <LuLock style={styles.inputIcon} />
             <input
               type={showPassword ? "text" : "password"}
               id="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               style={styles.input}
+              placeholder="Ingresa tu contraseña"
               required
+              ref={inputRef}
             />
             {password.length > 0 && (
                 <div
                   style={styles.toggleIcon}
                   onMouseDown={e => e.preventDefault()}
-                  onClick={() => setShowPassword(prev => !prev)}
+                  onClick={togglePasswordVisibility}
             
                 >
                 {showPassword
@@ -113,6 +136,8 @@ function Login() {
                 </div>
               )}
           </div>
+          </div>
+          
 
           <button
             type="submit"
@@ -126,7 +151,10 @@ function Login() {
             Ingresando...
           </div>
         ) : (
-          "Ingresar"
+        <div style={styles.buttonContent}>
+          <CgEnter style={styles.enterIcon} />
+          <span>Ingresar</span>
+      </div>
         )}
       </button>
       {error && <div style={styles.error}>{error}</div>}
@@ -151,9 +179,18 @@ function Login() {
         `}</style>
         </form>
 
-        <p style={styles.forgotPassword} onClick={handleForgotPassword}>
+        <p style={{
+          ...styles.forgotPassword,
+          textDecoration: isHovered ? 'underline' : 'none'
+        }} 
+          onClick={handleForgotPassword}
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+        >
           ¿Olvidaste tu contraseña?
         </p>
+
+        <div style={styles.divider}></div>
 
         <div style={styles.buttonContainer}>
         <button
@@ -187,7 +224,7 @@ const styles = {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    gap: "6rem",
+    gap: "10rem",
     maxWidth: "1200px",
     width: "100%",
     flexWrap: "wrap", // Permite que los elementos se apilen en pantallas pequeñas
@@ -212,11 +249,11 @@ const styles = {
     backgroundColor: '#ffffff',
     padding: '3rem',
     marginLeft: '-80px',
-    borderRadius: '0.8rem',
+    borderRadius: '0.7rem',
     //boxShadow: '0 8px 8px ',
     width: '50%',
-    maxWidth: '400px',
-    minWidth: '500px',
+    maxWidth: '30rem',
+    minWidth: '30rem',
     height: "auto",
     position: "relative",
     display: "flex",
@@ -256,8 +293,9 @@ const styles = {
     border: "1px solid #ccc",
     borderRadius: "0.5rem",
     position: "relative",
-    transition: "border-color 0.2s ease",
+    transition: "border-color 0.2s opacity 0.1s ease",
     outline: "none",
+    paddingLeft: '40px',
   },
   button: {
     padding: "0.75rem",
@@ -289,10 +327,11 @@ const styles = {
     border: "none",
     cursor: "pointer",
     borderRadius: "0.5rem",
-    marginTop: "1.5rem",
+    marginTop: "1rem",
     position: "relative",
     transition: "background-color 0.2s ease",
     transform: "none !important",
+    marginBottom: "-1rem",
   },
   icon: {
     width: "1rem",
@@ -301,12 +340,12 @@ const styles = {
     marginRight: "0.3rem"
   },
   forgotPassword: {
-    marginTop: '1rem',
+    marginTop: '1.1rem',
     fontSize: '0.875rem',
     textAlign: 'center',
     color: '#27548A',
     cursor: 'pointer',
-    textDecoration: 'underline',
+    transition: 'color 0.2s ease',
   },
   loadingContent: {
     display: "flex",
@@ -339,14 +378,42 @@ const styles = {
     "100%": { backgroundPosition: "0% 50%" },
   },
   toggleIcon: {
-  position: 'absolute',
-  right: '1rem',
-  top: '70%',
-  transform: 'translateY(-50%)',
-  cursor: 'pointer',
-  fontSize: '1.5rem',
-  color: '#000000'       
-},
+    position: 'absolute',
+    right: '1rem',
+    top: '55%',
+    transform: 'translateY(-50%)',
+    cursor: 'pointer',
+    fontSize: '1rem',
+    color: '#000000'       
+  },
+  inputContainer: {
+    position: 'relative',
+    width: '100%',
+  },
+  inputIcon: {
+    position: 'absolute',
+    left: '12px',
+    top: '50%',
+    transform: 'translateY(-50%)',
+    color: '#000000',
+    fontSize: '1.1rem',
+    zIndex: 1,
+  },
+  buttonContent: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '8px',
+  },
+  enterIcon: {
+    fontSize: '1.2rem',
+  },
+  divider: {
+    width: '100%',
+    height: '1px',
+    backgroundColor: '#e0e0e0',
+    margin: '0.5rem 0',
+  },
 
 };
 

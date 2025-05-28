@@ -185,8 +185,8 @@ const handleEditActa = () => {
 
     // Mapear datos al formato requerido por el backend
     const requestBody = {
-      tipoPdf: selectedRow.ceremonia.toLowerCase(),
-      tipoDocumento: "largo",
+      tipoPdf: "largo",
+      tipoDocumento: selectedRow.ceremonia.toLowerCase(),
       parametros: {
         libro: selectedRow.libro || "",
         folio: selectedRow.folio || "",
