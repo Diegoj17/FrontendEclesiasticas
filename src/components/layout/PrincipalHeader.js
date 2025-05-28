@@ -111,7 +111,6 @@ const styles = {
     display: "flex",
     alignItems: "center",
     gap: "1rem",
-    cursor: "pointer",
   },
   logo: {
     height: "3.8rem",
