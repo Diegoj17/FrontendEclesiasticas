@@ -48,12 +48,13 @@ function PrincipalHeader() {
   
   return (
     <header style={styles.header}>
-      <div style={styles.logoContainer}
-        onClick={() => navigate("/Principal")}
-        role="button"
-        tabIndex={0}
+      <div style={styles.logoContainer}>
+        <button 
+          onClick={() => navigate("/Principal")} 
+          style={styles.logoButton}
         >
       <img src={logo || "/placeholder.svg"} alt="Logo" style={styles.logo} />
+        </button>
       </div>
 
       <div style={styles.titleContainer}>
@@ -238,6 +239,14 @@ const styles = {
   },
   dropdownIconText: {
     color: '#ffffff',
+  },
+  logoButton: {
+  background: 'none',
+  border: 'none',
+  padding: 0,
+  cursor: 'pointer',
+  display: 'flex',
+  alignItems: 'center',
   },
 }
 
