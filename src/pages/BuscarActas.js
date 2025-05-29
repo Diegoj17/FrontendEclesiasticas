@@ -167,6 +167,12 @@ const handleEditActa = () => {
       )
   }
 
+  const formatFecha = (fecha) => {
+    const options = { day: 'numeric', month: 'long', year: 'numeric' };
+    const partes = new Date(fecha).toLocaleDateString('es-ES', options).split(' ');
+    return `${partes[0]} de ${partes[2].toUpperCase()} de ${partes[4]}`;
+  };
+
   const handleRowSelect = (rowData) => {
   console.log("Fila seleccionada:", rowData);
   setSelectedRow(rowData);
@@ -176,36 +182,142 @@ const handleEditActa = () => {
   setSelectedRow(actaFormateada);
   };
 
-  const handlePrintLargo = async () => {
+  const handlePrint = async (tipoPdf) => {
   if (!selectedRow) return;
 
   try {
     const token = localStorage.getItem("token");
     if (!token) throw new Error("No hay token de autenticación");
 
-    // Mapear datos al formato requerido por el backend
-    const requestBody = {
-      tipoPdf: "largo",
-      tipoDocumento: selectedRow.ceremonia.toLowerCase(),
-      parametros: {
-        libro: selectedRow.libro || "",
-        folio: selectedRow.folio || "",
-        acta: selectedRow.acta || "",
-        num_dias: "15", // Ejemplo - ajustar según necesidad
-        mes_anio: new Date().toLocaleDateString('es-ES', { month: 'long', year: 'numeric' }).toUpperCase(),
-        monsenior: selectedRow.monsenor || selectedRow.oficiante || "",
-        nombre_bautizado: `${selectedRow.primerNombre} ${selectedRow.segundoNombre} ${selectedRow.primerApellido} ${selectedRow.segundoApellido}`,
-        nombre_padre: selectedRow.nombresPadre || "",
-        nombre_madre: selectedRow.nombresMadre || "",
-        nombre_padrinos: selectedRow.nombrepadrinos || selectedRow.padrino || "N/A",
-        nombre_doyfe: selectedRow.doyFe || "",
-        nota_marginal: selectedRow.notaMarginal || "Ninguna",
-        fecha_nacimiento: selectedRow.fechaNacimiento || "",
-        fecha_actual: new Date().toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })
-      }
+    const tipoDocumento = selectedRow.ceremonia.toLowerCase();
+    let requestBody = {
+      tipoPdf: tipoPdf,
+      tipoDocumento: tipoDocumento,
+      parametros: {}
     };
 
-  const response = await axios.get(
+    // Obtener fecha actual formateada
+    const fechaActual = new Date();
+    const mesAnio = fechaActual.toLocaleDateString('es-ES', { 
+      month: 'long', 
+      year: 'numeric' 
+    }).toUpperCase();
+    
+    const fechaActualFormateada = formatFecha(fechaActual);
+
+    // Construir parámetros según el tipo de documento
+    switch (tipoDocumento) {
+      case "bautismo":
+        requestBody.parametros = {
+          libro: selectedRow.libro || "",
+          folio: selectedRow.folio || "",
+          acta: selectedRow.acta || "",
+          num_dias: "15",
+          mes_anio: mesAnio,
+          monsenior: selectedRow.monsenor || selectedRow.oficiante || "",
+          nombre_bautizado: `${selectedRow.primerNombre} ${selectedRow.segundoNombre} ${selectedRow.primerApellido} ${selectedRow.segundoApellido}`,
+          nombre_padre: selectedRow.nombresPadre || "",
+          nombre_madre: selectedRow.nombresMadre || "",
+          nombre_padrinos: selectedRow.nombrepadrinos || selectedRow.padrino || "N/A",
+          nombre_doyfe: selectedRow.doyFe || "",
+          nota_marginal: selectedRow.notaMarginal || "Ninguna",
+          fecha_nacimiento: selectedRow.fechaNacimiento 
+            ? formatFecha(selectedRow.fechaNacimiento) 
+            : "",
+          fecha_actual: fechaActualFormateada
+        };
+        break;
+
+      case "matrimonio":
+        requestBody.parametros = {
+          libro: selectedRow.libro || "",
+          folio: selectedRow.folio || "",
+          acta: selectedRow.acta || "",
+          fecha: selectedRow.fecha || selectedRow.fechaCeremonia || "",
+
+          nombres_esposo: `${selectedRow.primerNombre} ${selectedRow.segundoNombre} ${selectedRow.primerApellido} ${selectedRow.segundoApellido}`,
+          nombres_padreesposo: selectedRow.nombresPadre || "",
+          nombres_madresesposo: selectedRow.nombresMadre || "",
+          fecha_nacimiento_esposo: selectedRow.fechaNacimiento || "",
+          libro_bautizo_esposo: selectedRow.libroBautizo || "",
+          folio_bautizo_esposo: selectedRow.folioBautizo || "",
+          acta_bautizo_esposo: selectedRow.actaBautizo || "",
+          lugar_nacimiento_esposo: selectedRow.lugarNacimiento || "",
+
+          nombres_esposa: selectedRow.nombresEsposa || "",
+          nombres_padreesposa: selectedRow.nombresPadreEsposa || "",
+          nombres_madresesposa: selectedRow.nombresMadreEsposa || "",
+          fecha_nacimiento_esposa: selectedRow.fechaNacimientoEsposa || "",
+          libro_bautizo_esposa: selectedRow.libroBautizoEsposa || "",
+          folio_bautizo_esposa: selectedRow.folioBautizoEsposa || "",
+          acta_bautizo_esposa: selectedRow.actaBautizoEsposa || "",
+          lugar_nacimiento_esposa: selectedRow.lugarNacimientoEsposa || "",
+
+          primer_testigo: selectedRow.testigo1 || "",
+          segundo_testigo: selectedRow.testigo2 || "",
+          tercer_testigo: selectedRow.testigo3 || "",
+          cuarto_testigo: selectedRow.testigo4 || "",
+
+          monsr: selectedRow.monsenor || "",
+          sacerdote: selectedRow.oficiante || "",
+          doyfe: selectedRow.doyFe || "",
+          notamarginal: selectedRow.notaMarginal || "Sin observaciones"
+        };
+        break;
+
+      case "confirmacion":
+        if (tipoPdf === "largo") {
+          requestBody.parametros = {
+            libro: selectedRow.libro || "",
+            folio: selectedRow.folio || "",
+            acta: selectedRow.acta || "",
+            nombre_confirmante: `${selectedRow.primerNombre} ${selectedRow.segundoNombre} ${selectedRow.primerApellido} ${selectedRow.segundoApellido}`,
+            num_dias: "15",
+            mes_anio: mesAnio.split(' ')[0], // Solo el mes (ej: "MAYO")
+            monsenior: selectedRow.monsenor || "",
+            fecha_nacimiento: selectedRow.fechaNacimiento 
+              ? formatFecha(selectedRow.fechaNacimiento) 
+              : "",
+            nombre_padre: selectedRow.nombresPadre || "",
+            nombre_madre: selectedRow.nombresMadre || "",
+            nombre_padrinos: selectedRow.nombrepadrinos || "",
+            nombre_doyfe: selectedRow.doyFe || "",
+            nota_marginal: selectedRow.notaMarginal || "",
+            fecha_actual: fechaActualFormateada
+          };
+        } else {
+          requestBody.parametros = {
+            nombre: `${selectedRow.primerNombre} ${selectedRow.segundoNombre} ${selectedRow.primerApellido} ${selectedRow.segundoApellido}`,
+            libro: selectedRow.libro || "",
+            folio: selectedRow.folio || "",
+            acta: selectedRow.acta || "",
+            fecha: selectedRow.fecha || "",
+            lugar_bautizo: selectedRow.lugarBautizo || "",
+            fecha_bautizo: selectedRow.fechaBautizo || "",
+            diocesis_bautizo: selectedRow.diocesis || "",
+            libro_bautizo: selectedRow.libroBautizo || "",
+            folio_bautizo: selectedRow.folioBautizo || "",
+            acta_bautizo: selectedRow.actaBautizo || "",
+            nombre_padre: selectedRow.nombresPadre || "",
+            nombre_madre: selectedRow.nombresMadre || "",
+            nombre_padrino: selectedRow.padrino || "",
+            nombre_madrina: selectedRow.madrina || "",
+            monsr: selectedRow.monsenor || "",
+            sacerdote: selectedRow.oficiante || "",
+            doyfe: selectedRow.doyFe || "",
+            notamarginal: selectedRow.notaMarginal || ""
+          };
+        }
+        break;
+
+      default:
+        throw new Error(`Tipo de ceremonia no válido: ${tipoDocumento}`);
+    }
+
+    console.log("Enviando a PDF:", JSON.stringify(requestBody, null, 2));
+
+    // Enviar solicitud POST con el JSON
+    const response = await axios.get(
       "https://actaseclesiasticas.koyeb.app/api/actas/pdf",
       requestBody,
       {
@@ -217,22 +329,27 @@ const handleEditActa = () => {
       }
     );
 
-    // Crear y descargar el PDF
+    // Descargar PDF
     const pdfBlob = new Blob([response.data], { type: 'application/pdf' });
     const pdfUrl = URL.createObjectURL(pdfBlob);
-    
     const link = document.createElement('a');
     link.href = pdfUrl;
     link.download = `acta_${selectedRow.ceremonia}_${selectedRow.acta}.pdf`;
     link.click();
-    
     URL.revokeObjectURL(pdfUrl);
 
   } catch (error) {
     console.error("Error al generar PDF:", error);
-    alert(`Error al generar el PDF: ${error.message}`);
+    
+    let errorMessage = error.message;
+    if (error.response) {
+      // Si el backend devuelve un mensaje de error específico
+      errorMessage = error.response.data.error || error.response.statusText;
+    }
+    
+    alert(`Error al generar el PDF: ${errorMessage}`);
   }
-  };
+};
   
 
   
@@ -310,7 +427,7 @@ return (
                 </button>
                 <button
                   type="button"
-                  onClick={handlePrintLargo}
+                  onClick={() => handlePrint('corto')}
                   style={{
                     ...styles.printButton,
                     opacity: selectedRow ? 1 : 0.5,
@@ -324,7 +441,7 @@ return (
                 </button>
                 <button
                   type="button"
-                  onClick={handlePrintLargo}
+                  onClick={() => handlePrint('largo')}
                   style={{
                     ...styles.printButton,
                     opacity: selectedRow ? 1 : 0.5,
