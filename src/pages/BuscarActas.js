@@ -189,6 +189,8 @@ const handleEditActa = () => {
     const token = localStorage.getItem("token");
     if (!token) throw new Error("No hay token de autenticación");
 
+    console.log("Token:", token);
+
     const tipoDocumento = selectedRow.ceremonia.toLowerCase();
     let requestBody = {
       tipoPdf: tipoPdf,
@@ -317,26 +319,23 @@ const handleEditActa = () => {
     console.log("Enviando a PDF:", JSON.stringify(requestBody, null, 2));
 
     // Enviar solicitud POST con el JSON
-    const response = await axios.get(
-      "https://actaseclesiasticas.koyeb.app/api/actas/pdf",
-      requestBody,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        responseType: 'blob'
-      }
-    );
+    const response = await axios.post(
+  "https://actaseclesiasticas.koyeb.app/api/actas/pdf",
+  requestBody,
+  {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    },
+    responseType: 'blob'
+  }
+);
 
     // Descargar PDF
     const pdfBlob = new Blob([response.data], { type: 'application/pdf' });
     const pdfUrl = URL.createObjectURL(pdfBlob);
-    const link = document.createElement('a');
-    link.href = pdfUrl;
-    link.download = `acta_${selectedRow.ceremonia}_${selectedRow.acta}.pdf`;
-    link.click();
-    URL.revokeObjectURL(pdfUrl);
+    
+    window.open(pdfUrl, "_blank");
 
   } catch (error) {
     console.error("Error al generar PDF:", error);
