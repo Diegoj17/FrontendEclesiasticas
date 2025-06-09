@@ -904,8 +904,6 @@ convertirActaPlano(acta) {
   }
 
 
-
-
   /**
    * Convierte un acta al formato plano que espera el backend
    * @param {Object} acta Acta a convertir
