@@ -68,7 +68,7 @@ function ListaActas() {
   }
 
   const handleBack = () => {
-    navigate("/añadirActas")
+    navigate("/-1")
   }
 
   const handleEditActa = () => {
@@ -509,10 +509,12 @@ const styles = {
     alignItems: "center",
     width: "100%",
     marginBottom: "0.5rem",
+    marginTop: "-0.5rem",
   },
   actionButtonsContainer: {
     display: "flex",
     gap: "0.5rem",
+    
   },
   actionButton: {
     display: "flex",

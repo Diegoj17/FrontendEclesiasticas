@@ -22,7 +22,7 @@ function Login() {
   // Redirigir si ya está autenticado
   useEffect(() => {
     if (isAuthenticated) {
-      navigate("/Principal")
+      navigate("/Principal"); // Cambia a la ruta que desees
     }
   }, [isAuthenticated, navigate])
 
@@ -30,6 +30,7 @@ function Login() {
     event.preventDefault();
     setIsLoading(true);
     setError("");
+
     try {
       const response = await axios.post(
         'https://actaseclesiasticas.koyeb.app/api/auth/login',
@@ -38,6 +39,7 @@ function Login() {
       
       if (response.data.error) {
         setError(response.data.error);
+        setIsLoading(false);
         return;
       }
   
@@ -45,12 +47,31 @@ function Login() {
       login({
         email: response.data.email,
         displayName: response.data.displayName,
-        token: response.data.idToken
+        token: response.data.idToken,
+        rol: response.data.rol
       });
       
-      navigate("/Principal");
-    } catch (error) {
-      setError(error.response?.data?.error || "Error desconocido");
+      navigate("/admin/dashboard");
+    } catch (err) {
+      // Si la respuesta del servidor existe, verificamos el código HTTP
+      if (err.response) {
+        const status = err.response.status;
+        const serverError = err.response.data?.error;
+
+        if (status === 401) {
+          // 401 → credenciales incorrectas
+          setError("Contraseña incorrecta");
+        } else if (serverError) {
+          // Cualquier otro mensaje de error proveniente del backend
+          setError(serverError);
+        } else {
+          // Fallback general
+          setError("Error desconocido");
+        }
+      } else {
+        // No hubo respuesta (problema de red, etc.)
+        setError("Error de conexión");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -189,6 +210,8 @@ function Login() {
         >
           ¿Olvidaste tu contraseña?
         </p>
+
+        
 
         <div style={styles.divider}></div>
 

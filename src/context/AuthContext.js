@@ -48,6 +48,7 @@ export function AuthProvider({ children }) {
       nombre: nombre || "",
       apellido: apellido || "",
       displayName: userData.displayName || "",
+      rol: userData.rol || "", 
     }
 
     setIsAuthenticated(true)
@@ -108,8 +109,8 @@ export function AuthProvider({ children }) {
       const response = await fetch("https://actaseclesiasticas.koyeb.app/api/user/update-profile", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(updateData),
       })
@@ -160,7 +161,7 @@ export function AuthProvider({ children }) {
   return (
     <AuthContext.Provider
       value={{
-        isAuthenticated,
+        isAuthenticated: !!user,
         user,
         login,
         logout,

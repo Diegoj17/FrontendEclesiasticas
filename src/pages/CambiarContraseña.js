@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { FaEye, FaEyeSlash, FaCheck, FaArrowLeft, FaKey, FaExclamationCircle,FaSave } from "react-icons/fa";
@@ -6,7 +6,7 @@ import logo from "../assets/logo.png";
 
 function CambiarContraseña() {
   const navigate = useNavigate();
-  const { updatedUser } = useAuth();
+  const { user, updateUser } = useAuth();
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
   const [showSuccessModal, setShowSuccessModal] = useState(false);
@@ -29,11 +29,9 @@ function CambiarContraseña() {
 
   const [modal, setModal] = useState({
     show: false,
-    type: 'success', // 'success' o 'error'
+    type: '', // 'success' o 'error'
     message: ''
   });
-
-  const [message, setMessage] = useState({ text: "", type: "" });
 
   const [formData, setFormData] = useState({
     currentPassword: "",
@@ -41,9 +39,24 @@ function CambiarContraseña() {
     confirmPassword: ""
   });
 
-  const inputRef = useRef(null);
+  const inputNewRef = useRef(null);
+
   const bubbleRef = useRef(null);
   const [showRules, setShowRules] = useState(false);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        bubbleRef.current &&
+        !bubbleRef.current.contains(event.target) &&
+        inputNewRef.current !== event.target
+      ) {
+        setShowRules(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const handleBlur = (field) => {
     setTouched((prev) => ({ ...prev, [field]: true }));
@@ -84,13 +97,14 @@ function CambiarContraseña() {
     }
 
     try {
-      await updatedUser({
-        currentPassword: formData.currentPassword,
-        newPassword: formData.newPassword
+      const success = await updateUser({
+        nombre: user.nombre,
+        apellido: user.apellido,
+        email: user.email,
+        password: formData.newPassword,
       });
-
-      const savedPath = sessionStorage.getItem("currentPath") || "/Principal";
-      navigate(savedPath);
+      
+      navigate(-1);
     } catch (error) {
       setErrors(prev => ({ ...prev, general: error.message }));
     } finally {
@@ -106,21 +120,20 @@ function CambiarContraseña() {
   ];
 
   const closeSuccessModal = () => {
-  const savedPath = sessionStorage.getItem("currentPath") || "/Principal";
+  
   setModal(prev => ({ ...prev, show: false }));
-  navigate(savedPath);
+  navigate(-1); 
 };
 
   const closeErrorModal = () => {
-    const savedPath = sessionStorage.getItem("currentPath") || "/Principal";
+    
   setModal(prev => ({ ...prev, show: false }));
-  navigate(savedPath);
+  navigate(-1); 
   };
 
   const handleCancel = () => {
-  const savedPath = sessionStorage.getItem("currentPath") || "/Principal";
-  navigate(savedPath);
-};
+    navigate(-1); 
+  };
 
   return (
     <div style={styles.container}>
@@ -295,10 +308,11 @@ function CambiarContraseña() {
               <button type="button" onClick={handleCancel} style={styles.cancelButton}>
                 Cancelar
               </button>
+
               <button
                 type="submit"
                 style={styles.saveButton}
-                disabled={loading || Object.values(passwordErrors).some((v) => !v)}
+                disabled={loading}
               >
                 {loading ? (
                   <div style={styles.loadingContent}>
@@ -583,7 +597,7 @@ const styles = {
   errorIcon: {
     position: 'absolute',
     right: '0.5rem',
-    top: '50%',
+    top: '85%',
     transform: 'translateY(-50%)',
     color: "#FF0000",
     fontSize: '1.2rem'
@@ -591,7 +605,7 @@ const styles = {
   errorIcon1: {
     position: 'absolute',
     right: '0.5rem',
-    top: '2.9rem',
+    top: '3.1rem',
     transform: 'translateY(-50%)',
     color: "#FF0000",
     fontSize: '1.2rem'
@@ -705,7 +719,7 @@ const styles = {
   toggleIcon: {
   position: 'absolute',
   right: '2rem',
-  top: '50%',
+  top: '85%',
   transform: 'translateY(-50%)',
   cursor: 'pointer',
   fontSize: '1.5rem',
@@ -714,7 +728,7 @@ const styles = {
   toggleIcon1: {
   position: 'absolute',
   right: '1rem',
-  top: '50%',
+  top: '85%',
   transform: 'translateY(-50%)',
   cursor: 'pointer',
   fontSize: '1.5rem',

@@ -16,6 +16,14 @@ import BuscarActas from "./pages/BuscarActas"
 import VistaActas from "./pages/VistaActas"
 import ListaActas from "./pages/ListaActas"
 import EditarActas from "./pages/EditarActas"
+import AdminDashboard from "./components/admin/Dashboard"
+import CrearActas from "./pages/CrearActas"
+import VistaActaDetalle from "./pages/VistaActaDetalle"
+import VistaActasAdmin from "./pages/VistaActasAdmin"
+import CorregirActas from "./pages/CorregirActas"
+import GestionUsuarios from "./components/admin/GestionUsuarios"
+import CrearUsuarios from "./pages/CrearUsuarios"
+
 
 function App() {
   return (
@@ -49,21 +57,23 @@ function AppContent() {
 
 
   // Componente de ruta protegida
-  const ProtectedRoute = ({ children }) => {
+  const ProtectedRoute = ({ children, allowedRoles = [] }) => {
     const navigate = useNavigate()
 
     useEffect(() => {
-      if (!isAuthenticated && isInitialized) {
-        navigate("/", { replace: true })
-      }
-    }, [navigate, isAuthenticated, isInitialized])
-
     if (!isAuthenticated && isInitialized) {
-      return null
+      navigate("/", { replace: true });
+    } else if (isAuthenticated && allowedRoles.length > 0 && !allowedRoles.includes(user.rol)) {
+      navigate("/no-autorizado", { replace: true });
     }
+  }, [navigate, isAuthenticated, isInitialized, user?.rol]);
 
-    return children
+  if (!isAuthenticated || (allowedRoles.length > 0 && !allowedRoles.includes(user?.rol))) {
+    return null;
   }
+
+  return children;
+};
 
   // Componente para manejar la redirección después del login
   const LoginRedirect = () => {
@@ -73,7 +83,7 @@ function AppContent() {
       if (isAuthenticated) {
         // Redirigir a la última ruta guardada o a Principal
         const savedPath = localStorage.getItem("lastPath")
-        navigate("/Principal", { replace: true })
+        navigate("Principal", { replace: true })
       }
     }, [navigate, isAuthenticated])
 
@@ -165,6 +175,64 @@ function AppContent() {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/admin/dashboard"
+          element={
+            <ProtectedRoute>
+              <AdminDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/crearActas"
+          element={
+            <ProtectedRoute>
+              <CrearActas />
+            </ProtectedRoute>
+          }
+        />
+        <Route 
+          path="/vistaActaDetalle/:id" 
+          element={
+            <ProtectedRoute>
+              <VistaActaDetalle />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/vistaActasAdmin"
+          element={
+            <ProtectedRoute>
+              <VistaActasAdmin />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/actas/editar/:id/:tipo"
+          element={
+            <ProtectedRoute>
+              <CorregirActas/>
+            </ProtectedRoute>
+          }
+        />
+        <Route 
+          path="/admin/usuarios" 
+          element={
+            <ProtectedRoute>
+              <GestionUsuarios />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/crearUsuarios" 
+          element={
+            <ProtectedRoute>
+              <CrearUsuarios />
+            </ProtectedRoute>
+          } 
+        />
+
+
         
 
          {/* Ruta comodín que redirige a login o a la última ruta guardada */}
@@ -172,7 +240,7 @@ function AppContent() {
           path="*"
           element={
             isAuthenticated ? (
-              <Navigate to={"/Principal"} replace />
+              <Navigate to={"/admin/dashboard"} replace />
             ) : (
               <Navigate to="/" replace />
             )

@@ -1,707 +1,635 @@
-import React, { useState, useEffect } from "react"
-import { useNavigate } from "react-router-dom"
-import { useAuth } from "../context/AuthContext"
-import Header from "../components/layout/Header"
-import Sidebar from "../components/layout/Sidebar"
-import DataTable from "../components/layout/DataTable"
-import { FilterMatchMode, FilterOperator } from "primereact/api"
-import { FaEdit } from "react-icons/fa"
+import { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import HeaderAdmin from "../components/layout/HeaderAdmin";
+import CommonRegistroSection from "../components/forms/CommonRegistroSection";
+import CommonOficianteSection from "../components/forms/CommonOficianteSection";
+import ConfirmacionOficianteSection from "../components/forms/ConfirmacionOficianteSection";
+import BautismoForm from "../components/forms/BautismoForm";
+import ConfirmacionForm from "../components/forms/ConfirmacionForm";
+import MatrimonioForm from "../components/forms/MatrimonioForm";
+import ActaService from "../services/ActaService";
+import { FaArrowLeft, FaSave, FaCheck, FaExclamationTriangle } from "react-icons/fa";
 
+const initialFormData = {
+  libro: "",
+  folio: "",
+  acta: "",
+  oficiante: "",
+  doyFe: "",
+  notaMarginal: "",
+  fechaCeremonia: { dia: "", mes: "", año: "" },
+  bautismo: {
+    primerNombre: "",
+    segundoNombre: "",
+    primerApellido: "",
+    segundoApellido: "",
+    fechaNacimiento: { dia: "", mes: "", año: "" },
+    lugarNacimiento: "",
+    nombrePadre: "",
+    nombreMadre: "",
+    abueloPaterno: "",
+    abuelaPaterna: "",
+    abueloMaterno: "",
+    abuelaMaterna: "",
+    padrino: "",
+    madrina: "",
+  },
+  confirmacion: {
+    primerNombre: "",
+    segundoNombre: "",
+    primerApellido: "",
+    segundoApellido: "",
+    fechaNacimiento: { dia: "", mes: "", año: "" },
+    lugarNacimiento: "",
+    fechaBautismo: { dia: "", mes: "", año: "" },
+    lugarBautismo: "",
+    nombrePadre: "",
+    nombreMadre: "",
+    padrino: "",
+    madrina: "",
+    monseñor: "",
+    sacerdote: "",
+    doyFe: "",
+  },
+  matrimonio: {
+    novio: {
+      primerNombre: "",
+      segundoNombre: "",
+      primerApellido: "",
+      segundoApellido: "",
+      fechaNacimiento: { dia: "", mes: "", año: "" },
+      lugarNacimiento: "",
+      nombrePadre: "",
+      nombreMadre: "",
+    },
+    novia: {
+      primerNombre: "",
+      segundoNombre: "",
+      primerApellido: "",
+      segundoApellido: "",
+      fechaNacimiento: { dia: "", mes: "", año: "" },
+      lugarNacimiento: "",
+      nombrePadre: "",
+      nombreMadre: "",
+    },
+    testigo1: "",
+    testigo2: "",
+    testigo3: "",
+    testigo4: "",
+  },
+}
+
+const normalizarTipo = (tipoRecibido) => {
+  if (!tipoRecibido) return ""
+
+  const tipoLower = tipoRecibido.toString().toLowerCase()
+
+  console.log("🔧 Normalizando tipo:", tipoRecibido, "→", tipoLower)
+
+  // Bautismo/Bautizo - SIMPLIFICADO
+  if (tipoLower.includes("baut")) {
+    console.log("✅ Detectado como bautismo")
+    return "bautismo"
+  }
+
+  // Confirmación
+  if (tipoLower.includes("confirm")) {
+    console.log("✅ Detectado como confirmacion")
+    return "confirmacion"
+  }
+
+  // Matrimonio
+  if (tipoLower.includes("matri")) {
+    console.log("✅ Detectado como matrimonio")
+    return "matrimonio"
+  }
+
+  console.log("❌ Tipo no reconocido:", tipoLower)
+  return tipoLower
+}
 
 function CorregirActas() {
-    const navigate = useNavigate()
-    const { user, logout } = useAuth()
-    const [menuAbierto, setMenuAbierto] = useState(false)
-    const [isSubmenuOpen, setIsSubmenuOpen] = useState(false)
-    const [isLoading, setIsLoading] = useState(false)
-    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-    const toggleDropdown = () => setIsDropdownOpen(!isDropdownOpen);
-    const [searchTerm, setSearchTerm] = useState("")
-    const [selectedRow, setSelectedRow] = useState(null)
 
-    const [registrosFiltrados, setRegistrosFiltrados] = useState([])
-    const [registros, setRegistros] = useState([]) 
-    
-    const [filters, setFilters] = useState({
-        global: { value: null, matchMode: FilterMatchMode.CONTAINS },
-        primerNombre: {
-          operator: FilterOperator.AND,
-          constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }],
-        },
-        segundoNombre: {
-          operator: FilterOperator.AND,
-          constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }],
-        },
-        primerApellido: {
-          operator: FilterOperator.AND,
-          constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }],
-        },
-        segundoApellido: {
-          operator: FilterOperator.AND,
-          constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }],
-        },
-      })
+  const { id, tipo } = useParams();
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
+  const [ciudadesColombia, setCiudadesColombia] = useState([]);
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [formData, setFormData] = useState(initialFormData);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showErrorModal, setShowErrorModal] = useState(false);
+  const [modalMessage, setModalMessage] = useState("");
 
-    const toggleMenu = () => {
-        setMenuAbierto(!menuAbierto)
-        if (!menuAbierto) {
-          setIsSubmenuOpen(false)
+
+  const handleChange = (e) => {
+    const { name, value, isComboBox } = e.target;
+    if (isComboBox) {
+      setFormData(prev => ({ ...prev, [name]: value }));
+      return;
+    }
+    if (name.includes('.')) {
+      const parts = name.split('.');
+      setFormData(prev => {
+        const next = { ...prev };
+        let cursor = next;
+        parts.slice(0, -1).forEach(key => {
+          cursor[key] = { ...cursor[key] };
+          cursor = cursor[key];
+        });
+        cursor[parts[parts.length - 1]] = value;
+        return next;
+      });
+    } else {
+      setFormData(prev => ({ ...prev, [name]: value }));
+    }
+  };
+
+  useEffect(() => {
+    async function fetchData() {
+      if (!tipo) {
+        console.error("No se recibió el parámetro 'tipo' en la URL")
+        return
+      }
+
+      setLoading(true)
+      console.log("🔄 Iniciando carga de datos...")
+
+      const tipoNormalizado = normalizarTipo(tipo)
+      console.log("🔍 Tipo normalizado:", tipoNormalizado)
+
+      try {
+        let data
+        // Usar el tipo normalizado para las llamadas a la API
+        switch (tipoNormalizado) {
+          case "bautismo":
+            console.log("📞 Llamando a getBautizoById")
+            data = await ActaService.getBautizoById(id)
+            break
+          case "confirmacion":
+            console.log("📞 Llamando a getConfirmacionById")
+            data = await ActaService.getConfirmacionById(id)
+            break
+          case "matrimonio":
+            console.log("📞 Llamando a getMatrimonioById")
+            data = await ActaService.getMatrimonioById(id)
+            break
+          default:
+            console.warn(`Tipo de acta no reconocido: ${tipo}, usando datos por defecto`)
+            data = {} // Usar datos vacíos si el tipo no es reconocido
         }
-      }
-    const handleBack = () => {
-        navigate('/Principal')
-      }
-    
-      const handleViewActas = () => {
-        navigate('/vistaActas')
-      }
-    
-      // Funciones para los botones
-      const handleSearch = () => {
-        navigate('/buscarActas')
-      }
-    
-      const handleAdd = () => {
-        navigate('/añadirActas')
-      }
-    
-      const handleList = () => {
-        navigate('/listaActas')
-      }
-    
-      const handleCorrect = () => {
-        navigate('/corregirActas')
-      }
 
-      const handleEditProfile = () => {
-        console.log("Navegando a editar perfil")
-        setIsDropdownOpen(false)
-        navigate("/editarPerfil")
-      }
+        console.log("📊 Datos recibidos de la API:", data)
 
-      const handleSearchChange = (e) => {
-        setSearchTerm(e.target.value)
-      }
+        // Función para parsear fechas
+        const parseFecha = (fecha) => {
+          if (!fecha) return { dia: "", mes: "", año: "" }
+          if (typeof fecha === "object") return fecha
+          const [año, mes, dia] = fecha.split("-")
+          return { dia: dia || "", mes: mes || "", año: año || "" }
+        }
 
-      useEffect(() => {
-          if (searchTerm.trim() === "") {
-            setRegistrosFiltrados([])
-            setIsLoading(false)
-            return
+        // Base común para todos los tipos de acta
+        const baseData = {
+          libro: data.libro || data.idActa?.libro || "",
+          folio: data.folio || data.idActa?.folio || "",
+          acta: data.numeroActa || data.acta || data.idActa?.numeroActa || "",
+          oficiante: data.nombresSacerdote || data.idSacerdote?.nombre || "",
+          doyFe: data.nombresDoyFe || data.idDoyfe?.nombre || "",
+          notaMarginal: data.notas || data.idActa?.notas || "",
+          fechaCeremonia: parseFecha(data.fecha || data.idActa?.fecha),
+        }
+
+        // Datos específicos por tipo de acta
+        let specificData = {}
+        if (tipoNormalizado === "Bautismo" || tipoNormalizado === "bautizo" || tipoNormalizado === "bautismo" || tipoNormalizado === "BAUTIZO") {
+          console.log("🔍 Procesando datos para Bautismo")
+          const bautizado = data.idBautizado || {}
+          specificData = {
+            bautismo: {
+              primerNombre: bautizado.primerNombre || bautizado.nombre1 || data.primerNombre || "",
+              segundoNombre: bautizado.segundoNombre || bautizado.nombre2 || data.segundoNombre || "",
+              primerApellido: bautizado.primerApellido || bautizado.apellido1 || data.primerApellido || "",
+              segundoApellido: bautizado.segundoApellido || bautizado.apellido2 || data.segundoApellido || "",
+              fechaNacimiento: parseFecha(bautizado.fechaNacimiento),
+              lugarNacimiento: bautizado.lugarNacimiento || "",
+              nombrePadre: bautizado.padre?.nombre1 || data.nombresPadre || "",
+              nombreMadre: bautizado.madre?.nombre1 || data.nombresMadre || "",
+              abueloPaterno: data.abueloPaterno || "",
+              abuelaPaterna: data.abuelaPaterna || "",
+              abueloMaterno: data.abueloMaterno || "",
+              abuelaMaterna: data.abuelaMaterna || "",
+              padrino: data.nombrespadrino || data.idPadrino?.nombre1 || "",
+              madrina: data.nombresmadrina || data.idMadrina?.nombre1 || "",
+            },
           }
-      
-          setIsLoading(true)
-      
-          const timeoutId = setTimeout(() => {
-            const resultados = registros.filter((registro) => {
-              const fullName =
-                `${registro.primerNombre} ${registro.segundoNombre} ${registro.primerApellido} ${registro.segundoApellido}`.toLowerCase()
-              return fullName.includes(searchTerm.toLowerCase())
-            })
-      
-            setRegistrosFiltrados(resultados)
-            setIsLoading(false)
-          }, 300)
-      
-          return () => clearTimeout(timeoutId)
-        }, [searchTerm, registros])
-
-        const getEventoColor = (ceremonia) => {
-            switch (ceremonia) {
-              case 'Bautizo': return '#AED581';
-              case 'Matrimonio': return '#64B5F6';
-              default: return '#E0E0E0';
-            }
-          };
-
-          const handleEdit = () => {
-            if (!selectedRow) return;
-            navigate(`/editar-acta/${selectedRow.id}`, { state: { acta: selectedRow } });
-          };
-
-          const expandedRowTemplate = (data) => {
-            return (
-              <div className="p-3">
-                <h5>
-                  Detalles de {data.primerNombre} {data.primerApellido}
-                </h5>
-                <div className="grid">
-                  <div className="col-12 md:col-6 lg:col-3">
-                    <div className="p-2 border-1 surface-border border-round">
-                      <div className="text-500 font-medium mb-2">Información Familiar</div>
-                      <div className="flex align-items-center justify-content-between mb-2">
-                        <span className="font-medium">Padre:</span>
-                        <span>{data.padre}</span>
-                      </div>
-                      <div className="flex align-items-center justify-content-between mb-2">
-                        <span className="font-medium">Madre:</span>
-                        <span>{data.madre}</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="col-12 md:col-6 lg:col-3">
-                    <div className="p-2 border-1 surface-border border-round">
-                      <div className="text-500 font-medium mb-2">Abuelos Paternos</div>
-                      <div className="flex align-items-center justify-content-between mb-2">
-                        <span className="font-medium">Abuelo:</span>
-                        <span>{data.abueloPaterno}</span>
-                      </div>
-                      <div className="flex align-items-center justify-content-between mb-2">
-                        <span className="font-medium">Abuela:</span>
-                        <span>{data.abuelaPaterna}</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="col-12 md:col-6 lg:col-3">
-                    <div className="p-2 border-1 surface-border border-round">
-                      <div className="text-500 font-medium mb-2">Abuelos Maternos</div>
-                      <div className="flex align-items-center justify-content-between mb-2">
-                        <span className="font-medium">Abuelo:</span>
-                        <span>{data.abueloMaterno}</span>
-                      </div>
-                      <div className="flex align-items-center justify-content-between mb-2">
-                        <span className="font-medium">Abuela:</span>
-                        <span>{data.abuelaMaterna}</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="col-12 md:col-6 lg:col-3">
-                    <div className="p-2 border-1 surface-border border-round">
-                      <div className="text-500 font-medium mb-2">Información Adicional</div>
-                      <div className="flex align-items-center justify-content-between mb-2">
-                        <span className="font-medium">Sacerdote:</span>
-                        <span>{data.sacerdote}</span>
-                      </div>
-                      <div className="flex align-items-center justify-content-between mb-2">
-                        <span className="font-medium">Padrinos:</span>
-                        <span>{data.padrinos ? data.padrinos.join(", ") : "N/A"}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )
+        } else if (tipoNormalizado === "confirmacion" || tipoNormalizado === "Confirmacion") {
+          const confirmante = data.idConfirmante || {}
+          specificData = {
+            confirmacion: {
+              primerNombre: confirmante.primerNombre || confirmante.nombre1 || data.primerNombre || "",
+              segundoNombre: confirmante.segundoNombre || confirmante.nombre2 || data.segundoNombre || "",
+              primerApellido: confirmante.primerApellido || confirmante.apellido1 || data.primerApellido || "",
+              segundoApellido: confirmante.segundoApellido || confirmante.apellido2 || data.segundoApellido || "",
+              fechaNacimiento: parseFecha(confirmante.fechaNacimiento || data.fechaNacimiento),
+              lugarNacimiento: confirmante.lugarNacimiento || data.lugarNacimiento || "",
+              fechaBautismo: parseFecha(data.fechaBautismo),
+              lugarBautismo: data.lugarBautismo || "",
+              nombrePadre: confirmante.padre?.nombre1 || data.nombresPadre || "",
+              nombreMadre: confirmante.madre?.nombre1 || data.nombresMadre || "",
+              padrino: data.nombrespadrino || data.idPadrino?.nombre1 || "",
+              madrina: data.nombresmadrina || data.idMadrina?.nombre1 || "",
+              monseñor: data.monsenor || data.idMonsr?.nombre || "",
+              sacerdote: data.nombresSacerdote || data.idSacerdote?.nombre || "",
+              doyFe: data.nombresDoyFe || data.idDoyfe?.nombre || "",
+            },
           }
-          const renderDetallesActa = (acta) => {
-            if (acta.tipo === "Bautismo") {
-              return (
-                <div style={styles.detailsGrid}>
-                   <div style={styles.detailsSection}>
-                     <h4 style={styles.sectionTitle}>Datos del Bautizado</h4>
-                     <div style={styles.detailsRow}>
-                       <span style={styles.detailsLabel}>Fecha de bautizo:</span>
-                       <span style={styles.detailsValue}>
-                         {acta.bautismo.fechaNacimiento?.dia}/{acta.bautismo.fechaNacimiento?.mes}/
-                         {acta.bautismo.fechaNacimiento?.año}
-                       </span>
-                     </div>
-                     <div style={styles.detailsRow}>
-                       <span style={styles.detailsLabel}>Lugar de bautizo:</span>
-                       <span style={styles.detailsValue}>{acta.bautismo.lugarNacimiento || "No disponible"}</span>
-                     </div>
-                   </div>
-                  <div style={styles.detailsSection}>
-                     <h4 style={styles.sectionTitle}>Datos del Padre</h4>
-                     <div style={styles.detailsRow}>
-                       <span style={styles.detailsLabel}>Padre:</span>
-                       <span style={styles.detailsValue}>{acta.bautismo.nombrePadre || "No disponible"}</span>
-                     </div>
-                     <div style={styles.detailsRow}>
-                       <span style={styles.detailsLabel}>Abuelo Paterno:</span>
-                       <span style={styles.detailsValue}>{acta.bautismo.abueloPaterno || "No disponible"}</span>
-                     </div>
-                     <div style={styles.detailsRow}>
-                       <span style={styles.detailsLabel}>Abuela Paterna:</span>
-                       <span style={styles.detailsValue}>{acta.bautismo.abuelaPaterna || "No disponible"}</span>
-                     </div>
-                   </div>
-         
-                   <div style={styles.detailsSection}>
-                     <h4 style={styles.sectionTitle}>Datos de la Madre</h4>
-                     <div style={styles.detailsRow}>
-                       <span style={styles.detailsLabel}>Madre:</span>
-                       <span style={styles.detailsValue}>{acta.bautismo.nombreMadre || "No disponible"}</span>
-                     </div>
-                     <div style={styles.detailsRow}>
-                       <span style={styles.detailsLabel}>Abuelo Materno:</span>
-                       <span style={styles.detailsValue}>{acta.bautismo.abueloMaterno || "No disponible"}</span>
-                     </div>
-                     <div style={styles.detailsRow}>
-                       <span style={styles.detailsLabel}>Abuela Materna:</span>
-                       <span style={styles.detailsValue}>{acta.bautismo.abuelaMaterna || "No disponible"}</span>
-                     </div>
-                   </div>
-         
-                   <div style={styles.detailsSection}>
-                     <h4 style={styles.sectionTitle}>Padrinos</h4>
-                     <div style={styles.detailsRow}>
-                       <span style={styles.detailsLabel}>Padrino:</span>
-                       <span style={styles.detailsValue}>{acta.bautismo.padrino || "No disponible"}</span>
-                     </div>
-                     <div style={styles.detailsRow}>
-                       <span style={styles.detailsLabel}>Madrina:</span>
-                       <span style={styles.detailsValue}>{acta.bautismo.madrina || "No disponible"}</span>
-                     </div>
-                   </div>
-         
-                   <div style={styles.detailsSection}>
-                     <h4 style={styles.sectionTitle}>Datos de la Ceremonia</h4>
-                     <div style={styles.detailsRow}>
-                       <span style={styles.detailsLabel}>Sacerdote:</span>
-                       <span style={styles.detailsValue}>{acta.oficiante || "No disponible"}</span>
-                     </div>
-                     <div style={styles.detailsRow}>
-                       <span style={styles.detailsLabel}>Doy Fe:</span>
-                       <span style={styles.detailsValue}>{acta.doyFe || "No disponible"}</span>
-                     </div>
-                     <div style={styles.detailsRow}>
-                       <span style={styles.detailsLabel}>Fecha de la Ceremonia:</span>
-                       <span style={styles.detailsValue}>
-                         {acta.fechaCeremonia?.dia}/{acta.fechaCeremonia?.mes}/{acta.fechaCeremonia?.año}
-                       </span>
-                     </div>
-                </div>
-                <div style={styles.detailsSection}>
-                     <h4 style={styles.sectionTitle}>Nota Marginal</h4>
-                      <div style={styles.detailsRow}>
-                        <span style={styles.detailsValue}>{acta.notaMarginal || "No disponible"}</span>
-                        </div>
-                        </div>
-              </div>
-              );
-            } else if (acta.tipo === "Confirmación") {
-              return (
-                <div style={styles.detailsGrid}>
-        
-                   <div style={styles.detailsSection}>
-                     <h4 style={styles.sectionTitle}>Datos de Acta de Bautizo</h4>
-                     <div style={styles.detailsRow}>
-                       <span style={styles.detailsLabel}>Libro:</span>
-                       <span style={styles.detailsValue}>{acta.libro || "No disponible"}</span>
-                     </div>
-                     <div style={styles.detailsRow}>
-                       <span style={styles.detailsLabel}>Folio:</span>
-                       <span style={styles.detailsValue}>{acta.folio || "No disponible"}</span>
-                     </div>
-                     <div style={styles.detailsRow}>
-                       <span style={styles.detailsLabel}>Acta:</span>
-                       <span style={styles.detailsValue}>{acta.acta || "No disponible"}</span>
-                     </div>
-                     <div style={styles.detailsRow}>
-                       <span style={styles.detailsLabel}>Fecha de bautizo:</span>
-                       <span style={styles.detailsValue}>
-                         {acta.confirmacion.fechaNacimiento?.dia}/{acta.confirmacion.fechaNacimiento?.mes}/
-                         {acta.confirmacion.fechaNacimiento?.año}
-                       </span>
-                     </div>
-                     <div style={styles.detailsRow}>
-                       <span style={styles.detailsLabel}>Lugar de bautizo:</span>
-                       <span style={styles.detailsValue}>{acta.confirmacion.lugarNacimiento || "No disponible"}</span>
-                     </div>
-                     <div style={styles.detailsRow}>
-                       <span style={styles.detailsLabel}>Diocesis de bautizo:</span>
-                       <span style={styles.detailsValue}>{acta.confirmacion.diocesis || "No disponible"}</span>
-                     </div>
-                   </div>
-         
-                   <div style={styles.detailsSection}>
-                     <h4 style={styles.sectionTitle}>Datos de la Familia</h4>
-                     <div style={styles.detailsRow}>
-                       <span style={styles.detailsLabel}>Padre:</span>
-                       <span style={styles.detailsValue}>{acta.confirmacion.nombrePadre || "No disponible"}</span>
-                     </div>
-                     <div style={styles.detailsRow}>
-                       <span style={styles.detailsLabel}>Madre:</span>
-                       <span style={styles.detailsValue}>{acta.confirmacion.nombreMadre || "No disponible"}</span>
-                     </div>
-                     <div style={styles.detailsRow}>
-                       <span style={styles.detailsLabel}>Padrino:</span>
-                       <span style={styles.detailsValue}>{acta.confirmacion.padrino || "No disponible"}</span>
-                     </div>
-                     <div style={styles.detailsRow}>
-                       <span style={styles.detailsLabel}>Madrina:</span>
-                       <span style={styles.detailsValue}>{acta.confirmacion.madrina || "No disponible"}</span>
-                     </div>
-                   </div>
-         
-                   <div style={styles.detailsSection}>
-                     <h4 style={styles.sectionTitle}>Datos de la Ceremonia</h4>
-                     <div style={styles.detailsRow}>
-                       <span style={styles.detailsLabel}>Monseñor:</span>
-                       <span style={styles.detailsValue}>{acta.confirmacion.monseñor || "No disponible"}</span>
-                     </div>
-                     <div style={styles.detailsRow}>
-                       <span style={styles.detailsLabel}>Párroco o Vicario:</span>
-                       <span style={styles.detailsValue}>{acta.confirmacion.sacerdote || "No disponible"}</span>
-                     </div>
-                     <div style={styles.detailsRow}>
-                       <span style={styles.detailsLabel}>Doy Fe:</span>
-                       <span style={styles.detailsValue}>{acta.confirmacion.doyFe || acta.doyFe || "No disponible"}</span>
-                     </div>
-                     <div style={styles.detailsRow}>
-                       <span style={styles.detailsLabel}>Fecha de la Ceremonia:</span>
-                       <span style={styles.detailsValue}>
-                         {acta.fechaCeremonia?.dia}/{acta.fechaCeremonia?.mes}/{acta.fechaCeremonia?.año}
-                       </span>
-                     </div>
-                     </div>
-                     <div style={styles.detailsSection}>
-                     <h4 style={styles.sectionTitle}>Nota Marginal</h4>
-                      <div style={styles.detailsRow}>
-                        <span style={styles.detailsValue}>{acta.notaMarginal || "No disponible"}</span>
-                        </div>
-                        </div>
-                 </div>
-              );
-            } else if (acta.tipo === "Matrimonio") {
-              return (
-                <div style={styles.detailsGrid}>
-                  <div style={styles.detailsSection}>
-                    <h4 style={styles.sectionTitle}>Datos del Esposo</h4>
-                    <div style={styles.detailsRow}>
-                       <span style={styles.detailsLabel}>Libro:</span>
-                       <span style={styles.detailsValue}>{acta.libro || "No disponible"}</span>
-                     </div>
-                     <div style={styles.detailsRow}>
-                       <span style={styles.detailsLabel}>Folio:</span>
-                       <span style={styles.detailsValue}>{acta.folio || "No disponible"}</span>
-                     </div>
-                     <div style={styles.detailsRow}>
-                       <span style={styles.detailsLabel}>Acta:</span>
-                       <span style={styles.detailsValue}>{acta.acta || "No disponible"}</span>
-                     </div>
-                    <div style={styles.detailsRow}>
-                       <span style={styles.detailsLabel}>Fecha de nacimiento:</span>
-                       <span style={styles.detailsValue}>
-                         {acta.matrimonio.novio.fechaNacimiento?.dia}/{acta.matrimonio.novio.fechaNacimiento?.mes}/
-                         {acta.matrimonio.novio.fechaNacimiento?.año}
-                       </span>
-                     </div>
-                     <div style={styles.detailsRow}>
-                       <span style={styles.detailsLabel}>Lugar de nacimiento:</span>
-                       <span style={styles.detailsValue}>{acta.matrimonio.novio.lugarNacimiento || "No disponible"}</span>
-                     </div>
-                     <div style={styles.detailsRow}>
-                       <span style={styles.detailsLabel}>Padre:</span>
-                       <span style={styles.detailsValue}>{acta.matrimonio.novio.nombrePadre || "No disponible"}</span>
-                     </div>
-                     <div style={styles.detailsRow}>
-                       <span style={styles.detailsLabel}>Madre:</span>
-                       <span style={styles.detailsValue}>{acta.matrimonio.novio.nombreMadre || "No disponible"}</span>
-                     </div>
-                   </div>
-         
-                   <div style={styles.detailsSection}>
-                     <h4 style={styles.sectionTitle}>Datos de la Esposa</h4>
-                     <div style={styles.detailsRow}>
-                       <span style={styles.detailsLabel}>Nombre completo:</span>
-                       <span style={styles.detailsValue}>
-                         {acta.matrimonio.novia.primerNombre} {acta.matrimonio.novia.segundoNombre}{" "}
-                         {acta.matrimonio.novia.primerApellido} {acta.matrimonio.novia.segundoApellido}
-                       </span>
-                     </div>  
-                     <div style={styles.detailsRow}>
-                       <span style={styles.detailsLabel}>Libro:</span>
-                       <span style={styles.detailsValue}>{acta.libro || "No disponible"}</span>
-                     </div>
-                     <div style={styles.detailsRow}>
-                       <span style={styles.detailsLabel}>Folio:</span>
-                       <span style={styles.detailsValue}>{acta.folio || "No disponible"}</span>
-                     </div>
-                     <div style={styles.detailsRow}>
-                       <span style={styles.detailsLabel}>Acta:</span>
-                       <span style={styles.detailsValue}>{acta.acta || "No disponible"}</span>
-                     </div>
-                     <div style={styles.detailsRow}>
-                       <span style={styles.detailsLabel}>Fecha de nacimiento:</span>
-                       <span style={styles.detailsValue}>
-                         {acta.matrimonio.novia.fechaNacimiento?.dia}/{acta.matrimonio.novia.fechaNacimiento?.mes}/
-                         {acta.matrimonio.novia.fechaNacimiento?.año}
-                       </span>
-                     </div>
-                     <div style={styles.detailsRow}>
-                       <span style={styles.detailsLabel}>Lugar de nacimiento:</span>
-                       <span style={styles.detailsValue}>{acta.matrimonio.novia.lugarNacimiento || "No disponible"}</span>
-                     </div>
-                     <div style={styles.detailsRow}>
-                       <span style={styles.detailsLabel}>Padre:</span>
-                       <span style={styles.detailsValue}>{acta.matrimonio.novia.nombrePadre || "No disponible"}</span>
-                     </div>
-                     <div style={styles.detailsRow}>
-                       <span style={styles.detailsLabel}>Madre:</span>
-                       <span style={styles.detailsValue}>{acta.matrimonio.novia.nombreMadre || "No disponible"}</span>
-                     </div>
-                   </div>
-         
-                   <div style={styles.detailsSection}>
-                     <h4 style={styles.sectionTitle}>Testigos</h4>
-                     <div style={styles.detailsRow}>
-                       <span style={styles.detailsLabel}>Primer testigo:</span>
-                       <span style={styles.detailsValue}>{acta.matrimonio.testigo1 || "No disponible"}</span>
-                     </div>
-                     <div style={styles.detailsRow}>
-                       <span style={styles.detailsLabel}>Segundo testigo:</span>
-                       <span style={styles.detailsValue}>{acta.matrimonio.testigo2 || "No disponible"}</span>
-                     </div>
-                     <div style={styles.detailsRow}>
-                       <span style={styles.detailsLabel}>Tercer testigo:</span>
-                       <span style={styles.detailsValue}>{acta.matrimonio.testigo3 || "No disponible"}</span>
-                     </div>
-                     <div style={styles.detailsRow}>
-                       <span style={styles.detailsLabel}>Cuarto testigo:</span>
-                       <span style={styles.detailsValue}>{acta.matrimonio.testigo4 || "No disponible"}</span>
-                     </div>
-                   </div>
-         
-                   <div style={styles.detailsSection}>
-                     <h4 style={styles.sectionTitle}>Datos de la Ceremonia</h4>
-                     <div style={styles.detailsRow}>
-                       <span style={styles.detailsLabel}>Sacerdote:</span>
-                       <span style={styles.detailsValue}>{acta.oficiante || "No disponible"}</span>
-                     </div>
-                     <div style={styles.detailsRow}>
-                       <span style={styles.detailsLabel}>Doy Fe:</span>
-                       <span style={styles.detailsValue}>{acta.doyFe || "No disponible"}</span>
-                     </div>
-                     <div style={styles.detailsRow}>
-                       <span style={styles.detailsLabel}>Fecha de la Ceremonia:</span>
-                       <span style={styles.detailsValue}>
-                         {acta.fechaCeremonia?.dia}/{acta.fechaCeremonia?.mes}/{acta.fechaCeremonia?.año}
-                       </span>
-                     </div>
-                  </div>
-                  <div style={styles.detailsSection}>
-                    <h4 style={styles.sectionTitle}>Nota Marginal</h4>
-                      <div style={styles.detailsRow}>
-                        <span style={styles.detailsValue}>{acta.notaMarginal || "No disponible"}</span>
-                      </div>
-                  </div>
-                </div>
-              );
-            } else {
-              return (
-                <div style={styles.detailsGrid}>
-                  <div style={styles.detailsSection}>
-                    <h4 style={styles.sectionTitle}>Información no disponible</h4>
-                    <p>No hay información detallada disponible para este tipo de acta.</p>
-                  </div>
-                </div>
-              );
-            }
-          };
-    return (
-          <div style={styles.container}>
-             {/* Barra superior */}
-                  <Header title="Corrección de Actas" />
-            
-                  <div style={styles.mainContent}>
-                    {/* Menú lateral */}
-                    <Sidebar 
-                    currentPage="VistaActas"
-                    isOpen={menuAbierto}
-                    onToggle={() => setMenuAbierto(!menuAbierto)}
-                    onViewActas={handleViewActas}
-                    onSearch={handleSearch}
-                    onAdd={handleAdd}
-                    onCorrect={handleCorrect}
-                    onBack={handleBack}
-                    />
-    
-              {/* Contenido principal */}
-              <main
-                style={{
-                  ...styles.content,
-                  marginLeft: menuAbierto ? "250px" : "50px",
-                  padding: menuAbierto ? "1.5rem" : "1.5rem",
-                  transition: "margin-left 0.2s ease-in-out",
-                  overflow: "auto",
-                  height: "calc(100vh - 70px)",
-                  position: "relative",
-                }}
-              >
-                {/* Formulario de búsqueda */}
-                <div style={styles.searchSection}>
-                  <div style={styles.searchLeft}>
-                    <label style={styles.searchLabel}>Digite los Nombres o Apellidos:</label>
-                    <div style={styles.searchInputContainer}>
-                      <input
-                        type="text"
-                        value={searchTerm}
-                        onChange={handleSearchChange}
-                        style={styles.searchInput}
-                        placeholder="Buscar por nombres o apellidos..."
-                        autoComplete="off"
-                      />
-                      <button type="button" style={styles.searchButton} title="Buscar">
-                        Buscar
-                      </button>
-                    </div>
-                  </div>
-                  <div style={styles.printControls}>
-          <button
-            type="button"
-            onClick={handleEdit}
-            style={{
-              ...styles.printButton,
-              opacity: selectedRow ? 1 : 0.5,
-              cursor: selectedRow ? "pointer" : "not-allowed",
-            }}
-            disabled={!selectedRow}
-            title="Editar Acta"
-          >
-            <FaEdit style={styles.iconPrint} />
-            <span style={styles.buttonText}>Editar Acta</span>
-          </button>
-        </div>
-                  </div>
+        } else if (tipoNormalizado === "matrimonio") {
+          const personaA = data.personaA || {}
+          const personaB = data.personaB || {}
+          specificData = {
+            matrimonio: {
+              sacerdote: data.nombresSacerdote || data.idSacerdote?.nombre || "",
+              doyFe: data.nombresDoyFe || data.idDoyfe?.nombre || "",
+              novio: {
+                primerNombre: personaB.primerNombre || personaB.nombre1 || "",
+                segundoNombre: personaB.segundoNombre || personaB.nombre2 || "",
+                primerApellido: personaB.primerApellido || personaB.apellido1 || "",
+                segundoApellido: personaB.segundoApellido || personaB.apellido2 || "",
+                fechaNacimiento: parseFecha(personaB.fechaNacimiento),
+                lugarNacimiento: personaB.lugarNacimiento || "",
+                nombrePadre: personaB.padre?.nombre1 || "",
+                nombreMadre: personaB.madre?.nombre1 || "",
+              },
+              novia: {
+                primerNombre: personaA.primerNombre || personaA.nombre1 || "",
+                segundoNombre: personaA.segundoNombre || personaA.nombre2 || "",
+                primerApellido: personaA.primerApellido || personaA.apellido1 || "",
+                segundoApellido: personaA.segundoApellido || personaA.apellido2 || "",
+                fechaNacimiento: parseFecha(personaA.fechaNacimiento),
+                lugarNacimiento: personaA.lugarNacimiento || "",
+                nombrePadre: personaA.padre?.nombre1 || "",
+                nombreMadre: personaA.madre?.nombre1 || "",
+              },
+              testigo1: data.testigo1 || "",
+              testigo2: data.testigo2 || "",
+              testigo3: data.testigo3 || "",
+              testigo4: data.testigo4 || "",
+            },
+          }
+        }
 
-                  
-        {/* DataTable */}
-        <div style={styles.tableContainer}>
-          {searchTerm.trim() !== "" && (
-            <>
-              {isLoading ? (
-                <div className="flex justify-content-center">
-                  <i className="pi pi-spin pi-spinner" style={{ fontSize: "1.5rem" }}></i>
-                  <span style={styles.loadingText}>Buscando...</span>
-                </div>
-              ) : (
-                <DataTable
-                registrosFiltrados={registrosFiltrados}
-                filters={filters}
-                onFilter={(e) => setFilters(e.filters)}
-                getEventoColor={getEventoColor}
-                selectedRow={selectedRow}
-                onSelectionChange={setSelectedRow}
-                expandedRowTemplate={renderDetallesActa}
-              />
-            )}
-          </>
-        )}
+        const newFormData = { ...initialFormData, ...baseData, ...specificData }
+        console.log("📝 FormData actualizado:", newFormData)
+        setFormData(newFormData)
+      } catch (err) {
+        console.error("❌ Error al cargar datos del acta:", err)
+        // No bloquear el renderizado por errores de API
+      } finally {
+        setLoading(false)
+        console.log("✅ Carga completada, loading = false")
+      }
+    }
+    fetchData()
+  }, [id, tipo])
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    
+    try {
+      await ActaService.createActasBatch(tipo, id, formData);
+      setModalMessage("Los cambios se han guardado correctamente.");
+      setShowSuccessModal(true);
+      
+      // Redirigir después de 2 segundos
+      setTimeout(() => {
+        navigate(-1); // O a la ruta que prefieras
+      }, 2000);
+      
+    } catch (err) {
+      console.error("Error al guardar acta:", err);
+      setModalMessage(err.response?.data?.message || "Error al guardar los cambios");
+      setShowErrorModal(true);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+
+  const handleBack = () => {
+    navigate("/admin/dashboard");
+  }
+
+  const tipoNormalizado = normalizarTipo(tipo)
+
+  return (
+    <div style={styles.container}>
+      <HeaderAdmin title={`Edición de Acta de ${tipo.charAt(0).toUpperCase() + tipo.slice(1)}`} />
+
+      <div style={styles.actionsBar}>
+        <button onClick={handleBack} style={styles.backButton} title="Atrás">
+          <FaArrowLeft style={styles.iconBack} />
+          <span style={styles.buttonText}>Atrás</span>
+        </button>
       </div>
-              </main>
+
+      <form onSubmit={handleSubmit} style={styles.form}>
+        <div style={styles.topSections}>
+          <CommonRegistroSection formData={formData} handleChange={handleChange} />
+          {tipoNormalizado === "bautismo" && <CommonOficianteSection formData={formData} handleChange={handleChange} />}
+          {tipoNormalizado === "confirmacion" && (
+            <ConfirmacionOficianteSection formData={formData} handleChange={handleChange} />
+          )}
+          {tipoNormalizado === "matrimonio" && (
+            <CommonOficianteSection formData={formData} handleChange={handleChange} />
+          )}
+        </div>
+
+        {tipoNormalizado === "bautismo" && (
+          <BautismoForm formData={formData} handleChange={handleChange} ciudadesColombia={ciudadesColombia} />
+        )}
+        {tipoNormalizado === "confirmacion" && (
+          <ConfirmacionForm formData={formData} handleChange={handleChange} ciudadesColombia={ciudadesColombia} />
+        )}
+        {tipoNormalizado === "matrimonio" && (
+          <MatrimonioForm formData={formData} handleChange={handleChange} ciudadesColombia={ciudadesColombia} />
+        )}
+
+        <div style={styles.formSection}>
+          <h2 style={styles.sectionTitle}>Nota Marginal</h2>
+            <div style={styles.formRow}>
+              <div style={styles.formGroup}>
+                <textarea
+                    name="notaMarginal"
+                    value={formData.notaMarginal}
+                    onChange={handleChange}
+                    style={styles.formNota}
+                    placeholder="Escriba la nota marginal aquí..."
+                />
+              </div>
+            </div>
+        </div>
+
+        <div style={styles.saveButtonContainer}>
+        <button 
+          type="submit" 
+          style={styles.submitButton}
+          disabled={isSubmitting}>
+          <FaSave style={styles.buttonIcon} />
+          <span style={styles.buttonText}>{isSubmitting ? "Guardando..." : "Guardar Acta"}</span>
+        </button>
+        </div>
+      </form>
+
+      {showSuccessModal && (
+        <div style={styles.modalOverlay}>
+          <div style={styles.modal}>
+            <div style={{...styles.modalHeader, backgroundColor: "#4CAF50"}}>
+              <h2 style={styles.modalTitle}>¡Éxito!</h2>
+            </div>
+            <div style={styles.modalBody}>
+              <FaCheck style={{color: "#4CAF50", fontSize: "2rem", marginBottom: "1rem"}} />
+              <p>{modalMessage}</p>
+            </div>
+            <div style={styles.modalFooter}>
+              <button 
+                onClick={() => {
+                  setShowSuccessModal(false);
+                  navigate(-1);
+                }} 
+                style={styles.confirmButton}
+              >
+                Aceptar
+              </button>
             </div>
           </div>
-    )
+        </div>
+      )}
+
+      {/* Modal de error */}
+      {showErrorModal && (
+        <div style={styles.modalOverlay}>
+          <div style={styles.modal}>
+            <div style={{...styles.modalHeader, backgroundColor: "#F44336"}}>
+              <h2 style={styles.modalTitle}>¡Error!</h2>
+            </div>
+            <div style={styles.modalBody}>
+              <FaExclamationTriangle style={{color: "#F44336", fontSize: "2rem", marginBottom: "1rem"}} />
+              <p>{modalMessage}</p>
+            </div>
+            <div style={styles.modalFooter}>
+              <button 
+                onClick={() => setShowErrorModal(false)} 
+                style={{...styles.confirmButton, backgroundColor: "#F44336"}}
+              >
+                Aceptar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+    
+    
+  );
+
 }
+
 const styles = {
-    container: {
-        display: "flex",
-        flexDirection: "column",
-        height: "100vh",
-        overflow: "hidden",
-        cursor: 'default',
-    },
-    searchSection: {
-      justifyContent: "space-between",
-      alignItems: "center",
-      padding: "0.5rem",
-      display: "flex",
-      gap: "38rem",
-      marginBottom: "0.5rem",
-      whiteSpace: "nowrap",
-      margin: 0,
-      width: "100%",
-      flexWrap: 'wrap',
-    },
-    searchLabel: {
-      fontSize: '1.2rem',
-      fontWeight: '600',
-      marginLeft: '0.5rem',
-      color: '#000000',
-      whiteSpace: "nowrap",
-      margin: 0,
-    },
-    searchForm: {
-      display: "flex",
-      flexDirection: "column",
-      gap: "1rem",
-      width: "100%",
-      maxWidth: "600px",
-    },
-    searchInputContainer: {
-      display: "flex",
-      alignItems: "center",
-      position: "relative",
-      flex: 1,
-      minWidth: "400px",
-      maxWidth: "800px",
-    },
-    searchInput: {
-      flex: "1",
-      padding: "0.5rem 1rem",
-      borderRadius: "0.5rem",
-      border: "1px solid #ced4da",
-      fontSize: "clamp(0.9rem, 1.5vw, 1rem)",
-      width: "100%",
-      paddingRight: "40px",
-    },
-    searchButton: {
-      position: "absolute",
-      right: "0",
-      top: "0",
-      transform: "translateY(-50%)",
-      background: "none",
-      border: "none",
-      padding: "0.5rem",
-      cursor: "pointer",
-      color: "#000000",
-      fontSize: "1rem",
-      fontWeight: "600",
-      borderRadius: "0.5rem",
-    },
-    searchLeft: {
-      display: "flex",
-      alignItems: "center",
-      gap: "1rem",
-      flex: "1 1 400px",
-      maxWidth: "800px",
-      minWidth: "300px",
-    },
-    printControls: {
-      display: "flex",
-      flex: "0 1 auto",
-      alignItems: "center",
-      gap: "1rem",
-    },
-    printButton: {
-      alignItems: "center",
+  container: {
+    display: "flex",
+    flexDirection: "column",
+    height: "100%",
+    overflow: "auto",
+    cursor: "default",
+
+  },
+  form: {
+    background: '#fff',
+    borderRadius: '8px',
+    padding: '0.5rem 1rem',
+  },
+  topSections: {
+    display: 'flex',
+    gap: '0.5rem',
+    flexWrap: 'wrap',
+    marginBottom: '0.5rem',
+  },
+  marginalSection: {
+    margin: '1rem 0',
+  },
+  textarea: {
+    width: '100%',
+    minHeight: '5rem',
+    borderRadius: '4px',
+    border: '1px solid #ced4da',
+    padding: '0.5rem',
+  },
+  actionsBar: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    width: "100%",
+    marginBottom: "0.5rem",
+  },
+  saveButtonContainer: {
+    display: "flex",
+    justifyContent: "flex-end",
+    alignItems: "center",
+    marginTop: "0rem",
+    whiteSpace: "nowrap",
+    flexWrap: "wrap",
+  },
+  submitButton: {
+    display: "flex",
+    alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#FCCE74",
-    color: "black",
+    gap: "0.5rem",
+    padding: "0.75rem 1rem",
     border: "none",
     borderRadius: "0.5rem",
-    padding: "clamp(0.3rem, 1vw, 0.5rem) clamp(0.8rem, 2vw, 1rem)",
-    fontSize: "clamp(0.9rem, 1.5vw, 1rem)",
-    height: "40px",
+    backgroundColor: "#385792",
+    cursor: "pointer",
+    textAlign: "left",
+    color: "white",
+    transition: "background-color 0.2s",
     whiteSpace: "nowrap",
-    marginLeft: "auto",
+    overflow: "hidden",
+    position: "relative",
+    minHeight: "40px",
+    marginTop: "0.5rem",
+    marginLeft: "69.7rem",
     marginBottom: "0.5rem",
-    transition: "all 0.3s",
-    opacity: props => props.disabled ? 0.5 : 1,
-    cursor: props => props.disabled ? "not-allowed" : "pointer",
-    '&:hover': {
-      backgroundColor: "#2a4274"
-    },
-    '&:disabled': {
-      opacity: 0.5,
-      cursor: "not-allowed"
-    }
-    },
+    flexWrap: "wrap",
+    opacity: 1,
+  },
+  buttonIcon: {
+    width: "16px",
+    height: "16px",
+  },
+  buttonText: {
+    fontSize: "1rem",
+    flex: 1,
+  },
+  backButton: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#FF000F",
+    color: "white",
+    border: "none",
+    borderRadius: "0.5rem",
+    padding: "0.5rem 1rem",
+    cursor: "pointer",
+    marginTop: "1rem",
+    marginLeft: "1rem",
+    gap: "0.5rem",
+    fontSize: "1rem",
+    minWidth: "100px",
+  },
 
-    iconPrint: {
-      fontSize: "clamp(0.9rem, 1.5vw, 1rem)",
-      color: "#000000",
-    },
-    buttonText: {
-      fontSize: "clamp(0.9rem, 1.5vw, 1rem)",
-      color: "#000000",
-    },
-    tableContainer: {
-      width: "100%",
-      flex: "1",
-      overflow: "auto",
-    },
-    
-}
-export default CorregirActas
+  formSection: {
+    flex: "1",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "stretch",
+    marginBottom: "0.5rem",
+    padding: "0.75rem",
+    border: "1px solid #000000",
+    borderRadius: "0.5rem",
+    backgroundColor: "#f9f9f9",
+    width: "100%",
+  },
+  sectionTitle: {
+    fontSize: "1.1rem",
+    padding: "0rem",
+    marginBottom: "0.5rem",
+    fontWeight: "700",
+    color: "#385792",
+    marginTop: "-0rem",
+  },
+  formRow: {
+    display: "flex",
+    flexWrap: "wrap",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: "1rem",
+    marginBottom: "0.5rem",
+    width: "100%",
+  },
+  formGroup: {
+    flex: "1",
+    minWidth: "300px",
+    marginBottom: "0.5rem",
+  },
+  formNota: {
+    display: "block",
+    width: "100%",
+    padding: "0.5rem",
+    border: "1px solid #ced4da",
+    borderRadius: "0.5rem",
+    fontSize: "1rem",
+    marginBottom: "10px",
+    color: "#000000",
+    fontWeight: "500",
+    minHeight: "100px",
+    maxHeight: "200px",
+    overflowY: "auto",
+    resize: "vertical",
+    whiteSpace: "pre-wrap",
+    verticalAlign: "top",
+  },
+  modalOverlay: {
+    position: "fixed",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 1000,
+  },
+  modal: {
+    backgroundColor: "white",
+    borderRadius: "0.5rem",
+    width: "400px",
+    maxWidth: "90%",
+    boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+    overflow: "hidden",
+  },
+  modalHeader: {
+    padding: "1rem",
+    borderBottom: "1px solid #e0e0e0",
+  },
+  modalTitle: {
+    margin: 0,
+    fontSize: "1.3rem",
+    fontWeight: "600",
+    textAlign: "center",
+    color: "white",
+  },
+  modalBody: {
+    padding: "1.5rem",
+    textAlign: "center",
+  },
+  modalFooter: {
+    padding: "1rem",
+    borderTop: "1px solid #e0e0e0",
+    display: "flex",
+    justifyContent: "center",
+  },
+  confirmButton: {
+    backgroundColor: "#4CAF50",
+    color: "white",
+    border: "none",
+    borderRadius: "0.25rem",
+    padding: "0.5rem 1rem",
+    cursor: "pointer",
+    fontWeight: "600",
+    minWidth: "100px",
+  },
+};
+
+export default CorregirActas;

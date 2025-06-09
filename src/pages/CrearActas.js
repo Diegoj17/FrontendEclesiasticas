@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom"
 import { useAuth } from "../context/AuthContext"
 import { useActas } from "../context/ActaContext"
 import Header from "../components/layout/Header"
-import Sidebar from "../components/layout/Sidebar"
 import CommonRegistroSection from "../components/forms/CommonRegistroSection"
 import CommonOficianteSection from "../components/forms/CommonOficianteSection"
 import ConfirmacionOficianteSection from "../components/forms/ConfirmacionOficianteSection"
@@ -11,7 +10,7 @@ import BautismoForm from "../components/forms/BautismoForm"
 import ConfirmacionForm from "../components/forms/ConfirmacionForm"
 import MatrimonioForm from "../components/forms/MatrimonioForm"
 import ActaService from "../services/ActaService"
-import { FaTimes, FaListAlt, FaFileMedical } from "react-icons/fa"
+import { FaTimes, FaListAlt, FaFileMedical, FaArrowLeft } from "react-icons/fa"
 
 function AñadirPartidas() {
   const navigate = useNavigate()
@@ -577,25 +576,13 @@ function AñadirPartidas() {
     }
   }
 
-  const handleViewActas = () => {
-    navigate('/vistaActas')
-  }
-
-  // Funciones para los botones
-  const handleSearch = () => {
-    navigate('/buscarActas')
-  }
-
-  const handleAdd = () => {
-    navigate('/añadirActas')
-  }
 
   const handleList = () => {
     navigate('/listaActas')
   }
 
   const handleBack = () => {
-    navigate('/Principal')
+    navigate('/admin/dashboard')
   }
 
   return (
@@ -603,25 +590,10 @@ function AñadirPartidas() {
       {/* Barra superior */}
       <Header title="Inscripciones de Actas" />
 
-      <div style={styles.mainContent}>
-        {/* Menú lateral */}
-        <Sidebar 
-        menuAbierto={menuAbierto}
-        setMenuAbierto={setMenuAbierto}
-        currentPage="añadirActas"
-        onViewActas={handleViewActas}
-        onSearch={handleSearch}
-        onAdd={handleAdd}
-        onBack={handleBack}
-        
-        />
-
        {/* Contenido principal */}
       <main
           style={{
             ...styles.content,
-            marginLeft: menuAbierto ? "15.6rem" : "3rem",
-            padding: menuAbierto ? "1rem 0rem" : "1rem 1rem",
             transition: "margin-left 0.3s ease-in-out",
             height: "calc(100vh - 70px)",
             overflow: "auto",
@@ -632,6 +604,10 @@ function AñadirPartidas() {
           {/* Selector de tipo de evento */}
           <div style={styles.filtroContainer}>
             <div style={styles.filtroLeft}>
+              <button onClick={handleBack} style={styles.backButton} title="Atrás">
+                  <FaArrowLeft style={styles.iconBack} />
+                  <span style={styles.buttonText}>Atrás</span>
+                </button>
               <label htmlFor="evento" style={styles.label}>
                 Seleccionar Tipo de Ceremonia:
               </label>
@@ -641,6 +617,7 @@ function AñadirPartidas() {
                 <option value="Confirmación">Confirmaciones</option>
                 <option value="Matrimonio">Matrimonios</option>
               </select>
+              
             </div>
 
             <div style={styles.topButtonContainer}>
@@ -734,7 +711,6 @@ function AñadirPartidas() {
           )}
         </main>
       </main>
-      </div>
 
       {/* Modal de confirmación */}
       {showModal && (
@@ -807,6 +783,7 @@ const styles = {
   mainContent: {
     display: "flex",
     flex: 1,
+    flexWrap: 'wrap',
     position: "relative",
     overflow: "hidden",
   },
@@ -819,6 +796,7 @@ const styles = {
     backgroundColor: "#FFFFFF",
     gap: "0rem",
     minHeight: "calc(100vh - 70px)",
+    
     cursor: 'default',
   },
   filtroContainer: {
@@ -857,11 +835,12 @@ const styles = {
     borderRadius: "0.5rem",
     border: "1px solid #ced4da",
     marginLeft: "0.5rem",
+    flexWrap: 'wrap',
     width: "220px",
     fontWeight: "550",
     cursor: "pointer",
     appearance: "none", // Elimina los estilos nativos
-    WebkitAppearance: "none", // Compatibilidad con Safari
+    WebkitAppearance: "none", 
     MozAppearance: "none",
   },
   form: {
@@ -876,6 +855,7 @@ const styles = {
     marginBottom: "0.5rem",
     justifyContent: "space-between",
     width: "100%",
+    flexWrap: 'wrap',
     alignItems: "stretch",
   },
   formSection: {
@@ -929,6 +909,15 @@ const styles = {
     whiteSpace: "pre-wrap",
     verticalAlign: "top",
   },
+  buttonText: {
+    fontSize: "1rem",
+    marginLeft: "0.5rem",
+  },
+  iconBack: {
+    width: "18px",
+    height: "18px",
+    color: "white", 
+  },
   sidebarButton: {
     display: "flex",
     alignItems: "center",
@@ -941,6 +930,7 @@ const styles = {
     cursor: "pointer",
     textAlign: "left",
     color: "black",
+    flexWrap: 'wrap',
     transition: "background-color 0.2s",
     whiteSpace: "nowrap",
     overflow: "hidden",
@@ -966,6 +956,21 @@ const styles = {
     position: "relative",
     minHeight: "40px",
     opacity: 1,
+  },
+  backButton: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#FF000F",
+    color: "white",
+    gap: "0.5rem",
+    border: "none",
+    borderRadius: "0.5rem",
+    padding: "0.5rem 1rem",
+    marginLeft: "1rem",
+    marginRight: "1rem",
+    cursor: "pointer",
+    fontSize: "1rem",
   },
   saveButtonContainer: {
     display: "flex",

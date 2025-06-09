@@ -1,47 +1,27 @@
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { useAuth } from "../context/AuthContext"
-import { FaArrowLeft, FaUser, FaSave, FaExclamationCircle, FaCheck, FaEye, FaEyeSlash } from "react-icons/fa"
+import { FaArrowLeft, FaUser, FaSave } from "react-icons/fa"
 import logo from "../assets/logo.png"
 
 function EditProfile() {
+
   const navigate = useNavigate();
   const { user, updateUser } = useAuth();
   const [loading, setLoading] = useState(false);
-  const [password, setPassword] = useState('');
-  const [name, setName] = useState('');
-  const [lastname, setLastname] = useState('');
+
   const [formData, setFormData] = useState({
     nombre: "",
     apellido: "",
     email: "",
   });
 
-  const [errors, setErrors] = useState({});
-  const [touched, setTouched] = useState({});
-  const [passwordErrors, setPasswordErrors] = useState({
-    length: false,
-    uppercase: false,
-    number: false,
-    specialChar: false,
-  });
-
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const [showErrorModal, setShowErrorModal] = useState(false);
-  const [modalMessage, setModalMessage] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [showRules, setShowRules] = useState(false);
-  const inputRef = useRef(null);
-  const bubbleRef = useRef(null);
-
   const [modal, setModal] = useState({
-      show: false,
-      type: 'success', // 'success' o 'error'
-      message: ''
+    show: false,
+    type: '', // 'success' o 'error'
+    message: ''
   });
-  
 
-  const [message, setMessage] = useState({ text: "", type: "" });
 
   // Cargar datos del usuario cuando el componente se monta
   useEffect(() => {
@@ -62,18 +42,11 @@ function EditProfile() {
     }));
   };
 
-  const handleBlur = (field) => {
-    setTouched((prev) => ({ ...prev, [field]: true }));
-  };
-
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    setLoading(true)
-    setErrors({}); // Limpiar errores previos
-
-    setMessage({ text: "", type: "" })
-
-    try {
+  e.preventDefault();
+  setLoading(true);
+  
+  try {
     console.log("Enviando datos para actualizar:", {
       nombre: formData.nombre,
       apellido: formData.apellido,
@@ -86,87 +59,49 @@ function EditProfile() {
       email: formData.email,  
     });
 
-      if (success) {
-        // Actualizar localStorage
-        const updatedUser = {
-            ...user,
-            nombre: formData.nombre,
-            apellido: formData.apellido,
-            email: formData.email,
-            displayName: `${formData.nombre} ${formData.apellido}`.trim(),
-        };
-        
-        localStorage.setItem("user", JSON.stringify(updatedUser));
-        window.dispatchEvent(new Event("storage"));
-        
-        // Mostrar modal de éxito
-        setModal({
-          show:true,
-          type: 'success',
-          message: 'Perfil Actualizado Exitosamente'
-        });
-
+    if (success) {
+      // Actualizar localStorage
+      const updatedUser = {
+        ...user,
+        nombre: formData.nombre,
+        apellido: formData.apellido,
+        email: formData.email,
+        displayName: `${formData.nombre} ${formData.apellido}`.trim(),
+      };
+      
+      localStorage.setItem("user", JSON.stringify(updatedUser));
+      window.dispatchEvent(new Event("storage"));
+      
+      // Mostrar modal de éxito
+      setModal({
+        show: true,
+        type: 'success',
+        message: "Perfil actualizado correctamente"
+      });
     } else {
-        setModalMessage("Error al actualizar el perfil");
-        setShowErrorModal(true);
+      setModal({
+        show: true,
+        type: 'error',
+        message: "Error al actualizar el perfil"
+      });
     }
-} catch (error) {
+  } catch (error) {
     console.error("Error:", error);
-    setModalMessage(error.message || "Error al actualizar el perfil");
-    setShowErrorModal(true);
-} finally {
+    setModal({
+      show: true,
+      type: 'error',
+      message: error.message || "Error al actualizar el perfil"
+    });
+  } finally {
     setLoading(false);
-}
+  }
 };
 
-
-  const validatePassword = (pass) => {
-
-    if (pass === "") return true;
-    const errors = {
-      length: pass.length >= 6, // Cambiado a 6 caracteres
-      uppercase: /[A-Z]/.test(pass),
-      number: /\d/.test(pass),
-      specialChar: /[!@#$%^&*]/.test(pass), // Caracteres específicos
-    };
-
-    const isValid = Object.values(errors).every((v) => v);
-    setPasswordErrors(errors);
-    setErrors((prev) => ({ ...prev, password: !isValid }));
-
-    return isValid;
-  };
-
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (bubbleRef.current && !bubbleRef.current.contains(event.target)) {
-        if (inputRef.current !== event.target) {
-          setShowRules(false);
-        }
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  const rules = [
-    { id: 1, text: 'Mínimo 6 caracteres', valid: password.length >= 6 },
-    { id: 2, text: 'Al menos una mayúscula', valid: /[A-Z]/.test(password) },
-    { id: 3, text: 'Al menos un número', valid: /\d/.test(password) },
-    { id: 4, text: 'Un carácter especial (!@#$%^&*)', valid: /[!@#$%^&*]/.test(password) },
-  ];
-
-  const closeSuccessModal = () => {
-  const savedPath = sessionStorage.getItem("currentPath") || "/Principal";
-  setModal(prev => ({...prev, show: false}));
-  navigate(savedPath);
-};
-
-  const closeErrorModal = () => {
-    const savedPath = sessionStorage.getItem("currentPath") || "/Principal";
-    setModal(prev => ({...prev, show: false}));
-    navigate(savedPath);
+  const closeModal = () => {
+    setModal(prev => ({ ...prev, show: false }));
+    if (modal.type === 'success') {
+      navigate(-1); // Navegar solo en éxito
+    }
   };
 
   const handleCancel = () => {
@@ -244,10 +179,11 @@ function EditProfile() {
               <button type="button" onClick={handleCancel} style={styles.cancelButton}>
                 Cancelar
               </button>
+
               <button
                 type="submit"
                 style={styles.saveButton}
-                disabled={loading || Object.values(passwordErrors).some((v) => !v)}
+                disabled={loading}
               >
                 {loading ? (
                   <div style={styles.loadingContent}>
@@ -274,52 +210,34 @@ function EditProfile() {
         </div>
       </div>
 
-      {showSuccessModal && (
-    <div style={styles.modalOverlay}>
-        <div style={styles.modal}>
-        <h3 style={{
-              ...styles.modalTitle,
-              color: modal.type === 'success' ? '#2ecc71' : '#e74c3c'
-            }}>
-              {modal.type === 'success' ? '¡Actualización Exitosa!' : 'Error'}
-            </h3>
-
-            <p style={styles.modalText}>{modal.message}</p>
-          
-            <button
-              style={{
-                ...styles.modalButton,
-                backgroundColor: modal.type === 'success' ? '#2ecc71' : '#e74c3c'
-              }}
-                onClick={closeSuccessModal}
-            >
-                Aceptar
-            </button>
-        </div>
+      {modal.show && (
+  <div style={styles.modalOverlay}>
+    <div style={styles.modal}>
+      <h3 style={{
+        ...styles.modalTitle,
+        color: modal.type === 'success' ? '#2ecc71' : '#e74c3c'
+      }}>
+        {modal.type === 'success' 
+          ? '¡Actualización Exitosa!' 
+          : 'Error'}
+      </h3>
+      <p style={styles.modalText}>{modal.message}</p>
+      <button
+        style={{
+          ...styles.modalButton,
+          backgroundColor: modal.type === 'success' ? '#2ecc71' : '#e74c3c'
+        }}
+        onClick={() => {
+          setModal(prev => ({ ...prev, show: false }));
+          if (modal.type === 'success') navigate(-1);
+        }}
+      >
+        {modal.type === 'success' ? 'Aceptar' : 'Cerrar'}
+      </button>
     </div>
+  </div>
 )}
 
-{showErrorModal && (
-    <div style={styles.modalOverlay}>
-        <div style={styles.modal}>
-        <h3 style={{
-              ...styles.modalTitle,
-              color: modal.type === 'success' ? '#2ecc71' : '#e74c3c'
-            }}>
-              {modal.type === 'success' ? '¡Actualización Exitosa!' : 'Error'}
-            </h3>
-
-            <p style={styles.modalText}>{modal.message}</p>
-
-            <button
-                style={{...styles.modalButton, backgroundColor: '#e74c3c'}}
-                onClick={closeErrorModal}
-            >
-                Cerrar
-            </button>
-        </div>
-    </div>
-)}
 
     </div>
   );
@@ -335,7 +253,6 @@ const styles = {
     padding: '20px 0 0 0',
     margin: '0 auto',
     cursor: 'default',
-    flexWrap: "wrap",
     overflow: "auto",
   },
   formContainer: {
@@ -354,7 +271,9 @@ const styles = {
     justifyContent: 'center',
     cursor: 'default',
     marginTop: '-15rem',
-    flexWrap: "wrap",
+    '@media (max-width: 768px)': {
+      marginTop: '-10rem',
+    }
   },
   logo: {
     width: '12.5rem',
@@ -367,7 +286,6 @@ const styles = {
     display: 'flex',
     gap: '0rem',
     marginBottom: '0rem',
-    flexWrap: "wrap",
     '@media (max-width: 768px)': {
       flexDirection: 'column',
       gap: '0',
@@ -382,7 +300,6 @@ const styles = {
     width: "100%",
     maxWidth: "400px",
     boxSizing: "border-box",
-    flexWrap: "wrap",
   },
   header: {
     display: "flex",

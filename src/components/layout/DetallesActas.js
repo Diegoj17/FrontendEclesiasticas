@@ -1,5 +1,3 @@
-"use client"
-
 import { useEffect, useState } from "react"
 import ActaService from "../../services/ActaService" // Ajusta la ruta según sea necesario
 

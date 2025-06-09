@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
-import { useAuth } from "../context/AuthContext"
 import Header from "../components/layout/Header"
 import Sidebar from "../components/layout/Sidebar"
 import ActaService from "../services/ActaService"
@@ -18,7 +17,6 @@ function BuscarPartidas() {
   const [selectedRow, setSelectedRow] = useState(null);
   const [isLoading, setIsLoading] = useState(false)
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [selectedActas, setSelectedActas] = useState([]);
   const toggleDropdown = () => setIsDropdownOpen(!isDropdownOpen);
   const [registros, setRegistros] = useState([])
   const [error, setError] = useState(null)
@@ -108,15 +106,6 @@ function BuscarPartidas() {
   return () => clearTimeout(timeoutId);
 }, [searchTerm, showAdvancedSearch, advancedSearchParams]);
 
-
-
-  // Manejar búsqueda avanzada
-  
-
-  
-
-  
-
   const handleBack = () => {
     navigate('/Principal')
   }
@@ -171,15 +160,6 @@ const handleEditActa = () => {
     const options = { day: 'numeric', month: 'long', year: 'numeric' };
     const partes = new Date(fecha).toLocaleDateString('es-ES', options).split(' ');
     return `${partes[0]} de ${partes[2].toUpperCase()} de ${partes[4]}`;
-  };
-
-  const handleRowSelect = (rowData) => {
-  console.log("Fila seleccionada:", rowData);
-  setSelectedRow(rowData);
-  
-  // Si necesitas transformar los datos como en VistaActas
-  const actaFormateada = ActaService.transformActasForTable(rowData);
-  setSelectedRow(actaFormateada);
   };
 
   const handlePrint = async (tipoPdf) => {
@@ -350,9 +330,6 @@ const handleEditActa = () => {
     alert(`Error al generar el PDF: ${errorMessage}`);
   }
 };
-  
-
-  
   
 
 

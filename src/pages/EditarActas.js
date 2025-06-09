@@ -1,4 +1,3 @@
-"use client";
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Header from "../components/layout/Header";
@@ -30,6 +29,7 @@ const initialFormData = {
 
 function EditarActa() {
   const { id, tipo } = useParams();
+
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [ciudadesColombia, setCiudadesColombia] = useState([]);
@@ -38,6 +38,11 @@ function EditarActa() {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
+
+  const [acta, setActa] = useState(null);
+
+  const [subActaId, setSubActaId] = useState(null); // <--- importante
+
 
   const handleChange = (e) => {
     const { name, value, isComboBox } = e.target;
@@ -71,12 +76,15 @@ function EditarActa() {
         switch (tipo.toLowerCase()) {
           case 'bautismo':
             data = await ActaService.getBautizoById(id);
+            setSubActaId(data.idBautizado.id);
             break;
           case 'confirmacion':
             data = await ActaService.getConfirmacionById(id);
+            setSubActaId(data.idConfirmante.id);
             break;
           case 'matrimonio':
             data = await ActaService.getMatrimonioById(id);
+            setSubActaId(data.idMatrimonio.id);
             break;
           default:
             throw new Error(`Tipo de acta no válido: ${tipo}`);
@@ -190,27 +198,39 @@ function EditarActa() {
   }, [id, tipo])
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    
-    try {
-      await ActaService.createActasBatch(tipo, id, formData);
-      setModalMessage("Los cambios se han guardado correctamente.");
-      setShowSuccessModal(true);
-      
-      // Redirigir después de 2 segundos
-      setTimeout(() => {
-        navigate(-1); // O a la ruta que prefieras
-      }, 2000);
-      
-    } catch (err) {
-      console.error("Error al guardar acta:", err);
-      setModalMessage(err.response?.data?.message || "Error al guardar los cambios");
-      setShowErrorModal(true);
-    } finally {
-      setIsSubmitting(false);
+  e.preventDefault();
+  if (!subActaId) {
+      console.error("Aún no tengo el ID de la sub-acta");
+      return;
     }
+  setIsSubmitting(true);
+
+  const rawActa = {
+    ...formData,
+    id: subActaId,
+    tipo: tipo.toLowerCase()
   };
+    
+  const payload = ActaService.convertirActaAFormatoPlano(rawActa);
+  console.log("Payload plano enviado:", payload);
+  
+  try {
+    // Asegurar que los datos estén en el formato correcto
+  
+    await ActaService.updateActa(payload);
+    
+    setModalMessage("Los cambios se han guardado correctamente.");
+    setShowSuccessModal(true);
+    
+    
+  } catch (err) {
+    console.error("Error al guardar acta:", err);
+    setModalMessage(err.response?.data?.message || "Error al guardar los cambios");
+    setShowErrorModal(true);
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
  // if (loading) return <div>Cargando acta...</div>;
 

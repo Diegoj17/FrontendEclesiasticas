@@ -1,12 +1,12 @@
 import { useState, useRef, useEffect, useCallback } from "react"
 import { useNavigate } from "react-router-dom"
 import { useAuth } from "../context/AuthContext"
-import Header from "../components/layout/Header"
-import Sidebar from "../components/layout/Sidebar"
+import HeaderAdmin from "../components/layout/HeaderAdmin"
 import ActaService from "../services/ActaService"
 import { FilterMatchMode, FilterOperator } from "primereact/api"
 import DataTableExpandle from "../components/layout/DataTableExpandle"
 import DetallesActas from "../components/layout/DetallesActas"
+import { FaArrowLeft } from "react-icons/fa"
 
 function VistaActas() {
 
@@ -137,24 +137,7 @@ useEffect(() => {
   }
 
   const handleBack = () => {
-    navigate('/Principal')
-  }
-
-  const handleViewActas = () => {
-    navigate('/vistaActas')
-  }
-
-  // Funciones para los botones
-  const handleSearch = () => {
-    navigate('/buscarActas')
-  }
-
-  const handleAdd = () => {
-    navigate('/añadirActas')
-  }
-
-  const handleCorrect = () => {
-    navigate('/corregirActas')
+    navigate('/admin/dashboard')
   }
 
   
@@ -162,27 +145,12 @@ useEffect(() => {
 
     <div style={styles.container}>
       {/* Barra superior */}
-      <Header title="Vista de Actas" />
-
-      <div style={styles.mainContent}>
-        {/* Menú lateral */}
-        <Sidebar 
-        menuAbierto={menuAbierto}
-        setMenuAbierto={setMenuAbierto}
-        currentPage="VistaActas"
-        onViewActas={handleViewActas}
-        onSearch={handleSearch}
-        onAdd={handleAdd}
-        onCorrect={handleCorrect}
-        onBack={handleBack}
-        />
+      <HeaderAdmin title="Vista de Actas" />
 
         {/* Contenido principal */}
         <main
           style={{
             ...styles.content,
-            marginLeft: menuAbierto ? "15.6rem" : "3rem",
-            padding: menuAbierto ? "1rem 0rem" : "1rem 1rem",
             transition: "margin-left 0.3s ease-in-out",
             overflow: "auto",
             height: "calc(100vh - 70px)",
@@ -190,6 +158,10 @@ useEffect(() => {
         >
           {/* Selector de tipo de evento */}
           <div style={styles.filtroContainer}>
+            <button onClick={handleBack} style={styles.backButton} title="Atrás">
+              <FaArrowLeft style={styles.iconBack} />
+              <span style={styles.buttonText}>Atrás</span>
+            </button>
             <label htmlFor="ceremonia" style={styles.label}>
               Seleccionar Tipo de Ceremonia:
             </label>
@@ -238,7 +210,6 @@ useEffect(() => {
             )}
           </div>
         </main>
-      </div>
     </div>
   )
 }
@@ -284,12 +255,13 @@ const styles = {
   filtroContainer: {
     alignItems: "center",
     marginBottom: "0.5rem",
-    marginLeft: '0.5rem',
+    marginLeft: '0rem',
     fontSize: '1rem',
     fontWeight: '600',
     display: 'flex',
     gap: '0rem',
     cursor: 'default',
+    marginTop: '-0.5rem',
   },
   label: {
     fontSize: '1.2rem',
@@ -321,7 +293,8 @@ const styles = {
     boxShadow: "none",
     overflow: "auto",
     marginBottom: "0.5rem",
-    marginLeft: '1rem',
+    marginTop: '1rem',
+    marginLeft: '0rem',
     fontSize: '1rem',
     fontWeight: '600',
     overflowX: "auto",
@@ -396,6 +369,26 @@ const styles = {
     top: "50%",
     left: "50%",
     transform: "translate(-50%, -50%)",
+  },
+  iconBack: {
+    width: "18px",
+    height: "18px",
+    color: "white", 
+  },
+  backButton: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#FF000F",
+    color: "white",
+    gap: "0.5rem",
+    border: "none",
+    borderRadius: "0.5rem",
+    padding: "0.5rem 1rem",
+    marginLeft: "0rem",
+    marginRight: "1rem",
+    cursor: "pointer",
+    fontSize: "1rem",
   },
 
 }
