@@ -310,7 +310,7 @@ const handleEditActa = () => {
     );
 
     // Descargar PDF
-    const pdfBlob = new Blob([response.data], { type: 'application/pdf' });More actions
+    const pdfBlob = new Blob([response.data], { type: 'application/pdf' });
     const pdfUrl = URL.createObjectURL(pdfBlob);
     const link = document.createElement('a');
     link.href = pdfUrl;
