@@ -312,11 +312,8 @@ const handleEditActa = () => {
     // Descargar PDF
     const pdfBlob = new Blob([response.data], { type: 'application/pdf' });
     const pdfUrl = URL.createObjectURL(pdfBlob);
-    const link = document.createElement('a');
-    link.href = pdfUrl;
-    link.download = `acta_${selectedRow.ceremonia}_${selectedRow.acta}.pdf`;
-    link.click();
-    URL.revokeObjectURL(pdfUrl);
+    
+
 
   } catch (error) {
     console.error("Error al generar PDF:", error);
