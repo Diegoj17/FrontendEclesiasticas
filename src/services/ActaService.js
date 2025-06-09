@@ -797,9 +797,117 @@ convertirPlanoAActa(plan) {
   }
 }
 
+  convertirActaPlano(acta) {
+  // Función para formatear fechas
+  const formatearFecha = (fecha) => {
+    if (typeof fecha === "string") return fecha;
+    if (fecha && fecha.dia != null && fecha.mes != null && fecha.año != null) {
+      const dia = String(fecha.dia).padStart(2, "0");
+      const mes = String(fecha.mes).padStart(2, "0");
+      const año = String(fecha.año).padStart(4, "0");
+      return `${dia}-${mes}-${año}`;
+    }
+    return "";
+  };
+
+  // Aplanar el objeto de entrada
+  const flat = { ...acta };
+  if (acta.bautismo) Object.assign(flat, acta.bautismo);
+  if (acta.confirmacion) Object.assign(flat, acta.confirmacion);
+  if (acta.matrimonio) {
+    // Datos de novio y novia
+    const { novio = {}, novia = {}, testigo1, testigo2, testigo3, testigo4 } = acta.matrimonio;
+    Object.assign(flat,
+      novio,
+      novia,
+      { testigo1, testigo2, testigo3, testigo4 }
+    );
+  }
+
+  // Normalizar tipo
+  let tipo = '';
+  if (flat.tipo) {
+    const tl = flat.tipo.toLowerCase();
+    if (tl.includes('baut')) tipo = 'bautizo';
+    else if (tl.includes('confirm')) tipo = 'confirmacion';
+    else if (tl.includes('matri')) tipo = 'matrimonio';
+    else tipo = tl;
+  }
+
+  // Mapeo a formato plano
+  const actaPlana = {
+    numero_formulario: String(flat.id || Date.now()),
+    numeroActa: String(flat.acta || flat.numeroActa || ''),
+    folio: String(flat.folio || ''),
+    libro: String(flat.libro || ''),
+    fecha: formatearFecha(flat.fechaCeremonia) || flat.fecha || '',
+    tipo: tipo || '',
+
+    nombresSacerdote: String(flat.oficiante || flat.sacerdote || flat.monseñor || ''),
+    nombresDoyFe: String(flat.doyFe || ''),
+    notaMarginal: String(flat.notaMarginal || ''),
+
+    // Campos personales (bautizo/confirmacion)
+    nombre1: String(flat.primerNombre || ''),
+    nombre2: String(flat.segundoNombre || ''),
+    apellido1: String(flat.primerApellido || ''),
+    apellido2: String(flat.segundoApellido || ''),
+    fechaNacimiento: formatearFecha(flat.fechaNacimiento) || '',
+    lugarNacimiento: String(flat.lugarNacimiento || ''),
+    ciudadNacimiento: String(flat.lugarNacimiento || ''),
+    nombresPadre: String(flat.nombrePadre || ''),
+    nombresMadre: String(flat.nombreMadre || ''),
+
+    // Padrinos
+    nombrepadrinos: String(flat.padrino || ''),
+    nombremadrinas: String(flat.madrina || ''),
+    nombrespadrino: String(flat.padrino || ''),
+    nombresmadrina: String(flat.madrina || ''),
+
+    // Campos monseñor (confirmacion)
+        // ...existing code...
+    idmonsr: flat.idMonsr?.id !== undefined && flat.idMonsr?.id !== null
+      ? String(flat.idMonsr.id)
+      : (flat.idmonsr !== undefined && flat.idmonsr !== null && flat.idmonsr !== "null"
+          ? String(flat.idmonsr)
+          : ''),
+    // ...existing code...
+    nombresmonsr: String(flat.nombresmonsr || ''),
+
+    
+
+    // Matrimonio: esposo/esposa y testigos
+    esposonombre1: String(flat.primerNombre || ''),
+    esposonombre2: String(flat.segundoNombre || ''),
+    esposoapellido1: String(flat.primerApellido || ''),
+    esposoapellido2: String(flat.segundoApellido || ''),
+    fechaNacimientoEsposo: formatearFecha(flat.fechaNacimiento) || '',
+    lugarNacimientoEsposo: String(flat.lugarNacimiento || ''),
+    nombresPadreEsposo: String(flat.nombrePadre || ''),
+    nombresMadreEsposo: String(flat.nombreMadre || ''),
+
+    esposanombre1: String(flat.primerNombre || ''),
+    esposanombre2: String(flat.segundoNombre || ''),
+    esposaapellido1: String(flat.primerApellido || ''),
+    esposaapellido2: String(flat.segundoApellido || ''),
+    fechaNacimientoEsposa: formatearFecha(flat.fechaNacimiento) || '',
+    lugarNacimientoEsposa: String(flat.lugarNacimiento || ''),
+    nombresPadreEsposa: String(flat.nombrePadre || ''),
+    nombresMadreEsposa: String(flat.nombreMadre || ''),
+
+    nombrestestigo1: String(flat.testigo1 || ''),
+    nombrestestigo2: String(flat.testigo2 || ''),
+    nombrestestigo3: String(flat.testigo3 || ''),
+    nombrestestigo4: String(flat.testigo4 || '')
+  };
+
+  return actaPlana;
+}
 
 
 
+
+/*
 
 
 convertirActaPlano(acta) {
