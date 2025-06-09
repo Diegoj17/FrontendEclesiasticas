@@ -83,7 +83,7 @@ function AppContent() {
       if (isAuthenticated) {
         // Redirigir a la última ruta guardada o a Principal
         const savedPath = localStorage.getItem("lastPath")
-        navigate("Principal", { replace: true })
+        navigate("admin/dashboard", { replace: true })
       }
     }, [navigate, isAuthenticated])
 
