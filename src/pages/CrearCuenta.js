@@ -208,18 +208,6 @@ function CrearCuenta() {
               </div>
             </div>
 
-            <div style={styles.formGroup}>
-              <label htmlFor="parroquia" style={styles.label}>Parroquia</label>
-                <input
-                  type="text"
-                  id="parroquia"
-                  value={parroquia}
-                  onChange={(e) => setParroquia(e.target.value)}
-                  style={styles.input}
-                  required
-                />
-              </div>
-
             <div style={styles.passwordContainer}>
               <label htmlFor="password" style={styles.label}>Contraseña</label>
               <div style={styles.inputWrapper}>
