@@ -297,7 +297,7 @@ const handleEditActa = () => {
     console.log("Enviando a PDF:", JSON.stringify(requestBody, null, 2));
 
     // Enviar solicitud POST con el JSON
-    const response = await axios.get(
+    const response = await axios.post(
       "https://actaseclesiasticas.koyeb.app/api/actas/pdf",
       requestBody,
       {
