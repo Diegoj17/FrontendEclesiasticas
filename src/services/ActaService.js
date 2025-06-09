@@ -618,72 +618,23 @@ class ActaService {
     }
   }
 
-  // ActaService.js
-
-// ... (código existente)
-
   /**
    * Actualiza un acta existente
    * @param {string} tipo Tipo de acta (bautismo, confirmacion, matrimonio)
    * @param {string} id ID del acta a actualizar
    * @param {Object} actaData Datos del acta actualizada
    * @returns {Promise} Promesa con el resultado de la actualización
-   
-  async updateActa(tipo, id, actaData) {
-  try {
-    const token = localStorage.getItem("token");
-
-    const formattedData = this.convertirActaAFormatoPlano({
-      tipo: tipo.toLowerCase(),
-      id,
-      ...actaData,
-    });
-
-    // Asegúrate que el ID se mande como string
-    formattedData.id = String(id);
-    formattedData.tipo = tipo.toLowerCase(); // aseguramos esto
-
-    const response = await axios.put(
-      "https://actaseclesiasticas.koyeb.app/api/actas/editar",
-      formattedData,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      }
-    );
-
-    return response.data;
-  } catch (error) {
-    console.error("Error al actualizar acta:", error);
-    throw error;
-  }
-}
   */
-
+ 
 async updateActa(plano) {
   try {
     const token = localStorage.getItem("token");
-    //const formattedData = this.convertirActaAFormatoPlano(actaData);
-    
-    // Asegurar que todos los valores sean strings
-    /*
-    const stringData = {};
-    for (const key in formattedData) {
-      stringData[key] = String(formattedData[key]);
-    }
-    
-    // Agregar campos requeridos por el backend
-    stringData.id = String(id);
-    stringData.tipo = tipo.toLowerCase();
-    */
 
     const response = await axios.put(`https://actaseclesiasticas.koyeb.app/api/actas/editar`, 
       plano, {
-  headers: {
-    Authorization: `Bearer ${token}`,
-    "Content-Type": "application/json"
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json"
   }
 });
     return response.data;
@@ -692,324 +643,88 @@ async updateActa(plano) {
     throw error;
   }
 }
-
-convertirPlanoAActa(plan) {
-  const parseFecha = (fechaStr) => {
-    if (!fechaStr) return null
-    const [dia, mes, año] = fechaStr.split("-").map(Number)
-    return { dia, mes, año }
-  }
-
-  const base = {
-    id: plan.numero_formulario ? parseInt(plan.numero_formulario) : undefined,
-    numeroActa: plan.numeroActa || "",
-    folio: plan.folio || "",
-    libro: plan.libro || "",
-    fecha: plan.fecha || "",
-    tipo: plan.tipo?.toLowerCase(),
-    idSacerdote: plan.idSacerdote || "",
-    nombresSacerdote: plan.nombresSacerdote || "",
-    idDoyFe: plan.idDoyFe || "",
-    nombresDoyFe: plan.nombresDoyFe || "",
-    idmonsr: plan.idmonsr || "",
-    nombresmonsr: plan.nombresmonsr || "",
-    idParroquia: plan.idParroquia || "",
-    notaMarginal: plan.notaMarginal || "",
-  }
-
-  switch (base.tipo) {
-    case "bautizo":
-      return {
-        ...base,
-        bautismo: {
-          primerNombre: plan.nombre1 || "",
-          segundoNombre: plan.nombre2 || "",
-          primerApellido: plan.apellido1 || "",
-          segundoApellido: plan.apellido2 || "",
-          fechaNacimiento: parseFecha(plan.fechaNacimiento),
-          lugarNacimiento: plan.lugarNacimiento || "",
-          ciudadNacimiento: plan.ciudadNacimiento || "",
-          nombrePadre: plan.nombresPadre || "",
-          nombreMadre: plan.nombresMadre || "",
-          abueloPaterno: plan.abueloPaterno || "",
-          abuelaPaterna: plan.abuelaPaterna || "",
-          abueloMaterno: plan.abueloMaterno || "",
-          abuelaMaterna: plan.abuelaMaterna || "",
-          padrino: plan.nombrepadrinos || "",
-          madrina: plan.nombremadrinas || "",
-        },
-      }
-
-    case "confirmacion":
-      return {
-        ...base,
-        confirmacion: {
-          primerNombre: plan.nombre1 || "",
-          segundoNombre: plan.nombre2 || "",
-          primerApellido: plan.apellido1 || "",
-          segundoApellido: plan.apellido2 || "",
-          fechaNacimiento: parseFecha(plan.fechaNacimiento),
-          lugarNacimiento: plan.lugarNacimiento || "",
-          ciudadNacimiento: plan.ciudadNacimiento || "",
-          nombrePadre: plan.nombresPadre || "",
-          nombreMadre: plan.nombresMadre || "",
-          padrino: plan.nombrespadrino || "",
-          madrina: plan.nombresmadrina || "",
-          monseñor: plan.nombresmonsr || "",
-          doyFe: plan.nombresDoyFe || "",
-          sacerdote: plan.nombresSacerdote || "",
-        },
-      }
-
-    case "matrimonio":
-      return {
-        ...base,
-        matrimonio: {
-          novio: {
-            primerNombre: plan.esposonombre1 || "",
-            segundoNombre: plan.esposonombre2 || "",
-            primerApellido: plan.esposoapellido1 || "",
-            segundoApellido: plan.esposoapellido2 || "",
-            fechaNacimiento: parseFecha(plan.fechaNacimientoEsposo),
-            lugarNacimiento: plan.lugarNacimientoEsposo || "",
-            nombrePadre: plan.nombresPadreEsposo || "",
-            nombreMadre: plan.nombresMadreEsposo || "",
-          },
-          novia: {
-            primerNombre: plan.esposanombre1 || "",
-            segundoNombre: plan.esposanombre2 || "",
-            primerApellido: plan.esposaapellido1 || "",
-            segundoApellido: plan.esposaapellido2 || "",
-            fechaNacimiento: parseFecha(plan.fechaNacimientoEsposa),
-            lugarNacimiento: plan.lugarNacimientoEsposa || "",
-            nombrePadre: plan.nombresPadreEsposa || "",
-            nombreMadre: plan.nombresMadreEsposa || "",
-          },
-          testigo1: plan.nombrestestigo1 || "",
-          testigo2: plan.nombrestestigo2 || "",
-          testigo3: plan.nombrestestigo3 || "",
-          testigo4: plan.nombrestestigo4 || "",
-        },
-      }
-
-    default:
-      return base
-  }
-}
-
-  convertirActaPlano(acta) {
-  // Función para formatear fechas
-  const formatearFecha = (fecha) => {
-    if (typeof fecha === "string") return fecha;
-    if (fecha && fecha.dia != null && fecha.mes != null && fecha.año != null) {
-      const dia = String(fecha.dia).padStart(2, "0");
-      const mes = String(fecha.mes).padStart(2, "0");
-      const año = String(fecha.año).padStart(4, "0");
-      return `${dia}-${mes}-${año}`;
+  /*
+ async updateActa(acta) {
+  try {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      console.error("No se encontró token de autenticación");
+      throw new Error("No se encontró token de autenticación");
     }
-    return "";
-  };
 
-  // Aplanar el objeto de entrada
-  const flat = { ...acta };
-  if (acta.bautismo) Object.assign(flat, acta.bautismo);
-  if (acta.confirmacion) Object.assign(flat, acta.confirmacion);
-  if (acta.matrimonio) {
-    // Datos de novio y novia
-    const { novio = {}, novia = {}, testigo1, testigo2, testigo3, testigo4 } = acta.matrimonio;
-    Object.assign(flat,
-      novio,
-      novia,
-      { testigo1, testigo2, testigo3, testigo4 }
+    // Convertir el acta al formato plano que espera el backend
+    const actaFormateada = this.convertirActaAFormatoPlano(acta);
+
+    // Forzar nombres de oficiantes si es de tipo confirmación
+    if (acta.tipo && acta.tipo.toLowerCase().includes("confirm")) {
+      actaFormateada.nombresSacerdote = String(
+        acta.oficiante || acta.nombresSacerdote || (acta.confirmacion && acta.confirmacion.sacerdote) || ""
+      );
+      actaFormateada.nombresDoyFe = String(
+        acta.doyFe || acta.nombresDoyFe || (acta.confirmacion && acta.confirmacion.doyFe) || ""
+      );
+      actaFormateada.nombresmonsr = String(
+        (acta.confirmacion && acta.confirmacion.monseñor) || acta.nombresmonsr || acta.oficiante || ""
+      );
+
+      if (
+        !actaFormateada.nombresSacerdote ||
+        actaFormateada.nombresSacerdote === "undefined" ||
+        actaFormateada.nombresSacerdote === "null"
+      ) {
+        actaFormateada.nombresSacerdote = "";
+      }
+      if (
+        !actaFormateada.nombresDoyFe ||
+        actaFormateada.nombresDoyFe === "undefined" ||
+        actaFormateada.nombresDoyFe === "null"
+      ) {
+        actaFormateada.nombresDoyFe = "";
+      }
+      if (
+        !actaFormateada.nombresmonsr ||
+        actaFormateada.nombresmonsr === "undefined" ||
+        actaFormateada.nombresmonsr === "null"
+      ) {
+        actaFormateada.nombresmonsr = "";
+      }
+    }
+
+    console.log("Acta formateada para actualizar:", actaFormateada);
+
+    const response = await axios.put(
+      `https://actaseclesiasticas.koyeb.app/api/actas/editar`,
+      actaFormateada,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
     );
+
+    console.log("Respuesta al actualizar acta:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("Error al actualizar acta:", error);
+
+    let errorMessage = "Error desconocido";
+    if (error.response) {
+      errorMessage = error.response.data.message || JSON.stringify(error.response.data);
+      console.error("Detalles del error:", error.response.data);
+      console.error("Status:", error.response.status);
+      console.error("Headers:", error.response.headers);
+    } else if (error.request) {
+      errorMessage = "No se recibió respuesta del servidor";
+      console.error("Request:", error.request);
+    } else {
+      errorMessage = error.message;
+    }
+
+    throw new Error(`Error en el servidor: ${errorMessage}`);
   }
-
-  // Normalizar tipo
-  let tipo = '';
-  if (flat.tipo) {
-    const tl = flat.tipo.toLowerCase();
-    if (tl.includes('baut')) tipo = 'bautizo';
-    else if (tl.includes('confirm')) tipo = 'confirmacion';
-    else if (tl.includes('matri')) tipo = 'matrimonio';
-    else tipo = tl;
-  }
-
-  // Mapeo a formato plano
-  const actaPlana = {
-    numero_formulario: String(flat.id || Date.now()),
-    numeroActa: String(flat.acta || flat.numeroActa || ''),
-    folio: String(flat.folio || ''),
-    libro: String(flat.libro || ''),
-    fecha: formatearFecha(flat.fechaCeremonia) || flat.fecha || '',
-    tipo: tipo || '',
-
-    nombresSacerdote: String(flat.oficiante || flat.sacerdote || flat.monseñor || ''),
-    nombresDoyFe: String(flat.doyFe || ''),
-    notaMarginal: String(flat.notaMarginal || ''),
-
-    // Campos personales (bautizo/confirmacion)
-    nombre1: String(flat.primerNombre || ''),
-    nombre2: String(flat.segundoNombre || ''),
-    apellido1: String(flat.primerApellido || ''),
-    apellido2: String(flat.segundoApellido || ''),
-    fechaNacimiento: formatearFecha(flat.fechaNacimiento) || '',
-    lugarNacimiento: String(flat.lugarNacimiento || ''),
-    ciudadNacimiento: String(flat.lugarNacimiento || ''),
-    nombresPadre: String(flat.nombrePadre || ''),
-    nombresMadre: String(flat.nombreMadre || ''),
-
-    // Padrinos
-    nombrepadrinos: String(flat.padrino || ''),
-    nombremadrinas: String(flat.madrina || ''),
-    nombrespadrino: String(flat.padrino || ''),
-    nombresmadrina: String(flat.madrina || ''),
-
-    // Campos monseñor (confirmacion)
-        // ...existing code...
-    idmonsr: flat.idMonsr?.id !== undefined && flat.idMonsr?.id !== null
-      ? String(flat.idMonsr.id)
-      : (flat.idmonsr !== undefined && flat.idmonsr !== null && flat.idmonsr !== "null"
-          ? String(flat.idmonsr)
-          : ''),
-    // ...existing code...
-    nombresmonsr: String(flat.nombresmonsr || ''),
-
-    
-
-    // Matrimonio: esposo/esposa y testigos
-    esposonombre1: String(flat.primerNombre || ''),
-    esposonombre2: String(flat.segundoNombre || ''),
-    esposoapellido1: String(flat.primerApellido || ''),
-    esposoapellido2: String(flat.segundoApellido || ''),
-    fechaNacimientoEsposo: formatearFecha(flat.fechaNacimiento) || '',
-    lugarNacimientoEsposo: String(flat.lugarNacimiento || ''),
-    nombresPadreEsposo: String(flat.nombrePadre || ''),
-    nombresMadreEsposo: String(flat.nombreMadre || ''),
-
-    esposanombre1: String(flat.primerNombre || ''),
-    esposanombre2: String(flat.segundoNombre || ''),
-    esposaapellido1: String(flat.primerApellido || ''),
-    esposaapellido2: String(flat.segundoApellido || ''),
-    fechaNacimientoEsposa: formatearFecha(flat.fechaNacimiento) || '',
-    lugarNacimientoEsposa: String(flat.lugarNacimiento || ''),
-    nombresPadreEsposa: String(flat.nombrePadre || ''),
-    nombresMadreEsposa: String(flat.nombreMadre || ''),
-
-    nombrestestigo1: String(flat.testigo1 || ''),
-    nombrestestigo2: String(flat.testigo2 || ''),
-    nombrestestigo3: String(flat.testigo3 || ''),
-    nombrestestigo4: String(flat.testigo4 || '')
-  };
-
-  return actaPlana;
 }
-
-
-
-
-/*
-
-
-convertirActaPlano(acta) {
-    const plain = {}
-    // Helper para formatear fechas objeto {dia,mes,año} o string
-    const fmt = (f) => {
-      if (!f) return ''
-      if (typeof f === 'string') return f
-      const { año, mes, dia } = f
-      const y = String(año).padStart(4, '0')
-      const m = String(mes).padStart(2, '0')
-      const d = String(dia).padStart(2, '0')
-      return `${d}-${m}-${y}`
-    }
-
-    // Campos comunes
-    plain.id = String(acta.id)
-    plain.tipo = String(acta.tipo)
-    plain.numero_formulario = String(acta.numeroFormulario || acta.numero_formulario || '')
-    plain.numeroActa = String(acta.numeroActa || acta.acta || '')
-    plain.folio = String(acta.folio || '')
-    plain.libro = String(acta.libro || '')
-    // Fecha de ceremonia o fallback
-    plain.fecha = fmt(acta.fechaCeremonia || acta.fecha)
-    plain.notas = String(acta.notaMarginal || acta.notas || '')
-    plain.nombresSacerdote = String(acta.nombresSacerdote || '')
-    plain.nombresDoyFe = String(acta.nombresDoyFe || '')
-
-    // Datos según tipo
-    if (acta.tipo === 'bautizo') {
-      const b = acta.bautismo || {}
-      Object.assign(plain, {
-        nombre1: String(b.primerNombre || b.nombre1 || ''),
-        nombre2: String(b.segundoNombre || b.nombre2 || ''),
-        apellido1: String(b.primerApellido || b.apellido1 || ''),
-        apellido2: String(b.segundoApellido || b.apellido2 || ''),
-        fechaNacimiento: fmt(b.fechaNacimiento),
-        lugarNacimiento: String(b.lugarNacimiento || ''),
-        ciudadNacimiento: String(b.ciudadNacimiento || ''),
-        nombresPadre: String(b.nombrePadre || ''),
-        nombresMadre: String(b.nombreMadre || ''),
-        abueloPaterno: String(b.abueloPaterno || ''),
-        abuelaPaterna: String(b.abuelaPaterna || ''),
-        abueloMaterno: String(b.abueloMaterno || ''),
-        abuelaMaterna: String(b.abuelaMaterna || ''),
-        nombresPadrino: String(b.padrino || ''),
-        nombresMadrina: String(b.madrina || '')
-      })
-    } else if (acta.tipo === 'confirmacion') {
-      const c = acta.confirmacion || {}
-      Object.assign(plain, {
-        nombre1: String(c.primerNombre || c.nombre1 || ''),
-        nombre2: String(c.segundoNombre || c.nombre2 || ''),
-        apellido1: String(c.primerApellido || c.apellido1 || ''),
-        apellido2: String(c.segundoApellido || c.apellido2 || ''),
-        fechaNacimiento: fmt(c.fechaNacimiento),
-        lugarNacimiento: String(c.lugarNacimiento || ''),
-        fechaBautismo: fmt(c.fechaBautismo),
-        lugarBautismo: String(c.lugarBautismo || ''),
-        nombresPadre: String(c.nombrePadre || ''),
-        nombresMadre: String(c.nombreMadre || ''),
-        nombresPadrino: String(c.padrino || ''),
-        nombresMadrina: String(c.madrina || ''),
-        monseñor: String(c.monseñor || ''),
-        sacerdote: String(c.sacerdote || ''),
-        doyFe: String(c.doyFe || '')
-      })
-    } else if (acta.tipo === 'matrimonio') {
-      const m = acta.matrimonio || {}
-      // Novio
-      Object.assign(plain, {
-        novioPrimerNombre: String(m.novio?.primerNombre || ''),
-        novioSegundoNombre: String(m.novio?.segundoNombre || ''),
-        novioPrimerApellido: String(m.novio?.primerApellido || ''),
-        novioSegundoApellido: String(m.novio?.segundoApellido || ''),
-        novioFechaNacimiento: fmt(m.novio?.fechaNacimiento),
-        novioLugarNacimiento: String(m.novio?.lugarNacimiento || ''),
-        novioNombrePadre: String(m.novio?.nombrePadre || ''),
-        novioNombreMadre: String(m.novio?.nombreMadre || ''),
-      })
-      // Novia
-      Object.assign(plain, {
-        noviaPrimerNombre: String(m.novia?.primerNombre || ''),
-        noviaSegundoNombre: String(m.novia?.segundoNombre || ''),
-        noviaPrimerApellido: String(m.novia?.primerApellido || ''),
-        noviaSegundoApellido: String(m.novia?.segundoApellido || ''),
-        noviaFechaNacimiento: fmt(m.novia?.fechaNacimiento),
-        noviaLugarNacimiento: String(m.novia?.lugarNacimiento || ''),
-        noviaNombrePadre: String(m.novia?.nombrePadre || ''),
-        noviaNombreMadre: String(m.novia?.nombreMadre || ''),
-      })
-      // Testigos
-      Object.assign(plain, {
-        testigo1: String(m.testigo1 || ''),
-        testigo2: String(m.testigo2 || ''),
-        testigo3: String(m.testigo3 || ''),
-        testigo4: String(m.testigo4 || '')
-      })
-    }
-
-    return plain
-  }
+  */
 
 
   /**
@@ -1020,6 +735,12 @@ convertirActaPlano(acta) {
   convertirActaAFormatoPlano(acta) {
     // Objeto para almacenar todos los campos como strings
     const actaPlana = {}
+
+    console.log("ID Monseñor:", acta.idmonsr || (acta.idMonsr?.id ? String(acta.idMonsr.id) : ""))
+    console.log('Datos completos del acta:', JSON.stringify(acta, null, 2));
+    console.log('idMonsr value:', acta.idMonsr);
+    console.log('idmonsr value:', acta.idmonsr);
+
 
     // Función para formatear fechas
     const formatearFecha = (fecha) => {
@@ -1051,7 +772,10 @@ convertirActaPlano(acta) {
     }
 
     // Campos comunes básicos
-    actaPlana["numero_formulario"] = String(acta.id || Date.now())
+    actaPlana["id"] = String(acta.acta || ""); // ID principal que el backend necesita
+    actaPlana["numero_formulario"] = String(acta.id || Date.now()); // ID de sub-acta (opcional pero útil)
+
+
     actaPlana["numeroActa"] = String(acta.acta || acta.numeroActa || "")
     actaPlana["folio"] = String(acta.folio || "")
     actaPlana["libro"] = String(acta.libro || "")
@@ -1103,8 +827,10 @@ convertirActaPlano(acta) {
       actaPlana["nombresMadre"] = String(acta.confirmacion.nombreMadre || "")
       actaPlana["nombrespadrino"] = String(acta.confirmacion.padrino || "")
       actaPlana["nombresmadrina"] = String(acta.confirmacion.madrina || "")
-      actaPlana["idmonsr"] = acta.idmonsr ? String(acta.idmonsr) : null
-      actaPlana["nombresmonsr"] = String(acta.nombresmonsr || acta.confirmacion.monseñor || acta.oficiante || "")
+      
+      actaPlana["nombresmonsr"] = String(
+        acta.confirmacion.monseñor || acta.nombresmonsr || "")
+
     } else if (tipo === "matrimonio" && acta.matrimonio) {
       // Datos del esposo
       actaPlana["esposonombre1"] = String(acta.matrimonio.novio?.primerNombre || "")

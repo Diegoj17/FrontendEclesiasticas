@@ -134,14 +134,8 @@ export default function AdminDashboard() {
               >
               Registrar Nueva Acta
             </button>
-
-            <button style={{...styles.actionButton, backgroundColor: '#10b981'}}>
-              Generar Reporte
-            </button>
-
-            <button style={{...styles.actionButton, backgroundColor: '#ef4444'}}>
-              Gestionar Sacramentos
-            </button>
+            
+            
           </div>
         </div>
       </div>

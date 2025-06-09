@@ -18,14 +18,66 @@ const initialFormData = {
   doyFe: "",
   notaMarginal: "",
   fechaCeremonia: { dia: "", mes: "", año: "" },
-  bautismo: { primerNombre: "", segundoNombre: "", primerApellido: "", segundoApellido: "", fechaNacimiento: { dia: "", mes: "", año: "" }, lugarNacimiento: "", nombrePadre: "", nombreMadre: "", abueloPaterno: "", abuelaPaterna: "", abueloMaterno: "", abuelaMaterna: "", padrino: "", madrina: "" },
-  confirmacion: { primerNombre: "", segundoNombre: "", primerApellido: "", segundoApellido: "", fechaNacimiento: { dia: "", mes: "", año: "" }, lugarNacimiento: "", fechaBautismo: { dia: "", mes: "", año: "" }, lugarBautismo: "", nombrePadre: "", nombreMadre: "", padrino: "", madrina: "", monseñor: "", sacerdote: "", doyFe: "" },
-  matrimonio: { 
-    novio: { primerNombre: "", segundoNombre: "", primerApellido: "", segundoApellido: "", fechaNacimiento: { dia: "", mes: "", año: "" }, lugarNacimiento: "", nombrePadre: "", nombreMadre: "" },
-    novia: { primerNombre: "", segundoNombre: "", primerApellido: "", segundoApellido: "", fechaNacimiento: { dia: "", mes: "", año: "" }, lugarNacimiento: "", nombrePadre: "", nombreMadre: "" },
-    testigo1: "", testigo2: "", testigo3: "", testigo4: ""
-  }
-};
+  bautismo: {
+    primerNombre: "",
+    segundoNombre: "",
+    primerApellido: "",
+    segundoApellido: "",
+    fechaNacimiento: { dia: "", mes: "", año: "" },
+    lugarNacimiento: "",
+    nombrePadre: "",
+    nombreMadre: "",
+    abueloPaterno: "",
+    abuelaPaterna: "",
+    abueloMaterno: "",
+    abuelaMaterna: "",
+    padrino: "",
+    madrina: "",
+  },
+  confirmacion: {
+    primerNombre: "",
+    segundoNombre: "",
+    primerApellido: "",
+    segundoApellido: "",
+    fechaNacimiento: { dia: "", mes: "", año: "" },
+    lugarNacimiento: "",
+    fechaBautismo: { dia: "", mes: "", año: "" },
+    lugarBautismo: "",
+    nombrePadre: "",
+    nombreMadre: "",
+    padrino: "",
+    madrina: "",
+    monseñor: "",
+  },
+  matrimonio: {
+    novio: {
+      primerNombre: "",
+      segundoNombre: "",
+      primerApellido: "",
+      segundoApellido: "",
+      fechaNacimiento: { dia: "", mes: "", año: "" },
+      lugarNacimiento: "",
+      nombrePadre: "",
+      nombreMadre: "",
+    },
+    novia: {
+      primerNombre: "",
+      segundoNombre: "",
+      primerApellido: "",
+      segundoApellido: "",
+      fechaNacimiento: { dia: "", mes: "", año: "" },
+      lugarNacimiento: "",
+      nombrePadre: "",
+      nombreMadre: "",
+    },
+    testigo1: "",
+    testigo2: "",
+    testigo3: "",
+    testigo4: "",
+  },
+}
+
+const normalizeTipo = (tipo) => tipo?.toString().toLowerCase().trim() || '';
 
 function EditarActa() {
   const { id, tipo } = useParams();
@@ -41,7 +93,8 @@ function EditarActa() {
 
   const [acta, setActa] = useState(null);
 
-  const [subActaId, setSubActaId] = useState(null); // <--- importante
+  const [subActaId, setSubActaId] = useState(null);
+  const [actaId, setActaId] = useState(null);
 
 
   const handleChange = (e) => {
@@ -70,21 +123,28 @@ function EditarActa() {
   useEffect(() => {
     async function fetchData() {
       setLoading(true);
+
+      const tipoNorm = normalizeTipo(tipo);
+      console.log("🔄 Cargando acta tipo:", tipoNorm, "id:", id, subActaId, "subActaId:" , subActaId);
       try {
         let data;
         // Obtener datos según el tipo de acta
         switch (tipo.toLowerCase()) {
           case 'bautismo':
             data = await ActaService.getBautizoById(id);
+            setActaId(data.idActa?.id);
             setSubActaId(data.idBautizado.id);
             break;
           case 'confirmacion':
             data = await ActaService.getConfirmacionById(id);
+            setActaId(data.idActa?.id);
             setSubActaId(data.idConfirmante.id);
             break;
           case 'matrimonio':
             data = await ActaService.getMatrimonioById(id);
-            setSubActaId(data.idMatrimonio.id);
+            setActaId(data.idActa?.id);
+            setSubActaId(data.idActa?.id ?? "");
+
             break;
           default:
             throw new Error(`Tipo de acta no válido: ${tipo}`);
@@ -148,8 +208,8 @@ function EditarActa() {
               padrino: data.nombrespadrino || data.idPadrino?.nombre1 || '',
               madrina: data.nombresmadrina || data.idMadrina?.nombre1 || '',
               monseñor: data.monsenor || data.idMonsr?.nombre || '',
-              sacerdote: data.nombresSacerdote || data.idSacerdote?.nombre || '',
-              doyFe: data.nombresDoyFe || data.idDoyfe?.nombre || '',
+              sacerdote: data.nombresSacerdote || data.idSacerdote?.nombre || "",
+              doyFe: data.nombresDoyFe || data.idDoyfe?.nombre || "",
             }
           };
         } else if (tipo.toLowerCase() === 'matrimonio') {
@@ -157,8 +217,6 @@ function EditarActa() {
           const personaB = data.personaB || {};
           specificData = {
             matrimonio: {
-              sacerdote: data.nombresSacerdote || data.idSacerdote?.nombre || '',
-              doyFe: data.nombresDoyFe || data.idDoyfe?.nombre || '',
               novio: {
                 primerNombre: personaB.primerNombre || personaB.nombre1 || '',
                 segundoNombre: personaB.segundoNombre || personaB.nombre2 || '',
@@ -179,6 +237,8 @@ function EditarActa() {
                 nombrePadre: personaA.padre?.nombre1 || '',
                 nombreMadre: personaA.madre?.nombre1 || '',
               },
+              sacerdote: data.nombresSacerdote || data.idSacerdote?.nombre || '',
+              doyFe: data.nombresDoyFe || data.idDoyfe?.nombre || '',
               testigo1: data.testigo1 || '',
               testigo2: data.testigo2 || '',
               testigo3: data.testigo3 || '',
@@ -197,6 +257,16 @@ function EditarActa() {
     fetchData();
   }, [id, tipo])
 
+  useEffect(() => {
+  if (subActaId) {
+    console.log("Sub-acta ID:", subActaId);
+    // lógica dependiente del ID...
+  } else {
+    console.warn("Aún no tengo el ID de la sub-acta");
+  }
+}, [subActaId]);
+
+
   const handleSubmit = async (e) => {
   e.preventDefault();
   if (!subActaId) {
@@ -205,13 +275,18 @@ function EditarActa() {
     }
   setIsSubmitting(true);
 
+  
   const rawActa = {
     ...formData,
-    id: subActaId,
-    tipo: tipo.toLowerCase()
+    id: actaId,
+    idSubActa: subActaId,
+    tipo: tipo.toLowerCase(),
+    
   };
     
   const payload = ActaService.convertirActaAFormatoPlano(rawActa);
+  console.log("ID real enviado al backend:", payload.id); // Debe ser, por ejemplo, "1"
+
   console.log("Payload plano enviado:", payload);
   
   try {
@@ -443,6 +518,7 @@ const styles = {
     borderRadius: "0.5rem",
     backgroundColor: "#f9f9f9",
     width: "100%",
+    textTransform: "capitalize",
   },
   sectionTitle: {
     fontSize: "1.1rem",
@@ -460,11 +536,13 @@ const styles = {
     gap: "1rem",
     marginBottom: "0.5rem",
     width: "100%",
+    textTransform: "capitalize",
   },
   formGroup: {
     flex: "1",
     minWidth: "300px",
     marginBottom: "0.5rem",
+    textTransform: "capitalize",
   },
   formNota: {
     display: "block",
@@ -482,6 +560,7 @@ const styles = {
     resize: "vertical",
     whiteSpace: "pre-wrap",
     verticalAlign: "top",
+    textTransform: "capitalize",
   },
   modalOverlay: {
     position: "fixed",

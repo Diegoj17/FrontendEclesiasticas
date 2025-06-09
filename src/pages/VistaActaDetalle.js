@@ -104,7 +104,7 @@ export default function VistaActaDetalle() {
 
   const handleEditActa = (actaId, tipoCeremonia) => {
     // convertimos el tipo a minúsculas para que coincida con lo que espera CorregirActas
-    const tipoNormalizado = tipoCeremonia.toLowerCase(); 
+    const tipoNormalizado = tipoCeremonia ? tipoCeremonia.toLowerCase() : tipo.toLowerCase();
     navigate(`/actas/editar/${actaId}/${tipoNormalizado}`);
   };
 
@@ -1085,7 +1085,7 @@ export default function VistaActaDetalle() {
 
           {/* Botones de acción a la derecha */}
           <div style={styles.rightActions} className="no-print">
-            <button onClick={() => handleEditActa(acta.id, acta.tipo)} style={styles.editButton}>
+            <button onClick={() => handleEditActa(acta.id)} style={styles.editButton}>
               <FaEdit /> Editar
             </button>
 

@@ -248,8 +248,6 @@ function CorregirActas() {
           const personaB = data.personaB || {}
           specificData = {
             matrimonio: {
-              sacerdote: data.nombresSacerdote || data.idSacerdote?.nombre || "",
-              doyFe: data.nombresDoyFe || data.idDoyfe?.nombre || "",
               novio: {
                 primerNombre: personaB.primerNombre || personaB.nombre1 || "",
                 segundoNombre: personaB.segundoNombre || personaB.nombre2 || "",
@@ -270,6 +268,8 @@ function CorregirActas() {
                 nombrePadre: personaA.padre?.nombre1 || "",
                 nombreMadre: personaA.madre?.nombre1 || "",
               },
+              sacerdote: data.nombresSacerdote || data.idSacerdote?.nombre || "",
+              doyFe: data.nombresDoyFe || data.idDoyfe?.nombre || "",
               testigo1: data.testigo1 || "",
               testigo2: data.testigo2 || "",
               testigo3: data.testigo3 || "",
